@@ -1,0 +1,330 @@
+<!DOCTYPE html>
+<!--
+  templates/index.html
+  ====================
+  This is the CHAT USER INTERFACE — everything the user sees in the browser.
+  Flask serves this file when someone visits http://127.0.0.1:5000
+
+  This file has three sections that work together:
+    1. <head>   — page settings and CSS styling (how it looks)
+    2. <body>   — HTML structure (the actual chat window elements)
+    3. <script> — JavaScript (the behaviour: sending messages, showing replies)
+
+  HOW IT CONNECTS TO THE BACKEND (Python/Flask):
+    - When the page loads, it just displays a welcome message (no server call).
+    - When the user clicks Send (or presses Enter), JavaScript sends the
+      message to POST /chat on the Flask server and waits for a JSON reply.
+    - When the user clicks ↺, JavaScript sends POST /reset to clear history.
+
+  NO PYTHON runs in this file — it's pure browser code (HTML, CSS, JS).
+-->
+<html lang="en">
+<head>
+  <!-- Tell the browser to use UTF-8 text encoding so Khmer characters display correctly. -->
+  <meta charset="UTF-8" />
+
+  <!-- Make the page look good on phones (don't zoom out to fit everything). -->
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+
+  <title>Samphor Expert System</title>
+
+  <style>
+    /*
+      CSS RESET
+      Browsers add default margins and padding to elements.
+      This rule wipes those defaults so we have full control.
+      box-sizing: border-box means "include padding inside the element's width"
+      — without this, padding makes elements unexpectedly wider.
+    */
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    /*
+      PAGE LAYOUT
+      display: flex + justify-content/align-items: center
+      centres the chat window both horizontally and vertically.
+      min-height: 100vh makes the body fill the full viewport height.
+    */
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      background: #f4f1ec;       /* warm off-white background */
+      display: flex;
+      justify-content: center;   /* horizontally centred */
+      align-items: center;       /* vertically centred */
+      min-height: 100vh;         /* 100% of the visible screen height */
+    }
+
+    /*
+      CHAT WINDOW
+      A white rounded card that takes 90% of the screen height.
+      display: flex + flex-direction: column stacks children top-to-bottom:
+        - header (title bar)
+        - #chat-box (scrollable message area)
+        - .input-area (text box + buttons)
+    */
+    .chat-wrapper {
+      width: 100%;
+      max-width: 700px;
+      display: flex;
+      flex-direction: column;
+      height: 90vh;
+      background: #fff;
+      border-radius: 12px;
+      box-shadow: 0 4px 24px rgba(0,0,0,0.12);   /* subtle drop shadow */
+      overflow: hidden;                            /* hide content that sticks out */
+    }
+
+    /* Dark red header bar at the top of the chat window. */
+    header {
+      background: #8b3a0f;   /* deep Cambodian clay red */
+      color: #fff;
+      padding: 18px 24px;
+    }
+    header h1 { font-size: 1.3rem; }
+    header p  { font-size: 0.85rem; opacity: 0.8; margin-top: 2px; }
+
+    /*
+      SCROLLABLE MESSAGE AREA
+      flex: 1 means "take up all remaining vertical space" (between header and input).
+      overflow-y: auto adds a vertical scrollbar only when messages overflow.
+      display: flex + flex-direction: column stacks messages from top to bottom.
+      gap: 12px puts 12px of space between each message bubble.
+    */
+    #chat-box {
+      flex: 1;
+      overflow-y: auto;
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    /* Base style for every message bubble (user and bot). */
+    .msg {
+      max-width: 80%;         /* bubbles don't stretch the full width */
+      padding: 10px 15px;
+      border-radius: 18px;    /* pill / rounded corners */
+      line-height: 1.5;
+      font-size: 0.95rem;
+    }
+
+    /*
+      USER MESSAGE (right-aligned, dark red background)
+      align-self: flex-end pushes this bubble to the right side.
+      border-bottom-right-radius: 4px creates the "chat tail" on the bottom right.
+    */
+    .msg.user {
+      align-self: flex-end;
+      background: #8b3a0f;
+      color: #fff;
+      border-bottom-right-radius: 4px;
+    }
+
+    /*
+      BOT MESSAGE (left-aligned, warm beige background)
+      align-self: flex-start pushes this bubble to the left side.
+      border-bottom-left-radius: 4px creates the "chat tail" on the bottom left.
+    */
+    .msg.bot {
+      align-self: flex-start;
+      background: #f0e6d3;
+      color: #333;
+      border-bottom-left-radius: 4px;
+    }
+
+    /* Row at the bottom containing the text input and buttons. */
+    .input-area {
+      display: flex;
+      padding: 14px 16px;
+      border-top: 1px solid #eee;
+      gap: 10px;
+      background: #fafafa;
+    }
+
+    /*
+      TEXT INPUT BOX
+      flex: 1 makes it expand to fill all available horizontal space
+      (so the buttons stay at a fixed width on the right).
+    */
+    #user-input {
+      flex: 1;
+      padding: 10px 14px;
+      border: 1px solid #ddd;
+      border-radius: 24px;
+      font-size: 0.95rem;
+      outline: none;             /* remove the default browser focus outline */
+    }
+    /* Change border colour to red when the user is typing in the box. */
+    #user-input:focus { border-color: #8b3a0f; }
+
+    /* Shared style for all buttons. */
+    button {
+      background: #8b3a0f;
+      color: #fff;
+      border: none;
+      padding: 10px 20px;
+      border-radius: 24px;
+      cursor: pointer;           /* show a hand cursor on hover */
+      font-size: 0.9rem;
+    }
+    button:hover { background: #a84510; }   /* slightly lighter on hover */
+
+    /* The reset button is grey and smaller than the Send button. */
+    #reset-btn {
+      background: #bbb;
+      padding: 10px 14px;
+    }
+    #reset-btn:hover { background: #999; }
+  </style>
+</head>
+<body>
+
+<!-- =========================================================
+     HTML STRUCTURE
+     ========================================================= -->
+<div class="chat-wrapper">
+
+  <!-- Title bar -->
+  <header>
+    <h1>Samphor Expert System</h1>
+    <p>Ask me anything about the traditional Cambodian drum</p>
+  </header>
+
+  <!-- Scrollable chat message area.
+       The first message is hardcoded HTML — the bot's welcome greeting. -->
+  <div id="chat-box">
+    <div class="msg bot">Hello! I am the Samphor Expert. Ask me about the history, materials, playing technique, or cultural role of Cambodia's iconic drum.</div>
+  </div>
+
+  <!-- Input row: text box, Send button, Reset button -->
+  <div class="input-area">
+    <input id="user-input" type="text" placeholder="Ask about the Samphor..." autocomplete="off"/>
+    <button id="send-btn">Send</button>
+    <!-- ↺ is a Unicode "clockwise arrow" symbol used as a reset icon -->
+    <button id="reset-btn" title="Reset session">&#8635;</button>
+  </div>
+
+</div><!-- end .chat-wrapper -->
+
+
+<!-- =========================================================
+     JAVASCRIPT — handles all the interactive behaviour
+     This section runs inside the browser (not on the server).
+     ========================================================= -->
+<script>
+  /*
+    Grab references to the HTML elements we'll be working with.
+    document.getElementById() finds an element by its id="..." attribute.
+    We store them in variables so we don't have to look them up every time.
+  */
+  const chatBox  = document.getElementById('chat-box');
+  const input    = document.getElementById('user-input');
+  const sendBtn  = document.getElementById('send-btn');
+  const resetBtn = document.getElementById('reset-btn');
+
+
+  /*
+    addMessage(text, role)
+    ─────────────────────
+    Creates a new message bubble <div> and appends it to the chat box.
+    'role' is either 'user' or 'bot' — this sets the CSS class which
+    controls colour and alignment (see the .msg.user / .msg.bot rules above).
+
+    chatBox.scrollTop = chatBox.scrollHeight automatically scrolls the
+    chat box to the bottom so the newest message is always visible.
+  */
+  function addMessage(text, role) {
+    const div = document.createElement('div');  // create a new <div> element
+    div.className = `msg ${role}`;              // e.g. "msg user" or "msg bot"
+    div.textContent = text;                     // set the visible text (safe — no HTML injection)
+    chatBox.appendChild(div);                   // add it to the bottom of the chat box
+    chatBox.scrollTop = chatBox.scrollHeight;   // auto-scroll to the bottom
+  }
+
+
+  /*
+    sendMessage()
+    ─────────────
+    Called when the user clicks Send or presses Enter.
+    This is an ASYNC function — it can pause and wait for the server to reply
+    without freezing the rest of the page.
+
+    Steps:
+      1. Read the text from the input box
+      2. Show the user's message immediately in the chat
+      3. Disable the input while waiting (so they can't send twice)
+      4. Send the text to POST /chat on the Flask server
+      5. Wait for the JSON reply
+      6. Show the bot's reply in the chat
+      7. Re-enable the input
+  */
+  async function sendMessage() {
+    const text = input.value.trim();   // .trim() removes leading/trailing whitespace
+    if (!text) return;                 // do nothing if the box is empty
+
+    addMessage(text, 'user');          // show the user's message on the right
+    input.value = '';                  // clear the text box
+    input.disabled = true;             // prevent typing while waiting
+    sendBtn.disabled = true;
+
+    try {
+      /*
+        fetch() sends an HTTP request to the server.
+        'await' means: "pause here until the server replies, then continue."
+        We send a POST request with a JSON body: { "message": "..." }
+        This matches what Flask expects in the /chat route in app.py.
+      */
+      const res = await fetch('/chat', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ message: text }),   // convert JS object to JSON string
+      });
+
+      // Parse the JSON response body: { "response": "The Samphor is..." }
+      const data = await res.json();
+
+      // Display the bot's reply on the left.
+      addMessage(data.response, 'bot');
+
+    } catch (err) {
+      // If the network request failed (e.g. server is not running), show an error.
+      addMessage('Error connecting to the server. Please try again.', 'bot');
+
+    } finally {
+      // 'finally' always runs, whether the request succeeded or failed.
+      // Re-enable the input so the user can type again.
+      input.disabled = false;
+      sendBtn.disabled = false;
+      input.focus();   // move the cursor back into the text box
+    }
+  }
+
+
+  /*
+    EVENT LISTENERS
+    ───────────────
+    addEventListener() watches for user actions and calls a function when they happen.
+
+    'click'  → triggered when the user clicks the Send button
+    'keydown' → triggered on EVERY key press in the input box
+       We check if the key is 'Enter' before calling sendMessage().
+  */
+  sendBtn.addEventListener('click', sendMessage);
+  input.addEventListener('keydown', e => { if (e.key === 'Enter') sendMessage(); });
+
+
+  /*
+    RESET BUTTON
+    ────────────
+    Sends POST /reset to tell Flask to clear the server-side conversation history.
+    Then wipes the visual chat box and shows a fresh welcome message.
+    This is also async because we need to wait for the server to confirm the reset.
+  */
+  resetBtn.addEventListener('click', async () => {
+    await fetch('/reset', { method: 'POST' });   // tell the server to clear history
+    // Replace ALL contents of the chat box with just the welcome message.
+    chatBox.innerHTML = '<div class="msg bot">Session reset. Ask me anything about the Samphor!</div>';
+  });
+
+</script>
+</body>
+</html>

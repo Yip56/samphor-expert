@@ -1,0 +1,30 @@
+# Virtual environment
+venv/
+.venv/
+
+# Trained model artefacts
+model/*.h5
+model/*.pkl
+
+# Python cache
+__pycache__/
+*.py[cod]
+*$py.class
+*.pyo
+
+# Environment variables
+.env
+.env.*
+
+# VS Code (keep settings.json, ignore local state)
+.vscode/launch.json
+.vscode/*.log
+
+# OS artefacts
+.DS_Store
+Thumbs.db
+
+# Distribution / packaging
+dist/
+build/
+*.egg-info/

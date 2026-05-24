@@ -1,0 +1,32 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(python -m venv venv)",
+      "Bash(./venv/Scripts/python.exe -m pip install --upgrade pip --quiet)",
+      "Bash(./venv/Scripts/python.exe -m pip install flask nltk numpy scikit-learn pandas)",
+      "Bash(./venv/Scripts/python.exe -m pip install tensorflow)",
+      "Bash(./venv/Scripts/python.exe -m pip index versions tensorflow)",
+      "Bash(./venv/Scripts/python.exe -m pip install \"tensorflow-cpu\")",
+      "Bash(./venv/Scripts/python.exe -m pip install \"tf-nightly\")",
+      "Bash(py -0)",
+      "Bash(where python3.12)",
+      "Bash(where python3.11)",
+      "Read(//c/Users/LXYip/AppData/Local/Programs/Python/**)",
+      "Bash(py -3.13 --version)",
+      "Bash(py -3.10 --version)",
+      "Bash(\"C:/Users/LXYip/AppData/Local/Programs/Python/Python310/python.exe\" --version)",
+      "Bash(\"C:/Users/LXYip/AppData/Local/Programs/Python/Python313/python.exe\" --version)",
+      "Bash(\"C:/Users/LXYip/AppData/Local/Programs/Python/Python313/python.exe\" -m pip index versions tensorflow)",
+      "Bash(\"C:/Users/LXYip/AppData/Local/Programs/Python/Python313/python.exe\" -m ensurepip --upgrade)",
+      "Bash(rm -rf venv)",
+      "Bash(\"C:/Users/LXYip/AppData/Local/Programs/Python/Python313/python.exe\" -m venv venv)",
+      "Bash(./venv/Scripts/python.exe --version)",
+      "Bash(./venv/Scripts/python.exe -m nltk.downloader punkt wordnet omw-1.4 stopwords punkt_tab)",
+      "Bash(./venv/Scripts/python.exe train.py)",
+      "Bash(TF_ENABLE_ONEDNN_OPTS=0 PYTHONIOENCODING=utf-8 ./venv/Scripts/python.exe train.py)",
+      "Bash(./venv/Scripts/python.exe -c ':*)",
+      "Bash(TF_ENABLE_ONEDNN_OPTS=0 PYTHONIOENCODING=utf-8 ./venv/Scripts/python.exe app.py)",
+      "Bash(taskkill /F /IM python.exe)"
+    ]
+  }
+}
