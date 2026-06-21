@@ -26,7 +26,11 @@
       "Bash(TF_ENABLE_ONEDNN_OPTS=0 PYTHONIOENCODING=utf-8 ./venv/Scripts/python.exe train.py)",
       "Bash(./venv/Scripts/python.exe -c ':*)",
       "Bash(TF_ENABLE_ONEDNN_OPTS=0 PYTHONIOENCODING=utf-8 ./venv/Scripts/python.exe app.py)",
-      "Bash(taskkill /F /IM python.exe)"
+      "Bash(taskkill /F /IM python.exe)",
+      "Bash(Get-ChildItem -Path \"C:\\\\Users\\\\YLX\\\\samphor-expert\" -Recurse -Force)",
+      "Bash(Select-Object FullName)",
+      "Bash(ConvertTo-Json)",
+      "PowerShell(Get-ChildItem -Path \"C:\\\\Users\\\\YLX\\\\samphor-expert\" -Recurse | ForEach-Object { $_.FullName })"
     ]
   }
 }
