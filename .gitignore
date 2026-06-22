@@ -2,9 +2,9 @@
 venv/
 .venv/
 
-# Trained model artefacts
-model/*.h5
-model/*.pkl
+# Trained model artefacts — tracked so Railway deploys with the ML model
+# model/*.h5
+# model/*.pkl
 
 # Python cache
 __pycache__/

@@ -42,7 +42,7 @@ from nltk.stem import WordNetLemmatizer  # turns words into their root form (e.g
 from engine.chat_engine import ChatEngine
 
 # Import the reply texts and the fallback message from the knowledge base.
-from knowledge.samphor_kb import FALLBACK_RESPONSE, INTENT_RESPONSES
+from knowledge.samphor_kb import FALLBACK_RESPONSE, INTENT_LABELS, INTENT_RESPONSES
 
 # -----------------------------------------------------------------------------
 # NLTK DATA AUTO-DOWNLOAD
@@ -336,60 +336,261 @@ class MLEngine(ChatEngine):
     # =========================================================================
     # PUBLIC METHOD: respond()
     # =========================================================================
-    # Called by: app.py → /chat route, on every user message
-    # This is the real-time inference path — no training happens here.
+    # Called by: app.py → /chat route, on every user message.
+    #
+    # context : per-user session dict passed in from Flask session storage.
+    #           Keys used: onboarding_step, user_name, user_occupation,
+    #                      last_intent, last_response, last_confidence
+    # Returns : (reply_string, updated_context_dict)
+    #
+    # Flow:
+    #   0. Onboarding gate — name → occupation → done (no NN needed)
+    #   1. Follow-up detection  — "tell me more" reuses the last intent
+    #   2. Pronoun context boost — "what is it made of?" resolves to last topic
+    #   3. Clarification query  — mid-confidence asks "did you mean X or Y?"
     # =========================================================================
-    def respond(self, user_input: str) -> str:
+    def respond(self, user_input: str, context: dict | None = None) -> tuple[str, dict]:
 
-        # Guard: if train() was never run and no saved model exists, bail out.
+        ctx  = context or {}
+        step = ctx.get("onboarding_step", "done")
+
+        # Onboarding runs before any ML inference — no model needed.
+        if step != "done":
+            return self._onboarding_respond(user_input, ctx)
+
         if self._model is None:
-            return "Model not loaded. Please run train() or load a saved model first."
+            return "Model not loaded. Please run train.py first.", {}
 
-        # Save the user's message to conversation history.
         self._history.append({"role": "user", "content": user_input})
 
-        # ------------------------------------------------------------------
-        # Convert the user's text into a BoW vector — the same transformation
-        # used during training so the numbers are compatible with the model.
-        # ------------------------------------------------------------------
-        tokens = nltk.word_tokenize(user_input)              # split into words
-        bow    = np.array([self._make_bow(tokens, self._words)])  # shape: (1, 389)
+        last_intent   = ctx.get("last_intent")
+        last_response = ctx.get("last_response")
+        user_name     = ctx.get("user_name", "")
+        lower         = user_input.lower().strip()
 
         # ------------------------------------------------------------------
-        # Run the neural network forward (inference / prediction).
-        # predictions is an array of 14 confidence scores (one per intent),
-        # e.g. [0.01, 0.03, 0.85, 0.02, ...]  — they sum to ~1.0
+        # LAYER 1: Follow-up detection
+        # If the user sends a short "tell me more"-style message and we
+        # already know what they were asking about, return an alternate reply
+        # for that same intent rather than re-running the neural network.
         # ------------------------------------------------------------------
+        FOLLOW_UP_WORDS    = {"more", "elaborate", "continue", "expand", "further", "details"}
+        FOLLOW_UP_PHRASES  = {"tell me more", "what else", "go on", "more detail", "more details",
+                              "anything else", "keep going", "say more"}
+        short_message      = len(user_input.split()) <= 5
+        word_match         = bool(set(lower.split()) & FOLLOW_UP_WORDS)
+        phrase_match       = any(p in lower for p in FOLLOW_UP_PHRASES)
+        is_follow_up       = last_intent and short_message and (word_match or phrase_match)
+
+        if is_follow_up:
+            responses = INTENT_RESPONSES.get(last_intent, [])
+            # Prefer a reply the user hasn't seen yet.
+            fresh = [r for r in responses if r != last_response]
+            if fresh:
+                reply = random.choice(fresh)
+            else:
+                reply = (
+                    "I've shared everything I know on that topic. "
+                    "Try asking about another aspect — history, materials, "
+                    "playing technique, tuning, or preservation."
+                )
+            self._history.append({"role": "assistant", "content": reply})
+            return reply, {**ctx, "last_intent": last_intent, "last_response": reply}
+
+        # ------------------------------------------------------------------
+        # Run the neural network to get confidence scores for all 14 intents.
+        # ------------------------------------------------------------------
+        tokens      = nltk.word_tokenize(user_input)
+        bow         = np.array([self._make_bow(tokens, self._words)])
         predictions = self._model.predict(bow, verbose=0)[0]
 
-        # np.argmax finds the INDEX of the highest value.
-        # That index corresponds to the intent the network is most confident about.
-        best_idx   = int(np.argmax(predictions))
-        confidence = float(predictions[best_idx])   # the actual confidence score
+        sorted_idx      = np.argsort(predictions)[::-1]   # highest first
+        best_idx        = int(sorted_idx[0])
+        second_idx      = int(sorted_idx[1])
+        confidence      = float(predictions[best_idx])
+        second_conf     = float(predictions[second_idx])
 
         # ------------------------------------------------------------------
-        # Confidence check: only trust the prediction if ≥ 70%.
-        # If the network isn't sure, return the fallback "I didn't understand" message.
+        # LAYER 2: Pronoun / context boost
+        # If confidence is low but the message contains a context pronoun
+        # ("it", "its", "this", "that") and the message is short, assume
+        # the user is asking a follow-up about the last intent.
         # ------------------------------------------------------------------
+        CONTEXT_PRONOUNS = {"it", "its", "this", "that"}
+        has_pronoun      = bool(set(lower.split()) & CONTEXT_PRONOUNS)
+
+        if (has_pronoun
+                and last_intent
+                and confidence < CONFIDENCE_THRESHOLD
+                and len(user_input.split()) <= 10):
+            tag       = last_intent
+            responses = INTENT_RESPONSES.get(tag, [FALLBACK_RESPONSE])
+            fresh     = [r for r in responses if r != last_response]
+            reply     = random.choice(fresh if fresh else responses)
+            self._history.append({"role": "assistant", "content": reply})
+            updated = {**ctx, "last_intent": tag, "last_response": reply,
+                       "last_confidence": round(confidence, 4)}
+            return reply, updated
+
+        # ------------------------------------------------------------------
+        # LAYER 3: Confidence-based clarification
+        # Below threshold but above a noise floor → ask which of the two
+        # most likely topics the user meant instead of a dead-end fallback.
+        # ------------------------------------------------------------------
+        name_prefix = f"{user_name}, " if user_name else ""
         if confidence < CONFIDENCE_THRESHOLD:
-            reply = FALLBACK_RESPONSE   # imported from knowledge/samphor_kb.py
-        else:
-            # Map the winning index back to an intent name (e.g. "ask_history").
-            tag = self._classes[best_idx]
-
-            # Look up the list of possible replies for this intent in samphor_kb.py.
-            responses = INTENT_RESPONSES.get(tag)
-
-            if responses:
-                # Pick one reply at random so the bot doesn't always say the same thing.
-                reply = random.choice(responses)
+            if confidence > 0.35 and second_conf > 0.15:
+                label1 = INTENT_LABELS.get(self._classes[best_idx],  self._classes[best_idx])
+                label2 = INTENT_LABELS.get(self._classes[second_idx], self._classes[second_idx])
+                reply  = (
+                    f"{name_prefix}I'm not quite sure what you'd like to know. "
+                    f"Were you asking about {label1}, or perhaps {label2}? "
+                    f"Try rephrasing and I'll do my best!"
+                )
             else:
-                # The tag exists in classes but has no entry in INTENT_RESPONSES — shouldn't
-                # happen in normal operation, but fall back gracefully just in case.
-                reply = FALLBACK_RESPONSE
+                if user_name:
+                    reply = (
+                        f"I'm not confident I understood that, {user_name}. Could you rephrase? "
+                        "You can ask about the Samphor's definition, history, materials, shape, "
+                        "playing technique, tuning, ceremonies, the Pinpeat ensemble, comparisons, "
+                        "learning, or preservation."
+                    )
+                else:
+                    reply = FALLBACK_RESPONSE
+            self._history.append({"role": "assistant", "content": reply})
+            return reply, {**ctx, "last_intent": None}
+
+        # ------------------------------------------------------------------
+        # Normal path: confident prediction → look up reply in knowledge base.
+        # ------------------------------------------------------------------
+        tag       = self._classes[best_idx]
+        responses = INTENT_RESPONSES.get(tag, [FALLBACK_RESPONSE])
+        reply     = random.choice(responses)
 
         self._history.append({"role": "assistant", "content": reply})
-        return reply
+        updated = {
+            **ctx,
+            "last_intent":    tag,
+            "last_response":  reply,
+            "last_confidence": round(confidence, 4),
+        }
+        return reply, updated
+
+    # =========================================================================
+    # ONBOARDING HELPERS
+    # =========================================================================
+    # These four methods handle the small "get to know you" conversation that
+    # runs before the main Q&A.  No neural network is involved — it is pure
+    # state-machine logic driven by ctx["onboarding_step"].
+    #
+    # State flow:  "name" → "occupation" → "done"
+    # =========================================================================
+
+    def _onboarding_respond(self, user_input: str, ctx: dict) -> tuple[str, dict]:
+        """Route to the correct onboarding step handler."""
+        step = ctx.get("onboarding_step", "name")
+        if step == "name":
+            name = self._extract_name(user_input)
+            reply = (
+                f"Lovely to meet you, {name}! "
+                f"What do you do for a living, if you don't mind me asking?"
+            )
+            updated = {**ctx, "onboarding_step": "occupation", "user_name": name}
+        elif step == "occupation":
+            name       = ctx.get("user_name", "friend")
+            occupation = self._extract_occupation(user_input)
+            reply      = self._occupation_greeting(name, occupation)
+            updated    = {**ctx, "onboarding_step": "done", "user_occupation": occupation}
+        else:
+            # Shouldn't reach here, but be safe.
+            reply   = "What would you like to know about the Samphor?"
+            updated = {**ctx, "onboarding_step": "done"}
+        self._history.append({"role": "assistant", "content": reply})
+        return reply, updated
+
+    @staticmethod
+    def _extract_name(text: str) -> str:
+        """Strip common lead-in phrases and return a title-cased name."""
+        text = text.strip().strip(".,!?")
+        SKIP_WORDS = {"skip", "pass", "private", "anonymous", "secret", "nothing", "nope", "no"}
+        if any(w in text.lower().split() for w in SKIP_WORDS):
+            return "friend"
+        for prefix in [
+            "my name is", "i'm called", "i am called", "you can call me",
+            "call me", "the name is", "name's", "it's", "i'm", "i am",
+        ]:
+            if text.lower().startswith(prefix):
+                text = text[len(prefix):].strip().strip(".,!?")
+                break
+        words = text.split()
+        # Clamp to two words so "John Smith who loves drums" → "John Smith"
+        name = " ".join(words[:2]) if len(words) > 2 else " ".join(words)
+        return name.title() if name else "friend"
+
+    @staticmethod
+    def _extract_occupation(text: str) -> str:
+        """Strip lead-in phrases and return a lowercase occupation string."""
+        text = text.strip().strip(".,!?")
+        SKIP_WORDS = {"skip", "pass", "private", "nothing", "nope", "no", "secret"}
+        if any(w in text.lower().split() for w in SKIP_WORDS):
+            return "professional"
+        # Sort longest-first so "i work as a" is tried before "i work"
+        PREFIXES = sorted([
+            "i work as a", "i work as an", "i am a", "i am an",
+            "i'm a", "i'm an", "my job is", "i work in", "i work as",
+            "i am", "i'm",
+        ], key=len, reverse=True)
+        for prefix in PREFIXES:
+            if text.lower().startswith(prefix):
+                text = text[len(prefix):].strip().strip(".,!?")
+                break
+        return text.lower() if text else "professional"
+
+    @staticmethod
+    def _occupation_greeting(name: str, occupation: str) -> str:
+        """Return a personalised transition message based on the user's occupation."""
+        occ = occupation.lower()
+        words = set(occ.split())
+
+        MUSICIAN_WORDS    = {"musician", "music", "singer", "guitarist", "pianist",
+                              "drummer", "performer", "artist", "band", "composer"}
+        TEACHER_WORDS     = {"teacher", "professor", "educator", "lecturer",
+                              "instructor", "tutor", "academic"}
+        STUDENT_WORDS     = {"student", "pupil", "learner", "undergraduate",
+                              "graduate", "studying", "study"}
+        RESEARCHER_WORDS  = {"researcher", "historian", "anthropologist",
+                              "ethnomusicologist", "scholar", "archivist"}
+
+        if words & MUSICIAN_WORDS:
+            return (
+                f"How fitting, {name}! As a fellow music person, "
+                f"you will have a natural appreciation for the Samphor's playing technique "
+                f"and its role as the rhythmic anchor of the Pinpeat ensemble. "
+                f"What would you like to explore first?"
+            )
+        if words & TEACHER_WORDS:
+            return (
+                f"Wonderful, {name}! Educators like yourself are vital for keeping traditions alive. "
+                f"The Samphor's rich history and cultural significance make for fascinating teaching material. "
+                f"What shall we start with?"
+            )
+        if words & STUDENT_WORDS:
+            return (
+                f"Great to have you here, {name}! Students are always my favourite visitors. "
+                f"You have come to the right place to learn about Cambodia's iconic drum. "
+                f"What would you like to discover first?"
+            )
+        if words & RESEARCHER_WORDS:
+            return (
+                f"Excellent, {name}! Scholars will find the Samphor particularly compelling — "
+                f"its history spans over a millennium and its preservation story is remarkable. "
+                f"What aspect would you like to explore first?"
+            )
+        return (
+            f"How interesting, {name}! I am delighted to have you here. "
+            f"Feel free to ask me anything about the Samphor — its history, how it is played, "
+            f"its cultural significance, and much more. Where shall we begin?"
+        )
 
     # =========================================================================
     # PUBLIC METHOD: reset()

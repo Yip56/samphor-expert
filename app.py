@@ -1,64 +1,86 @@
 # =============================================================================
 # app.py
 # =============================================================================
-# This is the ENTRY POINT — the file you run to start the chatbot website.
-# It uses Flask, a Python library for building web servers.
+# Flask web server — entry point for the Samphor Expert chatbot.
 #
-# WHAT IS A WEB SERVER?
-#   When you open http://127.0.0.1:5000 in your browser, the browser is
-#   asking this server for content.  Flask receives that request, figures out
-#   what to send back (an HTML page, a JSON reply, etc.), and sends it.
-#
-# HOW THE CHAT WORKS END-TO-END:
-#   1. User opens http://127.0.0.1:5000 in a browser
-#   2. Flask serves templates/index.html  (the chat page)
-#   3. User types a message and clicks Send
-#   4. JavaScript in index.html sends a POST request to /chat
-#   5. Flask receives it, passes the text to engine.respond()
-#   6. MLEngine processes the text and returns a reply string
-#   7. Flask wraps the reply in JSON and sends it back to the browser
-#   8. JavaScript displays the reply in the chat box
-#
-# CONNECTIONS:
-#   → Serves templates/index.html  (the visual chat UI)
-#   → Calls engine.respond()       (engine/ml_engine.py)
-#   → Calls engine.reset()         (engine/ml_engine.py)
+# UPGRADES APPLIED (see upgrade.md):
+#   Fix 1 — Session isolation  : per-user context stored in Flask session
+#   Fix 4 — Fallback engine    : auto-falls back to RuleBasedEngine if ML fails
+#   Logging                    : every turn written to logs/chat.log
+#   /logs endpoint             : returns recent log lines for inspection
 # =============================================================================
 
-# Flask    : the web framework
-# jsonify  : converts a Python dict to a JSON response  {"key": "value"}
-# render_template : loads an HTML file from the templates/ folder
-# request  : lets us read what the browser sent us
-from flask import Flask, jsonify, render_template, request
+import logging
+import os
+import uuid
 
-# ── ENGINE SELECTION ─────────────────────────────────────────────────────────
-# The "engine" is the brain of the chatbot. You can swap between:
-#   MLEngine        → smart neural-network engine (default)
-#   RuleBasedEngine → simple keyword engine (backup)
-#
-# To switch, comment/uncomment the two pairs of lines below.
-# ─────────────────────────────────────────────────────────────────────────────
+from flask import Flask, jsonify, render_template, request, session
+
+from engine.chat_engine import RuleBasedEngine
 from engine.ml_engine import MLEngine
-engine = MLEngine()   # MLEngine auto-loads the saved model from model/
 
-# To switch back to the rule-based engine, comment the two lines above
-# and uncomment these two lines:
-# from engine.chat_engine import RuleBasedEngine
-# engine = RuleBasedEngine()
-# ─────────────────────────────────────────────────────────────────────────────
+# =============================================================================
+# ENGINE SETUP
+# =============================================================================
+# Both engines are created once at startup (model loading is expensive).
+# _ml is the primary engine; _rule is the fallback used when the ML model
+# is missing or raises an unexpected exception.
+# =============================================================================
+_ml   = MLEngine()
+_rule = RuleBasedEngine()
 
-# Create the Flask application object.
-# __name__ tells Flask where to look for templates and static files.
-# (Flask looks for a 'templates/' folder next to this file.)
+
+def _get_reply(user_message: str, context: dict) -> tuple[str, dict]:
+    """Route a user message through MLEngine, fall back to RuleBasedEngine."""
+    if _ml._model is not None:
+        try:
+            return _ml.respond(user_message, context)
+        except Exception as exc:
+            _log.error("MLEngine.respond() raised %s — falling back to RuleBasedEngine", exc)
+    else:
+        _log.warning("MLEngine model not loaded — using RuleBasedEngine fallback")
+    reply, ctx = _rule.respond(user_message, context)
+    return reply, ctx
+
+
+# =============================================================================
+# LOGGING SETUP
+# =============================================================================
+# Every chat turn is appended to logs/chat.log (UTF-8) AND echoed to the
+# console so you can watch live in the terminal.
+# GET /logs returns the last 100 lines as JSON for quick inspection.
+# =============================================================================
+os.makedirs("logs", exist_ok=True)
+logging.basicConfig(
+    level=logging.INFO,
+    format="%(asctime)s  %(message)s",
+    datefmt="%Y-%m-%d %H:%M:%S",
+    handlers=[
+        logging.FileHandler("logs/chat.log", encoding="utf-8"),
+        logging.StreamHandler(),
+    ],
+)
+_log = logging.getLogger("samphor")
+
+# =============================================================================
+# FLASK APP
+# =============================================================================
 app = Flask(__name__)
 
+# secret_key is required for Flask session (cookie encryption).
+# Override with the SECRET_KEY environment variable in production.
+app.secret_key = os.environ.get("SECRET_KEY", "samphor-expert-dev-key-2024")
+
+
+@app.before_request
+def _ensure_session_id():
+    """Assign a short session ID on first visit for log correlation."""
+    if "sid" not in session:
+        session["sid"] = uuid.uuid4().hex[:8]
+
 
 # =============================================================================
-# ROUTE: /   (the homepage)
-# =============================================================================
-# A "route" is a URL path that Flask listens for.
-# @app.route("/") means: "when the browser asks for the homepage, run index()".
-# render_template("index.html") reads templates/index.html and sends it back.
+# ROUTE: /
 # =============================================================================
 @app.route("/")
 def index():
@@ -66,64 +88,76 @@ def index():
 
 
 # =============================================================================
-# ROUTE: /chat   (the chat API endpoint)
-# =============================================================================
-# methods=["POST"] means this route only accepts POST requests.
-# GET requests (normal browser navigation) would return a 405 error.
-# JavaScript in index.html sends a POST to this URL with JSON like:
-#   { "message": "What is the Samphor" }
-# Flask returns JSON like:
-#   { "response": "The Samphor is a barrel-shaped drum..." }
+# ROUTE: /chat
 # =============================================================================
 @app.route("/chat", methods=["POST"])
 def chat():
-    # request.get_json() parses the JSON body the browser sent.
-    # force=True means "try to parse as JSON even if the Content-Type header
-    # is missing" — makes the API more forgiving.
-    data = request.get_json(force=True)
-
-    # .get("message", "") safely reads the "message" key.
-    # If the key is missing, it returns "" instead of crashing.
-    # .strip() removes any leading/trailing whitespace.
+    data         = request.get_json(force=True)
     user_message = data.get("message", "").strip()
 
-    # If the user sent an empty message, return an error response.
-    # HTTP status 400 = "Bad Request" (the client sent something invalid).
     if not user_message:
         return jsonify({"response": "Please enter a message."}), 400
 
-    # Pass the message to the engine and get a reply string back.
-    # This is where all the ML magic happens (inside ml_engine.py).
-    reply = engine.respond(user_message)
+    # Restore this user's context.
+    # If onboarding_step is missing (brand-new session OR old session cookie
+    # from before the onboarding feature was added) AND user_name is also absent,
+    # restart from the beginning of the onboarding flow.
+    context = session.get("chat_context", {})
+    if "onboarding_step" not in context and "user_name" not in context:
+        context = {"onboarding_step": "name"}
 
-    # Wrap the reply in a JSON object and send it back to the browser.
-    # jsonify({"response": reply}) → HTTP 200 with body: {"response": "..."}
+    reply, updated_context = _get_reply(user_message, context)
+
+    # Persist updated context back into the session cookie.
+    session["chat_context"] = updated_context
+
+    # Log the turn.
+    intent = updated_context.get("last_intent") or "fallback/clarify"
+    conf   = updated_context.get("last_confidence", 0.0)
+    sid    = session.get("sid", "?")
+    _log.info(
+        "[%s] USER: %r  |  INTENT: %s  |  CONF: %.0f%%  |  REPLY: %r",
+        sid, user_message, intent, conf * 100, reply[:80],
+    )
+
     return jsonify({"response": reply})
 
 
 # =============================================================================
-# ROUTE: /reset   (clear the conversation history)
-# =============================================================================
-# Called when the user clicks the ↺ reset button in the chat UI.
-# engine.reset() clears the _history list in MLEngine.
+# ROUTE: /reset
 # =============================================================================
 @app.route("/reset", methods=["POST"])
 def reset():
-    engine.reset()
-    return jsonify({"status": "Session reset."})
+    _ml.reset()
+    # Restart onboarding so the bot re-introduces itself on a fresh session.
+    session["chat_context"] = {"onboarding_step": "name"}
+    _log.info("[%s] Session reset", session.get("sid", "?"))
+    return jsonify({
+        "status": "Session reset.",
+        "greeting": "Hello again! May I ask your name so we can start fresh?",
+    })
+
+
+# =============================================================================
+# ROUTE: /logs  — returns the last 100 log lines as JSON (for testing)
+# =============================================================================
+@app.route("/logs")
+def get_logs():
+    try:
+        with open("logs/chat.log", encoding="utf-8") as f:
+            lines = f.readlines()
+        return jsonify({"total": len(lines), "lines": lines[-100:]})
+    except FileNotFoundError:
+        return jsonify({"total": 0, "lines": []})
 
 
 # =============================================================================
 # ENTRY POINT
 # =============================================================================
-# This block only runs when you execute this file directly:
-#   python app.py
-# It does NOT run if another file imports app.py (e.g. in testing).
-#
-# debug=True enables:
-#   - Auto-reload: Flask restarts whenever you save a .py file
-#   - The Werkzeug debugger: shows a detailed error page in the browser
-#     if the server crashes (never use debug=True in production!)
+# Railway injects the PORT environment variable automatically.
+# host="0.0.0.0" is required so Railway's router can reach the process.
+# debug must be False in production.
 # =============================================================================
 if __name__ == "__main__":
-    app.run(debug=True)
+    port = int(os.environ.get("PORT", 5000))
+    app.run(host="0.0.0.0", port=port, debug=False)

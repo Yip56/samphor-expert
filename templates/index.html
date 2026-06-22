@@ -174,6 +174,14 @@
       padding: 10px 14px;
     }
     #reset-btn:hover { background: #999; }
+
+    /* Download button — earthy green to visually separate from reset. */
+    #download-btn {
+      background: #4a7c59;
+      padding: 10px 14px;
+      font-size: 1rem;
+    }
+    #download-btn:hover { background: #3a6347; }
   </style>
 </head>
 <body>
@@ -190,17 +198,19 @@
   </header>
 
   <!-- Scrollable chat message area.
-       The first message is hardcoded HTML — the bot's welcome greeting. -->
+       The first message is the onboarding opener — the bot asks for the user's name. -->
   <div id="chat-box">
-    <div class="msg bot">Hello! I am the Samphor Expert. Ask me about the history, materials, playing technique, or cultural role of Cambodia's iconic drum.</div>
+    <div class="msg bot">Hello! I am the Samphor Expert — your guide to Cambodia's iconic drum. Before we dive in, may I know your name?</div>
   </div>
 
   <!-- Input row: text box, Send button, Reset button -->
   <div class="input-area">
     <input id="user-input" type="text" placeholder="Ask about the Samphor..." autocomplete="off"/>
     <button id="send-btn">Send</button>
-    <!-- ↺ is a Unicode "clockwise arrow" symbol used as a reset icon -->
+    <!-- ↺ clockwise arrow = reset -->
     <button id="reset-btn" title="Reset session">&#8635;</button>
+    <!-- ↓ downward arrow = download chat history -->
+    <button id="download-btn" title="Download chat history">&#8659;</button>
   </div>
 
 </div><!-- end .chat-wrapper -->
@@ -313,6 +323,49 @@
 
 
   /*
+    downloadHistory()
+    ─────────────────
+    Reads every message bubble currently visible in the chat box, formats
+    them as plain text (role: content), then triggers an immediate file
+    download in the browser — no server round-trip needed.
+  */
+  function downloadHistory() {
+    const messages = document.querySelectorAll('#chat-box .msg');
+    if (!messages.length) {
+      alert('There is no chat history to download yet.');
+      return;
+    }
+
+    const lines = [];
+    const now   = new Date().toLocaleString();
+    lines.push('Samphor Expert System — Chat History');
+    lines.push('Downloaded: ' + now);
+    lines.push('='.repeat(50));
+    lines.push('');
+
+    messages.forEach(msg => {
+      const role = msg.classList.contains('user') ? 'You' : 'Samphor Expert';
+      lines.push(role + ': ' + msg.textContent.trim());
+      lines.push('');
+    });
+
+    // Build a Blob (in-memory file) and force the browser to download it.
+    const blob      = new Blob([lines.join('\n')], { type: 'text/plain;charset=utf-8' });
+    const url       = URL.createObjectURL(blob);
+    const timestamp = new Date().toISOString().slice(0, 16).replace('T', '_').replace(/:/g, '-');
+    const a         = document.createElement('a');
+    a.href          = url;
+    a.download      = 'samphor-chat-' + timestamp + '.txt';
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);   // free the memory after download triggers
+  }
+
+  document.getElementById('download-btn').addEventListener('click', downloadHistory);
+
+
+  /*
     RESET BUTTON
     ────────────
     Sends POST /reset to tell Flask to clear the server-side conversation history.
@@ -320,9 +373,10 @@
     This is also async because we need to wait for the server to confirm the reset.
   */
   resetBtn.addEventListener('click', async () => {
-    await fetch('/reset', { method: 'POST' });   // tell the server to clear history
-    // Replace ALL contents of the chat box with just the welcome message.
-    chatBox.innerHTML = '<div class="msg bot">Session reset. Ask me anything about the Samphor!</div>';
+    const res  = await fetch('/reset', { method: 'POST' });
+    const data = await res.json();
+    // Show the server-provided greeting (which restarts the onboarding flow).
+    chatBox.innerHTML = `<div class="msg bot">${data.greeting}</div>`;
   });
 
 </script>

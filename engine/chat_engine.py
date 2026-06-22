@@ -34,9 +34,10 @@ class ChatEngine(ABC):
 
     # @abstractmethod means: "subclasses MUST override this — no skipping."
     @abstractmethod
-    def respond(self, user_input: str) -> str:
+    def respond(self, user_input: str, context: dict | None = None) -> tuple[str, dict]:
         # user_input : the text the user typed in the chat box
-        # -> str     : the engine must return a text reply
+        # context    : per-session state dict (last_intent, last_response, …)
+        # returns    : (reply_text, updated_context)
         pass
 
     @abstractmethod
@@ -95,30 +96,21 @@ class RuleBasedEngine(ChatEngine):
         # The leading underscore (_) means "don't touch this from outside the class."
         self._history = []
 
-    def respond(self, user_input: str) -> str:
-        # Convert the user's message to lowercase so "What is" and "what is"
-        # both match the same keyword — Python string comparisons are case-sensitive.
+    def respond(self, user_input: str, context: dict | None = None) -> tuple[str, dict]:
         lower = user_input.lower()
-
-        # Save the user's turn to history before we reply.
         self._history.append({"role": "user", "content": user_input})
 
-        # Loop through every rule in the RULES table.
-        # 'keywords' is the tuple of trigger words; 'reply' is the canned response.
         for keywords, reply in self.RULES.items():
-            # any() returns True as soon as it finds ONE keyword in the message.
-            # This is the entire "brain" of the rule-based engine.
             if any(kw in lower for kw in keywords):
                 self._history.append({"role": "assistant", "content": reply})
-                return reply
+                return reply, {}
 
-        # No keyword matched → send a generic help message.
         fallback = (
             "I'm not sure about that. Try asking about the Samphor's history, "
             "materials, playing technique, or its role in Cambodian ceremonies."
         )
         self._history.append({"role": "assistant", "content": fallback})
-        return fallback
+        return fallback, {}
 
     def reset(self) -> None:
         # list.clear() empties the list completely.
