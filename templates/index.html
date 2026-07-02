@@ -2,65 +2,33 @@
 <!--
   templates/index.html
   ====================
-  This is the CHAT USER INTERFACE — everything the user sees in the browser.
-  Flask serves this file when someone visits http://127.0.0.1:5000
+  Chat UI for the Samphor Expert chatbot.
 
-  This file has three sections that work together:
-    1. <head>   — page settings and CSS styling (how it looks)
-    2. <body>   — HTML structure (the actual chat window elements)
-    3. <script> — JavaScript (the behaviour: sending messages, showing replies)
-
-  HOW IT CONNECTS TO THE BACKEND (Python/Flask):
-    - When the page loads, it just displays a welcome message (no server call).
-    - When the user clicks Send (or presses Enter), JavaScript sends the
-      message to POST /chat on the Flask server and waits for a JSON reply.
-    - When the user clicks ↺, JavaScript sends POST /reset to clear history.
-
-  NO PYTHON runs in this file — it's pure browser code (HTML, CSS, JS).
+  Upgrades applied:
+    Fix 5  — Quick reply chips after every bot response
+    Fix 6  — Typing indicator ("..." animation) while server replies
+    Fix 8  — localStorage persistence: chat survives a page refresh
+    Fix 12 — Thumbs-up / thumbs-down feedback buttons on bot replies
+    Fix 16 — Voice input via Web Speech API (hidden if browser unsupported)
 -->
 <html lang="en">
 <head>
-  <!-- Tell the browser to use UTF-8 text encoding so Khmer characters display correctly. -->
   <meta charset="UTF-8" />
-
-  <!-- Make the page look good on phones (don't zoom out to fit everything). -->
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-
   <title>Samphor Expert System</title>
 
   <style>
-    /*
-      CSS RESET
-      Browsers add default margins and padding to elements.
-      This rule wipes those defaults so we have full control.
-      box-sizing: border-box means "include padding inside the element's width"
-      — without this, padding makes elements unexpectedly wider.
-    */
     * { box-sizing: border-box; margin: 0; padding: 0; }
 
-    /*
-      PAGE LAYOUT
-      display: flex + justify-content/align-items: center
-      centres the chat window both horizontally and vertically.
-      min-height: 100vh makes the body fill the full viewport height.
-    */
     body {
       font-family: 'Segoe UI', sans-serif;
-      background: #f4f1ec;       /* warm off-white background */
+      background: #f4f1ec;
       display: flex;
-      justify-content: center;   /* horizontally centred */
-      align-items: center;       /* vertically centred */
-      min-height: 100vh;         /* 100% of the visible screen height */
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
     }
 
-    /*
-      CHAT WINDOW
-      A white rounded card that takes 90% of the screen height.
-      display: flex + flex-direction: column stacks children top-to-bottom:
-        - header (title bar)
-        - #chat-box (scrollable message area)
-        - .input-area (text box + buttons)
-    */
     .chat-wrapper {
       width: 100%;
       max-width: 700px;
@@ -69,61 +37,40 @@
       height: 90vh;
       background: #fff;
       border-radius: 12px;
-      box-shadow: 0 4px 24px rgba(0,0,0,0.12);   /* subtle drop shadow */
-      overflow: hidden;                            /* hide content that sticks out */
+      box-shadow: 0 4px 24px rgba(0,0,0,0.12);
+      overflow: hidden;
     }
 
-    /* Dark red header bar at the top of the chat window. */
     header {
-      background: #8b3a0f;   /* deep Cambodian clay red */
+      background: #8b3a0f;
       color: #fff;
       padding: 18px 24px;
     }
     header h1 { font-size: 1.3rem; }
     header p  { font-size: 0.85rem; opacity: 0.8; margin-top: 2px; }
 
-    /*
-      SCROLLABLE MESSAGE AREA
-      flex: 1 means "take up all remaining vertical space" (between header and input).
-      overflow-y: auto adds a vertical scrollbar only when messages overflow.
-      display: flex + flex-direction: column stacks messages from top to bottom.
-      gap: 12px puts 12px of space between each message bubble.
-    */
     #chat-box {
       flex: 1;
       overflow-y: auto;
       padding: 20px;
       display: flex;
       flex-direction: column;
-      gap: 12px;
+      gap: 8px;
     }
 
-    /* Base style for every message bubble (user and bot). */
     .msg {
-      max-width: 80%;         /* bubbles don't stretch the full width */
+      max-width: 80%;
       padding: 10px 15px;
-      border-radius: 18px;    /* pill / rounded corners */
+      border-radius: 18px;
       line-height: 1.5;
       font-size: 0.95rem;
     }
-
-    /*
-      USER MESSAGE (right-aligned, dark red background)
-      align-self: flex-end pushes this bubble to the right side.
-      border-bottom-right-radius: 4px creates the "chat tail" on the bottom right.
-    */
     .msg.user {
       align-self: flex-end;
       background: #8b3a0f;
       color: #fff;
       border-bottom-right-radius: 4px;
     }
-
-    /*
-      BOT MESSAGE (left-aligned, warm beige background)
-      align-self: flex-start pushes this bubble to the left side.
-      border-bottom-left-radius: 4px creates the "chat tail" on the bottom left.
-    */
     .msg.bot {
       align-self: flex-start;
       background: #f0e6d3;
@@ -131,254 +78,386 @@
       border-bottom-left-radius: 4px;
     }
 
-    /* Row at the bottom containing the text input and buttons. */
+    /* ── Fix 6: Typing indicator ── */
+    .typing-indicator {
+      align-self: flex-start;
+      background: #f0e6d3;
+      border-radius: 18px;
+      border-bottom-left-radius: 4px;
+      padding: 12px 18px;
+      display: none;
+      gap: 4px;
+    }
+    .typing-indicator span {
+      display: inline-block;
+      width: 7px;
+      height: 7px;
+      background: #8b3a0f;
+      border-radius: 50%;
+      animation: bounce 1.2s infinite;
+    }
+    .typing-indicator span:nth-child(2) { animation-delay: 0.2s; }
+    .typing-indicator span:nth-child(3) { animation-delay: 0.4s; }
+    @keyframes bounce {
+      0%, 60%, 100% { transform: translateY(0); }
+      30%           { transform: translateY(-6px); }
+    }
+
+    /* ── Fix 12: Feedback buttons ── */
+    .feedback-row {
+      align-self: flex-start;
+      display: flex;
+      gap: 2px;
+      margin-top: -2px;
+    }
+    .feedback-row .fb-btn {
+      background: none;
+      border: none;
+      font-size: 1rem;
+      cursor: pointer;
+      opacity: 0.3;
+      padding: 2px 6px;
+      border-radius: 8px;
+      transition: opacity 0.15s, background 0.15s;
+      line-height: 1;
+    }
+    .feedback-row .fb-btn:hover  { opacity: 0.9; background: #f0e6d3; }
+    .feedback-row .fb-btn.active { opacity: 1; }
+    .feedback-row.voted .fb-btn  { cursor: default; }
+
+    /* ── Fix 5: Quick reply chips ── */
+    .chips {
+      align-self: flex-start;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      padding: 2px 0 4px;
+    }
+    .chips .chip {
+      background: #fff;
+      border: 1.5px solid #8b3a0f;
+      color: #8b3a0f;
+      border-radius: 16px;
+      padding: 5px 13px;
+      font-size: 0.82rem;
+      cursor: pointer;
+      font-family: inherit;
+      transition: background 0.15s, color 0.15s;
+    }
+    .chips .chip:hover {
+      background: #8b3a0f;
+      color: #fff;
+    }
+
+    /* ── Input row ── */
     .input-area {
       display: flex;
       padding: 14px 16px;
       border-top: 1px solid #eee;
-      gap: 10px;
+      gap: 8px;
       background: #fafafa;
     }
-
-    /*
-      TEXT INPUT BOX
-      flex: 1 makes it expand to fill all available horizontal space
-      (so the buttons stay at a fixed width on the right).
-    */
     #user-input {
       flex: 1;
       padding: 10px 14px;
       border: 1px solid #ddd;
       border-radius: 24px;
       font-size: 0.95rem;
-      outline: none;             /* remove the default browser focus outline */
+      outline: none;
     }
-    /* Change border colour to red when the user is typing in the box. */
     #user-input:focus { border-color: #8b3a0f; }
 
-    /* Shared style for all buttons. */
     button {
       background: #8b3a0f;
       color: #fff;
       border: none;
       padding: 10px 20px;
       border-radius: 24px;
-      cursor: pointer;           /* show a hand cursor on hover */
+      cursor: pointer;
       font-size: 0.9rem;
     }
-    button:hover { background: #a84510; }   /* slightly lighter on hover */
+    button:hover { background: #a84510; }
 
-    /* The reset button is grey and smaller than the Send button. */
-    #reset-btn {
-      background: #bbb;
-      padding: 10px 14px;
-    }
+    #reset-btn    { background: #bbb; padding: 10px 14px; }
     #reset-btn:hover { background: #999; }
 
-    /* Download button — earthy green to visually separate from reset. */
-    #download-btn {
-      background: #4a7c59;
-      padding: 10px 14px;
-      font-size: 1rem;
-    }
+    #download-btn { background: #4a7c59; padding: 10px 14px; font-size: 1rem; }
     #download-btn:hover { background: #3a6347; }
+
+    /* Fix 7: Rich media links */
+    .media-links {
+      align-self: flex-start;
+      display: flex;
+      flex-direction: column;
+      gap: 3px;
+      padding: 0 0 4px;
+    }
+    .media-link {
+      font-size: 0.8rem;
+      color: #5a6ea8;
+      text-decoration: none;
+    }
+    .media-link:hover { text-decoration: underline; }
+
+    /* Fix 16: Mic button */
+    #mic-btn { background: #5a6ea8; padding: 10px 14px; font-size: 1rem; }
+    #mic-btn:hover { background: #4a5e98; }
+    #mic-btn.listening { background: #c0392b; animation: pulse 1s infinite; }
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50%       { opacity: 0.6; }
+    }
   </style>
 </head>
 <body>
 
-<!-- =========================================================
-     HTML STRUCTURE
-     ========================================================= -->
 <div class="chat-wrapper">
 
-  <!-- Title bar -->
   <header>
     <h1>Samphor Expert System</h1>
     <p>Ask me anything about the traditional Cambodian drum</p>
   </header>
 
-  <!-- Scrollable chat message area.
-       The first message is the onboarding opener — the bot asks for the user's name. -->
+  <!-- Scrollable message area. JS populates this on load. -->
   <div id="chat-box">
-    <div class="msg bot">Hello! I am the Samphor Expert — your guide to Cambodia's iconic drum. Before we dive in, may I know your name?</div>
+    <!-- Fix 6: Typing indicator lives here, always last child -->
+    <div id="typing" class="typing-indicator">
+      <span></span><span></span><span></span>
+    </div>
   </div>
 
-  <!-- Input row: text box, Send button, Reset button -->
   <div class="input-area">
     <input id="user-input" type="text" placeholder="Ask about the Samphor..." autocomplete="off"/>
+    <!-- Fix 16: Mic button (hidden by JS if browser doesn't support Speech API) -->
+    <button id="mic-btn" title="Voice input">&#127908;</button>
     <button id="send-btn">Send</button>
-    <!-- ↺ clockwise arrow = reset -->
     <button id="reset-btn" title="Reset session">&#8635;</button>
-    <!-- ↓ downward arrow = download chat history -->
     <button id="download-btn" title="Download chat history">&#8659;</button>
   </div>
 
-</div><!-- end .chat-wrapper -->
+</div>
 
-
-<!-- =========================================================
-     JAVASCRIPT — handles all the interactive behaviour
-     This section runs inside the browser (not on the server).
-     ========================================================= -->
 <script>
-  /*
-    Grab references to the HTML elements we'll be working with.
-    document.getElementById() finds an element by its id="..." attribute.
-    We store them in variables so we don't have to look them up every time.
-  */
-  const chatBox  = document.getElementById('chat-box');
-  const input    = document.getElementById('user-input');
-  const sendBtn  = document.getElementById('send-btn');
-  const resetBtn = document.getElementById('reset-btn');
+  const chatBox   = document.getElementById('chat-box');
+  const typing    = document.getElementById('typing');
+  const input     = document.getElementById('user-input');
+  const sendBtn   = document.getElementById('send-btn');
+  const resetBtn  = document.getElementById('reset-btn');
+  const micBtn    = document.getElementById('mic-btn');
 
+  const STORAGE_KEY = 'samphor-chat-v1';
 
-  /*
-    addMessage(text, role)
-    ─────────────────────
-    Creates a new message bubble <div> and appends it to the chat box.
-    'role' is either 'user' or 'bot' — this sets the CSS class which
-    controls colour and alignment (see the .msg.user / .msg.bot rules above).
-
-    chatBox.scrollTop = chatBox.scrollHeight automatically scrolls the
-    chat box to the bottom so the newest message is always visible.
-  */
-  function addMessage(text, role) {
-    const div = document.createElement('div');  // create a new <div> element
-    div.className = `msg ${role}`;              // e.g. "msg user" or "msg bot"
-    div.textContent = text;                     // set the visible text (safe — no HTML injection)
-    chatBox.appendChild(div);                   // add it to the bottom of the chat box
-    chatBox.scrollTop = chatBox.scrollHeight;   // auto-scroll to the bottom
+  // ── Fix 6: Typing indicator ──────────────────────────────────────────────
+  function showTyping() {
+    chatBox.appendChild(typing);          // keep it as last child
+    typing.style.display = 'flex';
+    chatBox.scrollTop = chatBox.scrollHeight;
+  }
+  function hideTyping() {
+    typing.style.display = 'none';
   }
 
+  // ── Message builders ─────────────────────────────────────────────────────
+  function addUserMessage(text) {
+    const div = document.createElement('div');
+    div.className = 'msg user';
+    div.textContent = text;
+    chatBox.insertBefore(div, typing);
+    chatBox.scrollTop = chatBox.scrollHeight;
+  }
 
-  /*
-    sendMessage()
-    ─────────────
-    Called when the user clicks Send or presses Enter.
-    This is an ASYNC function — it can pause and wait for the server to reply
-    without freezing the rest of the page.
+  function addBotMessage(text, chips, media) {
+    // Main reply bubble
+    const div = document.createElement('div');
+    div.className = 'msg bot';
+    div.textContent = text;
+    chatBox.insertBefore(div, typing);
 
-    Steps:
-      1. Read the text from the input box
-      2. Show the user's message immediately in the chat
-      3. Disable the input while waiting (so they can't send twice)
-      4. Send the text to POST /chat on the Flask server
-      5. Wait for the JSON reply
-      6. Show the bot's reply in the chat
-      7. Re-enable the input
-  */
-  async function sendMessage() {
-    const text = input.value.trim();   // .trim() removes leading/trailing whitespace
-    if (!text) return;                 // do nothing if the box is empty
+    // Fix 12: Feedback row
+    const fbRow = document.createElement('div');
+    fbRow.className = 'feedback-row';
+    ['up', 'down'].forEach(vote => {
+      const btn = document.createElement('button');
+      btn.className = 'fb-btn';
+      btn.title = vote === 'up' ? 'Helpful' : 'Not helpful';
+      btn.textContent = vote === 'up' ? '👍' : '👎';
+      btn.addEventListener('click', async () => {
+        if (fbRow.classList.contains('voted')) return;
+        fbRow.classList.add('voted');
+        btn.classList.add('active');
+        await fetch('/feedback', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ vote, text }),
+        }).catch(() => {});
+      });
+      fbRow.appendChild(btn);
+    });
+    chatBox.insertBefore(fbRow, typing);
 
-    addMessage(text, 'user');          // show the user's message on the right
-    input.value = '';                  // clear the text box
-    input.disabled = true;             // prevent typing while waiting
+    // Fix 5: Quick reply chips
+    if (chips && chips.length) {
+      const chipsDiv = document.createElement('div');
+      chipsDiv.className = 'chips';
+      chips.forEach(label => {
+        const chip = document.createElement('button');
+        chip.className = 'chip';
+        chip.textContent = label;
+        chip.addEventListener('click', () => {
+          chipsDiv.remove();
+          sendMessage(label);
+        });
+        chipsDiv.appendChild(chip);
+      });
+      chatBox.insertBefore(chipsDiv, typing);
+    }
+
+    // Fix 7: Rich media links
+    if (media && media.links && media.links.length) {
+      const linksDiv = document.createElement('div');
+      linksDiv.className = 'media-links';
+      media.links.forEach(({ label, url }) => {
+        const a = document.createElement('a');
+        a.href = url;
+        a.target = '_blank';
+        a.rel = 'noopener noreferrer';
+        a.className = 'media-link';
+        a.textContent = '🔗 ' + label;
+        linksDiv.appendChild(a);
+      });
+      chatBox.insertBefore(linksDiv, typing);
+    }
+
+    chatBox.scrollTop = chatBox.scrollHeight;
+  }
+
+  // ── Fix 8: localStorage persistence ──────────────────────────────────────
+  function saveToStorage() {
+    const msgs = [...chatBox.querySelectorAll('.msg')].map(m => ({
+      role: m.classList.contains('user') ? 'user' : 'bot',
+      text: m.textContent.trim(),
+    }));
+    try { localStorage.setItem(STORAGE_KEY, JSON.stringify(msgs)); } catch(e) {}
+  }
+
+  function loadFromStorage() {
+    try {
+      const saved = localStorage.getItem(STORAGE_KEY);
+      if (!saved) return false;
+      const msgs = JSON.parse(saved);
+      if (!msgs.length) return false;
+      msgs.forEach(({ role, text }) => {
+        if (role === 'user') addUserMessage(text);
+        else addBotMessage(text, [], null);   // no chips/media for restored messages
+      });
+      return true;
+    } catch(e) { return false; }
+  }
+
+  function clearStorage() {
+    try { localStorage.removeItem(STORAGE_KEY); } catch(e) {}
+  }
+
+  // ── Send message ──────────────────────────────────────────────────────────
+  async function sendMessage(overrideText) {
+    const text = typeof overrideText === 'string' ? overrideText : input.value.trim();
+    if (!text) return;
+
+    addUserMessage(text);
+    input.value = '';
+    input.disabled = true;
     sendBtn.disabled = true;
+    showTyping();
 
     try {
-      /*
-        fetch() sends an HTTP request to the server.
-        'await' means: "pause here until the server replies, then continue."
-        We send a POST request with a JSON body: { "message": "..." }
-        This matches what Flask expects in the /chat route in app.py.
-      */
-      const res = await fetch('/chat', {
+      const res  = await fetch('/chat', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ message: text }),   // convert JS object to JSON string
+        body: JSON.stringify({ message: text }),
       });
-
-      // Parse the JSON response body: { "response": "The Samphor is..." }
       const data = await res.json();
-
-      // Display the bot's reply on the left.
-      addMessage(data.response, 'bot');
-
-    } catch (err) {
-      // If the network request failed (e.g. server is not running), show an error.
-      addMessage('Error connecting to the server. Please try again.', 'bot');
-
+      hideTyping();
+      addBotMessage(data.response, data.chips || [], data.media || null);
+      saveToStorage();
+    } catch(err) {
+      hideTyping();
+      addBotMessage('Error connecting to the server. Please try again.', []);
     } finally {
-      // 'finally' always runs, whether the request succeeded or failed.
-      // Re-enable the input so the user can type again.
       input.disabled = false;
       sendBtn.disabled = false;
-      input.focus();   // move the cursor back into the text box
+      input.focus();
     }
   }
 
-
-  /*
-    EVENT LISTENERS
-    ───────────────
-    addEventListener() watches for user actions and calls a function when they happen.
-
-    'click'  → triggered when the user clicks the Send button
-    'keydown' → triggered on EVERY key press in the input box
-       We check if the key is 'Enter' before calling sendMessage().
-  */
   sendBtn.addEventListener('click', sendMessage);
   input.addEventListener('keydown', e => { if (e.key === 'Enter') sendMessage(); });
 
-
-  /*
-    downloadHistory()
-    ─────────────────
-    Reads every message bubble currently visible in the chat box, formats
-    them as plain text (role: content), then triggers an immediate file
-    download in the browser — no server round-trip needed.
-  */
+  // ── Download history ──────────────────────────────────────────────────────
   function downloadHistory() {
-    const messages = document.querySelectorAll('#chat-box .msg');
-    if (!messages.length) {
-      alert('There is no chat history to download yet.');
-      return;
-    }
-
+    const messages = chatBox.querySelectorAll('.msg');
+    if (!messages.length) { alert('No chat history to download yet.'); return; }
     const lines = [];
-    const now   = new Date().toLocaleString();
+    const now = new Date().toLocaleString();
     lines.push('Samphor Expert System — Chat History');
     lines.push('Downloaded: ' + now);
     lines.push('='.repeat(50));
     lines.push('');
-
     messages.forEach(msg => {
       const role = msg.classList.contains('user') ? 'You' : 'Samphor Expert';
       lines.push(role + ': ' + msg.textContent.trim());
       lines.push('');
     });
-
-    // Build a Blob (in-memory file) and force the browser to download it.
-    const blob      = new Blob([lines.join('\n')], { type: 'text/plain;charset=utf-8' });
-    const url       = URL.createObjectURL(blob);
-    const timestamp = new Date().toISOString().slice(0, 16).replace('T', '_').replace(/:/g, '-');
-    const a         = document.createElement('a');
-    a.href          = url;
-    a.download      = 'samphor-chat-' + timestamp + '.txt';
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    URL.revokeObjectURL(url);   // free the memory after download triggers
+    const blob = new Blob([lines.join('\n')], { type: 'text/plain;charset=utf-8' });
+    const url  = URL.createObjectURL(blob);
+    const ts   = new Date().toISOString().slice(0,16).replace('T','_').replace(/:/g,'-');
+    const a    = document.createElement('a');
+    a.href = url; a.download = 'samphor-chat-' + ts + '.txt';
+    document.body.appendChild(a); a.click();
+    document.body.removeChild(a); URL.revokeObjectURL(url);
   }
-
   document.getElementById('download-btn').addEventListener('click', downloadHistory);
 
-
-  /*
-    RESET BUTTON
-    ────────────
-    Sends POST /reset to tell Flask to clear the server-side conversation history.
-    Then wipes the visual chat box and shows a fresh welcome message.
-    This is also async because we need to wait for the server to confirm the reset.
-  */
+  // ── Reset ────────────────────────────────────────────────────────────────
   resetBtn.addEventListener('click', async () => {
     const res  = await fetch('/reset', { method: 'POST' });
     const data = await res.json();
-    // Show the server-provided greeting (which restarts the onboarding flow).
-    chatBox.innerHTML = `<div class="msg bot">${data.greeting}</div>`;
+    [...chatBox.querySelectorAll('.msg, .feedback-row, .chips')].forEach(el => el.remove());
+    clearStorage();
+    addBotMessage(data.greeting, [], null);
   });
 
+  // ── Fix 16: Voice input ───────────────────────────────────────────────────
+  const SpeechRec = window.SpeechRecognition || window.webkitSpeechRecognition;
+  if (!SpeechRec) {
+    micBtn.style.display = 'none';
+  } else {
+    const rec = new SpeechRec();
+    rec.lang = 'en-US';
+    rec.interimResults = false;
+    rec.onresult = e => {
+      input.value = e.results[0][0].transcript;
+      micBtn.classList.remove('listening');
+      input.focus();
+    };
+    rec.onend  = () => micBtn.classList.remove('listening');
+    rec.onerror = () => micBtn.classList.remove('listening');
+    micBtn.addEventListener('click', () => {
+      if (micBtn.classList.contains('listening')) {
+        rec.stop();
+      } else {
+        rec.start();
+        micBtn.classList.add('listening');
+      }
+    });
+  }
+
+  // ── Init: restore saved chat or show fresh greeting ───────────────────────
+  if (!loadFromStorage()) {
+    addBotMessage(
+      'Hello! I am the Samphor Expert — your guide to Cambodia\'s iconic drum. Before we dive in, may I know your name?',
+      [], null
+    );
+  }
 </script>
 </body>
 </html>

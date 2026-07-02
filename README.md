@@ -1,7 +1,7 @@
 # Samphor Expert System — Complete Learning Guide
 
 An AI-powered chatbot that answers questions about the **Samphor**, a traditional Cambodian barrel drum.
-The system uses a small neural network trained on hand-written example questions to understand what you are asking,
+The system uses a **sentence transformer** model to understand the semantic meaning of your questions,
 then looks up a human-written answer from a knowledge base.
 
 This README is written to be a **complete learning companion** — every concept is explained both in
@@ -22,33 +22,32 @@ A full learning roadmap is at the end.
    - [knowledge/samphor_kb.py — The Answer Book](#knowledgesamphor_kbpy--the-answer-book)
    - [data/intents.json — The Training Data](#dataintentsjson--the-training-data)
    - [templates/index.html — The Chat Interface](#templatesindexhtml--the-chat-interface)
+   - [templates/admin.html — The Analytics Dashboard](#templatesadminhtml--the-analytics-dashboard)
    - [requirements.txt — The Dependency List](#requirementstxt--the-dependency-list)
-   - [model/ — The Saved Brain Files](#model--the-saved-brain-files)
+   - [model/ — The Saved Embedding Files](#model--the-saved-embedding-files)
 4. [Deep Concept Explanations](#4-deep-concept-explanations)
    - [Python Virtual Environments](#python-virtual-environments)
    - [Object-Oriented Programming and Inheritance](#object-oriented-programming-and-inheritance)
    - [Abstract Base Classes](#abstract-base-classes)
    - [The Flask Web Framework and HTTP](#the-flask-web-framework-and-http)
    - [Natural Language Processing (NLP)](#natural-language-processing-nlp)
-   - [Tokenization](#tokenization)
-   - [Lemmatization](#lemmatization)
-   - [Bag of Words](#bag-of-words)
-   - [Neural Networks from Scratch](#neural-networks-from-scratch)
-   - [Activation Functions: ReLU and Softmax](#activation-functions-relu-and-softmax)
-   - [Dropout Regularization](#dropout-regularization)
-   - [The SGD Optimizer and Backpropagation](#the-sgd-optimizer-and-backpropagation)
-   - [Loss, Accuracy, and Epochs](#loss-accuracy-and-epochs)
+   - [Sentence Transformers and Embeddings](#sentence-transformers-and-embeddings)
+   - [Cosine Similarity](#cosine-similarity)
+   - [Semantic Search vs Keyword Matching](#semantic-search-vs-keyword-matching)
    - [Pickle and Model Serialization](#pickle-and-model-serialization)
    - [JSON and Data Exchange](#json-and-data-exchange)
    - [AJAX and the fetch() API](#ajax-and-the-fetch-api)
    - [Async/Await in JavaScript](#asyncawait-in-javascript)
    - [CSS Flexbox Layout](#css-flexbox-layout)
+   - [localStorage and Session Persistence](#localstorage-and-session-persistence)
+   - [Web Speech API](#web-speech-api)
 5. [Setup — Step by Step](#5-setup--step-by-step)
 6. [How to Run](#6-how-to-run)
-7. [How to Add a New Topic](#7-how-to-add-a-new-topic)
-8. [Switching Engines](#8-switching-engines)
-9. [Learning Roadmap](#9-learning-roadmap)
-10. [Glossary](#10-glossary)
+7. [All 17 Improvements Made](#7-all-17-improvements-made)
+8. [How to Add a New Topic](#8-how-to-add-a-new-topic)
+9. [Switching Engines](#9-switching-engines)
+10. [Learning Roadmap](#10-learning-roadmap)
+11. [Glossary](#11-glossary)
 
 ---
 
@@ -56,32 +55,35 @@ A full learning roadmap is at the end.
 
 ```
 You type a question  →  The AI figures out what category it is  →  It sends back a reply
-"What is the Samphor?"    "ask_definition" (85% confident)         "The Samphor is a barrel-shaped..."
+"What is the Samphor?"    "ask_definition" (92% confident)         "The Samphor is a barrel-shaped..."
 ```
 
 **Technical explanation:**
-The system is a multi-layer intent-classification chatbot. User input is preprocessed with NLP
-techniques (tokenization, lemmatization), converted to a bag-of-words feature vector, passed through
-a feedforward neural network (Sequential Keras model with Dense and Dropout layers), and the
-predicted intent class is used as a key to retrieve a response from a hand-authored knowledge base.
+The system is a multi-turn intent-classification chatbot. User input is encoded into a dense
+semantic vector by a pre-trained sentence transformer (`paraphrase-multilingual-MiniLM-L12-v2`).
+Cosine similarity between the query embedding and all pre-computed training pattern embeddings
+identifies the best-matching intent. The predicted intent key is used to retrieve a response from
+a hand-authored knowledge base. The system also supports Khmer-script input, multi-turn context,
+spell correction, rate limiting, and an admin analytics dashboard.
 
 **Plain English:**
-You type a question. The program doesn't search Google — it reads your words, turns them into a list
-of numbers, feeds those numbers to a small AI brain it was trained on beforehand, and the brain says
-"I think they're asking about the history" (or whatever category it is). The program then picks a
-pre-written answer from that category and sends it back. All the knowledge came from files you wrote,
-not the internet.
+You type a question. The program doesn't search Google — it reads your words and converts them
+into a list of numbers that captures the *meaning* (not just the exact words). It then compares
+that meaning against meanings of all the training examples it learned from, and picks the most
+similar one. It returns a pre-written answer from that category. All the knowledge came from
+files you wrote, not the internet.
 
 ---
 
 **Why separate training from chatting?**
 
-**Technical:** Training is computationally expensive (forward pass + backpropagation × 200 epochs × 280 samples).
-Inference is cheap (one forward pass). Separating them means the chatbot starts instantly.
+**Technical:** During training, the sentence transformer encodes all ~460 training patterns once
+and saves the resulting embedding matrix. At inference time only a single query embedding and a
+cosine similarity comparison are needed — this is very fast.
 
-**Plain English:** Teaching the AI takes a few minutes and lots of math. Once it's learned, answering
-a question takes milliseconds. So we teach it once, save what it learned, and let the chatbot just use
-the saved result.
+**Plain English:** Computing the meaning vectors for hundreds of training examples takes a few
+seconds. Once saved, answering any question takes milliseconds. So we do the heavy computation
+once, save the results, and the chatbot just uses the saved numbers.
 
 ---
 
@@ -95,48 +97,45 @@ Browser (templates/index.html)
        │  JavaScript fetch() — POST /chat  {"message": "What is the Samphor?"}
        ▼
 app.py  (Flask web server — the traffic director)
-       │
-       │  engine.respond("What is the Samphor?")
+       │  1. Check rate limit (30 requests/minute per IP)
+       │  2. Apply spell correction
+       │  3. Check Flask session for context (multi-turn)
+       │  4. engine.respond(message, context)
        ▼
 engine/ml_engine.py  (the AI brain)
-       │  1. tokenize + lemmatize user text
-       │  2. convert to bag-of-words vector
-       │  3. run neural network forward pass
-       │  4. pick highest confidence intent
+       │  1. Encode query → 384-dim embedding vector
+       │  2. Cosine similarity vs all 460 training embeddings
+       │  3. Pick highest-confidence intent per category
+       │  4. Return intent + confidence + context
        │
        ├──────────────────────────────────────────────────────┐
        ▼                                                       ▼
-model/samphor_model.h5                            knowledge/samphor_kb.py
-(the saved neural network weights)                (the dictionary of pre-written answers)
+model/embeddings.npy                            knowledge/samphor_kb.py
+(460 pre-computed embedding vectors)            (INTENT_RESPONSES, KHMER_RESPONSES, RICH_MEDIA)
        │                                                       │
-       │  returns "ask_definition" at 85% confidence          │  returns 1 random answer string
+       │  returns "ask_definition" at 92% confidence          │  returns 1 random answer string
        └──────────────────────────┬────────────────────────────┘
                                   ▼
                              app.py
-                                  │  JSON: {"response": "The Samphor is a barrel-shaped drum..."}
+                                  │  JSON: {"response": "...", "chips": [...], "media": {...}}
                                   ▼
-                        Browser displays reply in chat box
+                        Browser displays reply, quick-reply chips, and media links
 ```
 
 ### During Training (only run once with `train.py`)
 
 ```
 data/intents.json
-       │  14 intents × ~20 patterns = ~280 training examples
+       │  14 intents × ~33 patterns = ~460 training examples (English + Khmer)
        ▼
 engine/ml_engine.py  train()
-       │  Step 1: Load all patterns and their intent tags
-       │  Step 2: Tokenize and lemmatize every pattern
-       │  Step 3: Build vocabulary (list of all unique root words)
-       │  Step 4: Convert each pattern to a bag-of-words vector
-       │  Step 5: Convert each intent tag to a one-hot vector
-       │  Step 6: Build Keras neural network architecture
-       │  Step 7: Train for 200 epochs with SGD optimizer
-       │  Step 8: Save trained network and vocabulary to disk
+       │  Step 1: Load all patterns and their intent tags from intents.json
+       │  Step 2: Load sentence transformer model (downloads once from Hugging Face)
+       │  Step 3: Encode ALL patterns → one 384-dim vector per pattern
+       │  Step 4: Save embedding matrix and label list to disk
        ▼
-model/samphor_model.h5   (the trained network — ~1 MB binary file)
-model/words.pkl          (389 root words, the vocabulary)
-model/classes.pkl        (14 intent names, the output categories)
+model/embeddings.npy   (460 × 384 float32 matrix — the encoded training patterns)
+model/labels.pkl       (list of 460 intent tag strings, one per row in embeddings.npy)
 ```
 
 ---
@@ -146,111 +145,64 @@ model/classes.pkl        (14 intent names, the output categories)
 ### `app.py` — The Web Server
 
 **Technical explanation:**
-`app.py` is a Flask WSGI application. It registers three URL routes using Python decorators.
+`app.py` is a Flask WSGI application. It registers URL routes using Python decorators.
 The root route (`/`) renders a Jinja2 template. The `/chat` route accepts JSON POST requests,
-calls `engine.respond()`, and returns a JSON response. The `/reset` route clears conversation state.
-The engine is instantiated once at module level so it persists across requests.
+applies rate limiting (30 req/min per IP), spell correction, and session-based context management,
+calls `engine.respond()`, and returns a JSON response including reply text, quick-reply chips,
+and rich media links. Additional routes handle user feedback (`/feedback`), session reset (`/reset`),
+and an analytics dashboard (`/admin`, `/admin/stats`, `/admin/review`).
 
 **Plain English:**
 `app.py` is like the front door of a restaurant. When you walk in (visit the website), it gives
 you the menu (the chat page). When you order (send a message), it takes your order to the kitchen
-(the AI engine) and brings back the food (the reply). It runs continuously until you press Ctrl+C.
+(the AI engine) and brings back the food (the reply). It also logs what people ordered most
+(analytics) and politely asks if you enjoyed it (feedback buttons).
 
-**Full breakdown of every line that matters:**
+**Key routes:**
 
-```python
-from flask import Flask, jsonify, render_template, request
-```
-Imports four tools from Flask:
-- `Flask` — the class that creates the web application
-- `jsonify` — converts a Python dictionary to a JSON HTTP response
-- `render_template` — finds an HTML file in `templates/` and sends it to the browser
-- `request` — lets you read the data the browser sent (like the message text)
+| Route | Method | Purpose |
+|-------|--------|---------|
+| `/` | GET | Serve the chat UI |
+| `/chat` | POST | Process a chat message, return reply + chips + media |
+| `/reset` | POST | Clear the user's conversation session |
+| `/feedback` | POST | Record thumbs-up/down on a bot reply |
+| `/admin` | GET | Serve the analytics dashboard HTML |
+| `/admin/stats` | GET | JSON: total messages, intent breakdown, fallback rate |
+| `/admin/review` | GET | JSON: low-confidence turns queued for human review |
 
-```python
-app = Flask(__name__)
-```
-Creates the Flask application. `__name__` is a Python built-in that equals the file's name
-(`"__main__"` when run directly). Flask uses it to know where to look for templates and static files.
+**Rate limiting:**
+Each IP address is limited to 30 messages per minute. The limiter uses a sliding window stored
+in a Python dict (`_rate_limit`). If the limit is exceeded, the server returns HTTP 429.
+Messages longer than 500 characters are rejected with HTTP 400.
 
-```python
-engine = MLEngine()
-```
-Creates one instance of the AI engine when the server starts. It is created once and reused
-for every message. This means the model is loaded into memory once, not on every chat request.
-**This is important** — loading the model on every request would be very slow.
-
-```python
-@app.route("/")
-def index():
-    return render_template("index.html")
-```
-The `@app.route("/")` is a **decorator**. It tells Flask: "when the browser visits the root URL
-(`http://127.0.0.1:5000/`), call the `index()` function." The function returns the rendered
-`templates/index.html` file.
-
-```python
-@app.route("/chat", methods=["POST"])
-def chat():
-    data = request.get_json()
-    user_message = data.get("message", "").strip()
-    if not user_message:
-        return jsonify({"response": "Please type a message."}), 400
-    reply = engine.respond(user_message)
-    return jsonify({"response": reply})
-```
-- `methods=["POST"]` — only accepts POST requests (not GET). A POST request carries data in its body.
-- `request.get_json()` — parses the JSON body the browser sent.
-- `data.get("message", "")` — safely extracts the "message" field; defaults to `""` if missing.
-- `.strip()` — removes leading/trailing whitespace.
-- The `400` in the return is an HTTP status code meaning "Bad Request" — tells the browser something was wrong.
-- `jsonify({"response": reply})` — wraps the reply in JSON and sends it back.
-
-```python
-@app.route("/reset", methods=["POST"])
-def reset():
-    engine.reset()
-    return jsonify({"status": "ok"})
-```
-Clears conversation history when the user clicks the ↺ button. The browser sends a POST to `/reset`,
-Flask calls `engine.reset()`, and returns `{"status": "ok"}` so the browser knows it succeeded.
-
-```python
-if __name__ == "__main__":
-    app.run(debug=True)
-```
-`if __name__ == "__main__"` is a Python idiom. It means: "only run this block if this file was
-started directly (not imported by another file)." `debug=True` enables automatic server restart
-when you save a file, and shows detailed error messages in the browser.
+**Session handling (Fix 1):**
+Each browser tab gets its own Flask session (cookie-based). Conversation context (last intent,
+clarification state) is stored per-session so different browser tabs cannot interfere with each other.
 
 ---
 
 ### `train.py` — The Training Script
 
 **Technical explanation:**
-A standalone script that instantiates `MLEngine`, calls its `train()` method (which performs
-the full NLP preprocessing and model fitting pipeline), and prints a formatted summary of the
-final training metrics.
+A standalone script that instantiates `MLEngine`, calls its `train()` method (which encodes all
+training patterns with the sentence transformer), and prints a formatted summary. The sentence
+transformer pipeline returns `(1.0, 0.0)` as sentinel values since cosine similarity models
+do not expose traditional loss/accuracy metrics during training.
 
 **Plain English:**
-This is the "teacher" script. You run it once. It reads all the example questions, runs the
-math to teach the neural network, and saves everything it learned to the `model/` folder.
-After that, the chatbot can use the saved result without needing to learn again.
+This is the "preparation" script. You run it once. It reads all the example questions, converts
+them into meaning vectors using the sentence transformer, and saves those vectors to the `model/`
+folder. After that, the chatbot can compare any new question against those saved vectors instantly.
 
 **Key parts:**
 
 ```python
 engine = MLEngine()
-accuracy, loss = engine.train()
+accuracy, loss = engine.train()   # returns (1.0, 0.0) as sentinels
 ```
-Creates the engine and starts training. `train()` returns the final accuracy and loss after
-all 200 epochs.
 
-```python
-status = "PASS" if accuracy >= 0.70 else "FAIL"
-```
-A simple quality check. If accuracy is below 70%, something went wrong (maybe not enough
-training data, or the data is inconsistent). The system expects >99% on this small dataset.
+The `(1.0, 0.0)` sentinel tells `train.py` that a sentence transformer was used (no numeric
+loss to report). Training output says "PASS — embeddings generated successfully."
 
 ---
 
@@ -264,7 +216,8 @@ interface across engine implementations.
 
 Second, `RuleBasedEngine` is a concrete subclass of `ChatEngine`. It stores a `RULES`
 dictionary mapping tuples of keyword strings to response strings. Its `respond()` method
-lowercases the input and iterates over `RULES` looking for a keyword match.
+lowercases the input and iterates over `RULES` looking for a keyword match. It is used as an
+automatic fallback if `MLEngine` fails to load (Fix 4).
 
 **Plain English:**
 Imagine a job listing that says "all employees must be able to answer questions and reset
@@ -284,207 +237,137 @@ RULES = {
     ...
 }
 ```
+
 The key is a **tuple** (a group) of trigger words. If ANY of them appear in the user's message,
-the corresponding response is returned. The iteration checks keywords in order, so more specific
-intents should be listed first to avoid false matches.
-
-**The respond() method logic:**
-
-```python
-def respond(self, user_input: str) -> str:
-    lowered = user_input.lower()
-    for keywords, response in self.RULES.items():
-        if any(kw in lowered for kw in keywords):
-            self._history.append({"role": "user", "content": user_input})
-            self._history.append({"role": "assistant", "content": response})
-            return response
-    return "I can only answer questions about the Samphor drum."
-```
-- `.lower()` — converts to lowercase so "Hello" and "hello" both match.
-- `any(kw in lowered for kw in keywords)` — a generator expression that checks if at least one keyword is a substring of the message. This is called a **short-circuit evaluation** — it stops checking as soon as one match is found.
-- If no rule matches, a default fallback is returned.
+the corresponding response is returned.
 
 ---
 
 ### `engine/ml_engine.py` — The AI Brain
 
 **Technical explanation:**
-`MLEngine` extends `ChatEngine` and implements the full ML pipeline. It uses NLTK's
-`WordNetLemmatizer` for morphological reduction, a bag-of-words vectorization scheme
-for feature extraction, and a Keras Sequential model with Dense/Dropout layers trained
-with stochastic gradient descent (SGD with Nesterov momentum) and categorical crossentropy loss.
-Model artifacts are serialized to disk via `h5py` (`.h5` format for Keras weights) and
-`pickle` (for vocabulary and class label lists).
+`MLEngine` extends `ChatEngine` and implements a sentence-transformer-based intent classifier.
+At training time it loads `paraphrase-multilingual-MiniLM-L12-v2` from the `sentence-transformers`
+library, encodes all training patterns to 384-dimensional embeddings with L2 normalization, and
+saves the matrix (`embeddings.npy`) and label list (`labels.pkl`) via NumPy and pickle.
+
+At inference time it encodes the user query, computes cosine similarity against the stored
+embedding matrix using `sklearn.metrics.pairwise.cosine_similarity`, aggregates per-intent
+maximum scores, and returns the best intent when its score exceeds `CONFIDENCE_THRESHOLD = 0.52`.
+
+Additional capabilities: Khmer-script detection (`_is_khmer()`), domain-term spell correction
+(`_correct_spelling()` via `difflib.get_close_matches`), multi-turn follow-up detection
+("tell me more"), pronoun resolution ("what is it made of?"), and grey-zone clarification
+questions (Fix 3, when confidence is 0.35–0.52).
 
 **Plain English:**
-This is the real AI — the smart engine. It has two jobs:
+This is the smart engine. It has two jobs:
 
-1. **Teaching itself** (during `train.py`): It reads all the example questions, cleans them up,
-   converts them to numbers, and uses those numbers to train a tiny neural network. It runs through
-   all the data 200 times, getting a little better each time.
+1. **Preparing** (during `train.py`): It reads all example questions, converts each one into a
+   list of 384 numbers that captures the meaning of the sentence, and saves all those lists.
 
-2. **Answering questions** (during chatting): When you type something, it cleans up your words
-   the same way it did during training, converts them to numbers, and asks the saved neural network:
-   "which category does this belong to?" The network gives a confidence score for each of the 14
-   categories, and the engine picks the highest one.
+2. **Answering questions** (during chatting): When you type something, it converts your question
+   to 384 numbers too, then measures how "close" your numbers are to each training example.
+   The closest match wins. If no training example is close enough, it asks for clarification or
+   returns a fallback.
 
 **The Training Pipeline in detail:**
 
-**Step 1 — Loading intents:**
+**Step 1 — Load intents:**
 ```python
 with open("data/intents.json", "r", encoding="utf-8") as f:
     data = json.load(f)
-intents = data["intents"]
 ```
-Opens and parses the JSON file. `encoding="utf-8"` ensures Khmer script and special characters
-are read correctly. `json.load()` converts the JSON text into a Python dictionary.
+Reads ~460 training patterns across 14 intents, including Khmer-script patterns.
 
-**Step 2 — Tokenizing and lemmatizing every pattern:**
+**Step 2 — Encode all patterns:**
 ```python
-for intent in intents:
-    for pattern in intent["patterns"]:
-        tokens = nltk.word_tokenize(pattern)
-        lemmatized = self._lemmatize_tokens(tokens)
-        all_words.extend(lemmatized)
-        documents.append((lemmatized, intent["tag"]))
+model = SentenceTransformer("paraphrase-multilingual-MiniLM-L12-v2")
+embeddings = model.encode(all_patterns, normalize_embeddings=True)
 ```
-For each of the 280 example questions:
-- `nltk.word_tokenize()` splits it into individual words and punctuation tokens.
-- `_lemmatize_tokens()` reduces each word to its root form and discards punctuation.
-- The result is stored as a pair: `(cleaned_words, intent_tag)`.
-- All unique root words are collected to form the vocabulary.
+Each pattern becomes a 384-number vector. `normalize_embeddings=True` ensures all vectors
+have length 1, which makes cosine similarity equivalent to a dot product (faster math).
 
-**Step 3 — Building bag-of-words training data:**
+**Step 3 — Save artifacts:**
 ```python
-X = []
-y = []
-for doc_words, tag in documents:
-    bow = self._make_bow(doc_words, self._words)
-    X.append(bow)
-    y.append(class_index)
-X = np.array(X)
-y = to_categorical(y, num_classes=len(self._classes))
+np.save("model/embeddings.npy", embeddings)
+pickle.dump(labels, open("model/labels.pkl", "wb"))
 ```
-- Each of the 280 patterns becomes one **row** in `X` (a 389-length vector of 0s and 1s).
-- Each intent tag becomes one **row** in `y` (a 14-length one-hot vector, e.g., `[0,0,1,0,...]`).
-- `to_categorical()` converts class indices to one-hot vectors. This is called **one-hot encoding**.
-- `np.array()` wraps the lists in NumPy arrays, which Keras requires.
-
-**Step 4 — Building the neural network:**
-```python
-model = Sequential([
-    Dense(128, input_shape=(len(self._words),), activation="relu"),
-    Dropout(0.5),
-    Dense(64, activation="relu"),
-    Dropout(0.5),
-    Dense(len(self._classes), activation="softmax"),
-])
-```
-This is the architecture — the "shape" of the brain:
-- **Layer 1:** Takes 389 numbers in, outputs 128 numbers. Uses ReLU activation.
-- **Dropout:** Randomly ignores 50% of layer-1 neurons during each training step.
-- **Layer 2:** Takes 128 numbers in, outputs 64 numbers. Uses ReLU activation.
-- **Dropout:** Randomly ignores 50% of layer-2 neurons.
-- **Output Layer:** Takes 64 numbers in, outputs 14 confidence scores. Uses Softmax activation.
-
-**Step 5 — Compiling and training:**
-```python
-model.compile(
-    loss="categorical_crossentropy",
-    optimizer=SGD(learning_rate=0.01, momentum=0.9, nesterov=True),
-    metrics=["accuracy"],
-)
-model.fit(X, y, epochs=200, batch_size=5, verbose=1)
-```
-- `loss="categorical_crossentropy"` — the math formula used to measure how wrong the predictions are. Correct for multi-class classification.
-- `SGD` — Stochastic Gradient Descent, the optimizer that updates the network weights to reduce loss.
-- `momentum=0.9` — makes the optimizer "remember" the direction it's been moving, so it doesn't reverse sharply.
-- `nesterov=True` — a refinement of momentum that looks ahead before computing the gradient.
-- `epochs=200` — passes through all 280 examples 200 times.
-- `batch_size=5` — updates weights after every 5 examples (not all 280 at once).
-
-**Step 6 — Saving:**
-```python
-model.save("model/samphor_model.h5")
-with open("model/words.pkl", "wb") as f:
-    pickle.dump(self._words, f)
-with open("model/classes.pkl", "wb") as f:
-    pickle.dump(self._classes, f)
-```
-Saves the neural network in HDF5 format (`.h5`), and pickles the vocabulary and class list.
-Without saving, everything would be lost when the script ends.
+The embedding matrix (shape: `[460, 384]`) and the list of 460 intent tags are saved.
+These are the only two files the chatbot needs at runtime.
 
 **The Inference Pipeline in detail (every chat message):**
 
 ```python
-def respond(self, user_input: str) -> str:
-    tokens = nltk.word_tokenize(user_input)
-    lemmatized = self._lemmatize_tokens(tokens)
-    bow = self._make_bow(lemmatized, self._words)
-    prediction = self._model.predict(np.array([bow]), verbose=0)[0]
-    idx = int(np.argmax(prediction))
-    confidence = float(prediction[idx])
-    if confidence >= 0.70:
-        tag = self._classes[idx]
-        replies = INTENT_RESPONSES.get(tag, [FALLBACK_RESPONSE])
-        reply = random.choice(replies)
-    else:
-        reply = FALLBACK_RESPONSE
-    self._history.append({"role": "user", "content": user_input})
-    self._history.append({"role": "assistant", "content": reply})
-    return reply
+def _predict(self, text: str) -> tuple[str, float, str | None, float]:
+    query_emb = self._st_model.encode([text], normalize_embeddings=True)
+    sims = cosine_similarity(query_emb, self._embeddings)[0]
+
+    # aggregate: best score per intent
+    intent_best: dict[str, float] = {}
+    for idx, label in enumerate(self._labels):
+        score = float(sims[idx])
+        if label not in intent_best or score > intent_best[label]:
+            intent_best[label] = score
+
+    sorted_intents = sorted(intent_best.items(), key=lambda x: -x[1])
+    best_tag, best_conf = sorted_intents[0]
+    second_tag, second_conf = sorted_intents[1] if len(sorted_intents) > 1 else (None, 0.0)
+    return best_tag, best_conf, second_tag, second_conf
 ```
 
 Line by line:
-1. Tokenize and lemmatize the user's input — **exact same steps as during training**.
-2. Convert to bag-of-words vector — must use the same vocabulary as training.
-3. `np.array([bow])` — wraps the vector in an extra dimension. Keras expects shape `(batch_size, features)` so this becomes shape `(1, 389)`.
-4. `self._model.predict(...)` — runs the neural network forward pass. Returns an array of shape `(1, 14)`.
-5. `[0]` — takes the first (only) result, giving shape `(14,)`.
-6. `np.argmax(prediction)` — finds the index of the highest value (most confident intent).
-7. `confidence = float(prediction[idx])` — the confidence score (0.0 to 1.0).
-8. If confidence ≥ 70%, look up the intent name, get its possible replies, pick one at random.
-9. Otherwise, return the fallback message.
+1. Encode the user query → 1 × 384 embedding.
+2. Cosine similarity against all 460 training embeddings → 460 scores.
+3. For each intent, keep the highest score among its patterns.
+4. Sort intents by score. Return top-2 for clarification logic.
 
-**Helper methods:**
-
+**Spell correction (Fix 9):**
 ```python
-def _lemmatize_tokens(self, tokens: list[str]) -> list[str]:
-    return [
-        self._lemmatizer.lemmatize(t.lower())
-        for t in tokens
-        if t.isalpha()
-    ]
+@staticmethod
+def _correct_spelling(text: str) -> str:
+    domain_terms = ["samphor", "pinpeat", "khmer", ...]
+    corrected = []
+    for word in text.split():
+        matches = get_close_matches(word.lower(), domain_terms, n=1, cutoff=0.75)
+        corrected.append(matches[0] if matches else word)
+    return " ".join(corrected)
 ```
-- `t.isalpha()` — filters out punctuation and numbers (keeps only pure letters).
-- `self._lemmatizer.lemmatize(t.lower())` — lowercases and reduces to root form.
+Uses `difflib.get_close_matches` to fix typos in Samphor-related domain words (e.g.,
+"Sanphor" → "Samphor", "Phinpeat" → "Pinpeat") without any extra packages.
 
+**Khmer detection (Fix 13):**
 ```python
-def _make_bow(self, tokens: list[str], vocab: list[str]) -> list[int]:
-    return [1 if word in tokens else 0 for word in vocab]
+@staticmethod
+def _is_khmer(text: str) -> bool:
+    return any('ក' <= c <= '៿' for c in text)
 ```
-For each word in the 389-word vocabulary, checks if it appears in the user's tokens.
-Returns a list of 389 zeros and ones. This is the feature vector.
+Checks if any character falls in the Khmer Unicode block (U+1780–U+17FF). If true,
+`respond()` serves replies from `KHMER_RESPONSES` instead of `INTENT_RESPONSES`.
+
+**Multi-turn context (Fix 2):**
+The `respond()` method inspects the `context` dict for follow-up signals:
+- "tell me more" / "continue" → re-use `last_intent` from the previous turn.
+- Pronoun references ("what is it made of?") → resolve "it" to `last_intent`.
+- Grey-zone confidence (0.35–0.52): ask "Did you mean X or Y?" (Fix 3).
+- Low confidence (<0.35): save to the active learning queue (Fix 15).
 
 ---
 
 ### `knowledge/samphor_kb.py` — The Answer Book
 
 **Technical explanation:**
-A module containing two module-level constants: `INTENT_RESPONSES` (a `dict[str, list[str]]`
-mapping intent tags to lists of response strings) and `FALLBACK_RESPONSE` (a plain `str` returned
-when classifier confidence falls below the threshold). No ML logic exists here.
+A module containing four module-level constants:
+- `INTENT_RESPONSES` — `dict[str, list[str]]` mapping intent tags to English response strings.
+- `KHMER_RESPONSES` — `dict[str, list[str]]` mapping intent tags to Khmer-script responses.
+- `FALLBACK_RESPONSE` — a plain `str` returned when confidence is too low.
+- `RICH_MEDIA` — `dict[str, dict]` mapping intent tags to Wikipedia/external links shown in the UI.
 
 **Plain English:**
-This is literally a dictionary — a lookup table. The AI figures out the category ("ask_history"),
-and then this file is where the actual text answers are stored. The engine picks one answer at
-random from the list so conversations feel slightly varied rather than robotic and repetitive.
-
-**Why keep answers separate from training data?**
-`data/intents.json` has `"responses"` fields too, but they're not used. The reason is
-**separation of concerns**: intents.json is about teaching the AI to classify; samphor_kb.py
-is about what to say. You can improve answers without retraining. You can retrain without
-worrying about answer wording.
+This is literally a lookup table. The AI figures out the category ("ask_history"),
+and this file is where the actual text answers live. The engine picks one answer at random
+from the list so conversations feel slightly varied. Khmer users get Khmer replies automatically.
+Wikipedia links appear as clickable buttons under each bot reply.
 
 **Structure:**
 ```python
@@ -493,11 +376,24 @@ INTENT_RESPONSES: dict[str, list[str]] = {
         "The Samphor is a barrel-shaped, two-headed drum...",
         "A Samphor is a traditional Khmer percussion instrument...",
     ],
-    "ask_history": [
-        "The Samphor traces its origins to the Angkor Empire...",
-        "Historical evidence from temple bas-reliefs at Angkor Wat...",
+    ...
+}
+
+KHMER_RESPONSES: dict[str, list[str]] = {
+    "ask_definition": [
+        "សំភោ គឺជាស្គរប្រពៃណីខ្មែរ...",
+        ...
     ],
-    # ... 12 more intents
+    ...
+}
+
+RICH_MEDIA: dict[str, dict] = {
+    "ask_definition": {
+        "links": [
+            {"label": "Wikipedia: Samphor", "url": "https://en.wikipedia.org/wiki/Samphor"},
+        ]
+    },
+    ...
 }
 
 FALLBACK_RESPONSE: str = (
@@ -512,19 +408,19 @@ FALLBACK_RESPONSE: str = (
 **Technical explanation:**
 A JSON file containing an array of intent objects. Each object has three fields: `"tag"` (str),
 `"patterns"` (list of str — the training examples), and `"responses"` (list of str — unused
-by the engine but kept for documentation). The file encodes the complete labeled training dataset
-for the intent classifier.
+by the engine but kept for documentation). The file contains ~460 patterns across 14 intents,
+including English patterns (20 original + 10 additional) and Khmer-script patterns (4 per intent).
 
 **Plain English:**
 This is the textbook the AI studies from. Each "intent" is a chapter, and each "pattern" is one
-way a human might phrase a question about that topic. The more patterns you write, the better the
-AI gets at recognizing that topic.
+way a human might phrase a question about that topic. More patterns = better recognition.
+Khmer patterns let native Cambodian speakers ask in their own language.
 
 **The 14 intents and what they cover:**
 
 | Intent Tag | Topic | Example Pattern |
 |-----------|-------|----------------|
-| `ask_definition` | What is the Samphor? | "What is the Samphor?", "Define the Samphor" |
+| `ask_definition` | What is the Samphor? | "What is the Samphor?", "ស័មភោ គឺ ជា អ្វី?" |
 | `ask_history` | Origins and history | "When was it invented?", "How old is the Samphor?" |
 | `ask_material` | What it's made of | "What wood is used?", "What is the drum skin made from?" |
 | `ask_shape` | Physical dimensions | "What shape is the Samphor?", "How big is it?" |
@@ -535,37 +431,46 @@ AI gets at recognizing that topic.
 | `ask_compare` | Comparison to other drums | "How is it different from the tabla?", "Compare to taiko" |
 | `ask_learning` | How to learn it | "Where can I learn the Samphor?", "How long does it take?" |
 | `ask_preservation` | Cultural preservation | "Is the Samphor endangered?", "UNESCO heritage?" |
-| `greeting` | Hello messages | "Hi", "Hello", "Good morning" |
-| `farewell` | Goodbye messages | "Bye", "See you", "Thank you, goodbye" |
+| `greeting` | Hello messages | "Hi", "Hello", "ជំរាប សួរ" |
+| `farewell` | Goodbye messages | "Bye", "See you", "លា ហើយ" |
 | `out_of_scope` | Unrelated questions | "What's the weather?", "Tell me a joke" |
 
-**Why ~20 patterns per intent?**
-Neural networks need enough examples to find patterns. Too few (fewer than 5) and the model
-memorizes exact sentences rather than learning concepts. ~20 gives enough variety while keeping
-the dataset small enough to train in seconds.
-
-**One-hot encoding of intent tags:**
-During training, `"ask_history"` becomes `[0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]`
-(a 1 in position 2, zeros everywhere else). This is **one-hot encoding** — a way to represent
-categorical labels as numbers without implying any mathematical relationship between categories.
+**Why ~33 patterns per intent (up from ~20)?**
+Synonym expansion (Fix 11) was applied — each original pattern was augmented with rephrased
+variants to improve robustness. The sentence transformer generalizes much better than the old
+Bag-of-Words approach, so extra patterns reduce edge-case misclassifications rather than
+causing overfitting.
 
 ---
 
 ### `templates/index.html` — The Chat Interface
 
 **Technical explanation:**
-A single HTML document that serves as a Single Page Application (SPA). It contains embedded CSS
-for styling and inline JavaScript. The JS uses the Fetch API to make asynchronous POST requests to
-the `/chat` and `/reset` Flask endpoints. The chat log is rendered by dynamically creating DOM
-elements via `document.createElement()` and appending them to a scrollable container div.
+A single HTML document serving as a Single Page Application (SPA). It contains embedded CSS
+for styling and inline JavaScript. Key features implemented in JS include:
+- Fetch API for async POST to `/chat` and `/reset` / `/feedback`
+- Quick-reply chip buttons rendered from `data.chips` in the server response
+- Typing indicator (bouncing dots animation) while waiting for server
+- Rich media links rendered from `data.media.links`
+- Feedback thumbs-up/down buttons on each bot message
+- `localStorage` persistence so chat survives page refresh
+- Web Speech API integration for voice input
 
 **Plain English:**
-This is the web page you see in your browser. It has three parts baked into one file:
+This is the web page you see in your browser. It has the chat box, input field, Send button,
+mic button (for voice), and all the visual elements. When the bot replies, it automatically
+shows clickable topic suggestion buttons underneath so you always know what to ask next.
 
-- **HTML** — the skeleton: the header, the chat box area, the text input, the Send button, the Reset button.
-- **CSS** — the skin: colors, fonts, rounded corners, shadows, responsive sizing.
-- **JavaScript** — the muscles: what happens when you click Send, how your message appears, how the
-  reply comes back without the page reloading.
+**New features in the UI:**
+
+| Feature | How it works |
+|---------|-------------|
+| **Typing indicator** (Fix 6) | A `<div class="typing">` with 3 animated dots appears after you send; removed when reply arrives |
+| **Quick-reply chips** (Fix 5) | Server returns `chips: ["What is it made of?", ...]`; rendered as `<button class="chip">` |
+| **Rich media links** (Fix 7) | Server returns `media.links: [{label, url}]`; rendered as `<a>` tags with external links |
+| **Feedback buttons** (Fix 12) | Each bot message gets 👍/👎 buttons; click posts `{msg_id, vote}` to `/feedback` |
+| **localStorage** (Fix 8) | On every message, full history is `JSON.stringify`-ed to `localStorage["samphor-chat-v1"]` |
+| **Voice input** (Fix 16) | Mic button uses `SpeechRecognition` API; hides itself if browser doesn't support it |
 
 **HTML structure:**
 
@@ -573,30 +478,18 @@ This is the web page you see in your browser. It has three parts baked into one 
 <div class="chat-wrapper">
     <header>
         <h1>Samphor Expert System</h1>
+        <button id="reset-btn">↺</button>
     </header>
     <div id="chat-box">
-        <!-- Message bubbles are added here by JavaScript -->
+        <!-- Message bubbles injected by JavaScript -->
     </div>
     <div class="input-area">
+        <button id="mic-btn">🎤</button>
         <input id="user-input" type="text" placeholder="Ask about the Samphor..."/>
         <button id="send-btn">Send</button>
-        <button id="reset-btn">↺</button>
     </div>
 </div>
 ```
-
-**CSS key concepts used:**
-
-| CSS Property/Concept | What it does |
-|---------------------|-------------|
-| `display: flex` | Enables Flexbox layout — items can be aligned and distributed |
-| `flex-direction: column` | Stack children top-to-bottom |
-| `overflow-y: auto` | Scrollbar appears when content is taller than the container |
-| `border-radius: 24px` | Rounded corners on inputs and buttons |
-| `box-shadow` | Adds a subtle shadow behind the chat card for depth |
-| `max-width: 700px` | Chat box never gets wider than 700px |
-| `90vh` | Height is 90% of the browser viewport height |
-| `margin-left: auto` | Together with `margin-right: auto`, centers the card horizontally |
 
 **Color palette:**
 - Background: `#f4f1ec` (warm off-white — feels like parchment)
@@ -604,73 +497,25 @@ This is the web page you see in your browser. It has three parts baked into one 
 - User messages: `#7a2a0a` (dark red — right side of chat)
 - Bot messages: `#f0e6d3` (warm beige — left side of chat)
 
-**JavaScript functions:**
+---
 
-```javascript
-function addMessage(text, role) {
-    const div = document.createElement("div");
-    div.className = `msg ${role}`;
-    div.textContent = text;
-    chatBox.appendChild(div);
-    chatBox.scrollTop = chatBox.scrollHeight;
-}
-```
-- `document.createElement("div")` — creates a new HTML `<div>` element in memory (not yet on the page).
-- `div.className = \`msg ${role}\`` — sets its CSS class. Role is either `"user"` or `"bot"`.
-  Template literals (backticks) allow embedding variables directly into strings.
-- `div.textContent = text` — sets the text inside the div. `textContent` (not `innerHTML`)
-  is used to prevent XSS (cross-site scripting) attacks — it treats the text as plain text, not HTML.
-- `chatBox.appendChild(div)` — adds the div to the chat box (now it appears on screen).
-- `chatBox.scrollTop = chatBox.scrollHeight` — auto-scrolls to the bottom so the latest message is visible.
+### `templates/admin.html` — The Analytics Dashboard
 
-```javascript
-async function sendMessage() {
-    const text = userInput.value.trim();
-    if (!text) return;
+**Technical explanation:**
+A standalone HTML page served at `/admin`. It uses `fetch()` on page load to call `/admin/stats`
+and `/admin/review`, then renders the data as summary cards, an intent frequency table, and a
+low-confidence review queue table. No authentication is implemented — restrict to localhost or
+add Flask-Login if deploying publicly.
 
-    addMessage(text, "user");
-    userInput.value = "";
-    userInput.disabled = true;
-    sendBtn.disabled = true;
+**Plain English:**
+Visit `http://127.0.0.1:5000/admin` to see a dashboard showing: how many messages the bot
+received, which topics were asked most, the fallback rate (how often the bot didn't understand),
+and a queue of uncertain replies that a human can review and correct.
 
-    try {
-        const res = await fetch("/chat", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ message: text }),
-        });
-        const data = await res.json();
-        addMessage(data.response, "bot");
-    } catch (err) {
-        addMessage("Error: could not reach the server.", "bot");
-    } finally {
-        userInput.disabled = false;
-        sendBtn.disabled = false;
-        userInput.focus();
-    }
-}
-```
-Step by step:
-1. Read input and trim whitespace. If empty, do nothing (`return`).
-2. Show the user's message immediately (before the server replies).
-3. Clear the input field and disable both input and button while waiting.
-4. `await fetch("/chat", {...})` — sends an async HTTP POST to `/chat` with JSON body.
-5. `await res.json()` — waits for the response and parses it as JSON.
-6. Show the bot's reply.
-7. `catch` — if the server is down or the network fails, show an error message.
-8. `finally` — always re-enables input and refocuses, even if there was an error.
-
-**Event listeners:**
-
-```javascript
-sendBtn.addEventListener("click", sendMessage);
-userInput.addEventListener("keydown", (e) => {
-    if (e.key === "Enter") sendMessage();
-});
-```
-The first line connects a click on the Send button to `sendMessage()`.
-The second listens to every keypress in the text box — if the key pressed was "Enter", it calls
-`sendMessage()`. This is why pressing Enter works the same as clicking Send.
+**Dashboard sections:**
+- **Summary cards:** Total messages, fallback count, fallback rate %, average confidence
+- **Intent breakdown:** Bar chart table showing how many times each intent was triggered
+- **Review queue:** Table of low-confidence turns (message, predicted intent, confidence score)
 
 ---
 
@@ -678,55 +523,51 @@ The second listens to every keypress in the text box — if the key pressed was 
 
 **Technical explanation:**
 A pip-compatible requirements file specifying exact package versions for reproducible builds.
-It pins all transitive dependencies (not just direct ones) to guarantee identical environments
-across machines.
+It pins all transitive dependencies to guarantee identical environments across machines.
 
 **Plain English:**
-A shopping list of Python packages. When you run `pip install -r requirements.txt`, Python goes
-and downloads and installs everything on the list. The version numbers (`==2.21.0`) ensure you
-get the exact same software versions as the project was built with, which prevents bugs from
-version mismatches.
+A shopping list of Python packages. When you run `pip install -r requirements.txt`, Python
+downloads and installs everything on the list. Version numbers ensure you get exactly the same
+software the project was built with, which prevents version-mismatch bugs.
 
 **The key packages and why they exist:**
 
 | Package | Version | Why it's here |
 |---------|---------|---------------|
 | `flask` | 3.1.3 | The web server framework — runs `app.py` |
-| `tensorflow` | 2.21.0 | The deep learning library — builds and runs the neural network |
-| `keras` | 3.14.1 | The high-level neural network API built on top of TensorFlow |
-| `numpy` | 2.4.6 | Numerical arrays — used for the bag-of-words vectors and matrix math |
-| `nltk` | 3.9.4 | Natural Language Toolkit — tokenization and lemmatization |
-| `scikit-learn` | 1.8.0 | ML utilities (used indirectly by training pipeline) |
-| `h5py` | 3.14.0 | Reads and writes HDF5 files — used to load `.h5` model files |
-| `jinja2` | 3.1.6 | HTML template engine — Flask uses this to serve `index.html` |
+| `sentence-transformers` | 3.4.1 | Encodes text to semantic embeddings — the AI core |
+| `numpy` | 2.4.6 | Numerical arrays — used for the embedding matrix |
+| `scikit-learn` | 1.8.0 | `cosine_similarity()` used during inference |
+| `jinja2` | 3.1.6 | HTML template engine — Flask uses this to serve HTML |
 | `werkzeug` | 3.1.8 | The WSGI utility library Flask is built on |
 
-**Why TensorFlow 2.x and not 3.x?**
-TensorFlow 2 is stable and widely used. TensorFlow 3 (if released) would require code changes.
-Pinning to `2.21.0` ensures stability.
+**Why `sentence-transformers` instead of Keras/TensorFlow?**
+The old approach used a 3-layer Dense network trained on Bag-of-Words vectors with NLTK
+tokenization and lemmatization. The new approach uses a pre-trained multilingual transformer
+(`paraphrase-multilingual-MiniLM-L12-v2`) that understands semantic meaning and natively
+supports 50+ languages including Khmer. This gives much better accuracy on unseen phrasings
+with zero additional training data. The model is ~120 MB and downloads once from Hugging Face.
 
 ---
 
-### `model/` — The Saved Brain Files
+### `model/` — The Saved Embedding Files
 
 **Technical explanation:**
-Three binary artifacts created by `train.py` and consumed by `MLEngine._load_artefacts()`.
-`samphor_model.h5` is an HDF5 file containing the Keras model architecture (as JSON) and all
-learned weight tensors. `words.pkl` and `classes.pkl` are Python pickle files containing
-the vocabulary list and intent class list respectively.
+Two binary artifacts created by `train.py` and consumed by `MLEngine._load_artefacts()`.
+`embeddings.npy` is a NumPy array of shape `(N, 384)` where N is the number of training
+patterns (~460) and 384 is the embedding dimension of the sentence transformer.
+`labels.pkl` is a Python pickle file containing a list of N intent tag strings.
 
 **Plain English:**
-These three files are the "saved brain." After training, the AI's learned knowledge is stored here.
-Without them, the chatbot can't answer anything. They are excluded from git (`.gitignore`) because:
-- They are large binary files (`.h5` can be megabytes).
-- They can always be recreated by running `train.py`.
-- Binary files don't version-control well (git can't show a human-readable diff).
+These two files are the "prepared knowledge." After training, each of the 460 example questions
+has been converted to 384 numbers representing its meaning. Without these files, the chatbot
+can't answer anything. They are excluded from git (`.gitignore`) because they can always be
+recreated by running `train.py`.
 
-| File | Size | Contents |
-|------|------|---------|
-| `samphor_model.h5` | ~1 MB | Neural network architecture + 389×128 + 128×64 + 64×14 weight matrices |
-| `words.pkl` | ~5 KB | Python list of 389 root words (the vocabulary) |
-| `classes.pkl` | ~1 KB | Python list of 14 intent tag strings |
+| File | Contents |
+|------|---------|
+| `embeddings.npy` | 460 × 384 float32 matrix — meaning vectors for all training patterns |
+| `labels.pkl` | Python list of 460 intent tag strings (one per embedding row) |
 
 ---
 
@@ -748,25 +589,28 @@ so that `python` resolves to the local interpreter. Package installations go int
 
 **Plain English:**
 Imagine your computer has one big kitchen (Python). Every project wants to use different
-ingredients (packages) at different versions. If you put everything in one kitchen, the projects
-start fighting over which version of the ingredient to use. A virtual environment is like giving
-each project its own mini-kitchen with its own separate fridge. They can't see each other's food.
+ingredients (packages) at different versions. If you put everything in one kitchen, projects
+start fighting over ingredient versions. A virtual environment gives each project its own
+mini-kitchen with its own separate fridge. They can't see each other's food.
 
 **How it works:**
 ```
 project/
-└── venv/
+└── .venv/
     ├── Scripts/        (Windows) or bin/ (Mac/Linux)
     │   ├── python.exe  ← this is the isolated Python
     │   └── pip.exe     ← this installs into the venv only
     └── Lib/
         └── site-packages/
             ├── flask/
-            ├── tensorflow/
+            ├── sentence_transformers/
             └── ... (all your packages)
 ```
 
-When you run `./venv/Scripts/python.exe`, Python uses only the packages in `venv/Lib/site-packages/`.
+**Important (Windows):** Python paths with spaces require the `&` call operator in PowerShell:
+```powershell
+& "C:\path with spaces\python.exe" -m pip install flask
+```
 
 ---
 
@@ -780,8 +624,7 @@ OOP organizes code into **classes** — blueprints that bundle data (attributes)
 
 **Plain English:**
 A class is like a cookie cutter — a template. An instance is an actual cookie made from the cutter.
-Inheritance means a subclass is like a specialized cookie cutter that has everything the original
-had, plus extra features.
+Inheritance means a subclass is like a specialized cutter that has everything the original had, plus extra features.
 
 **In this project:**
 ```
@@ -793,27 +636,14 @@ ChatEngine (abstract superclass)
     │       Implements: reset() by clearing history
     │
     └── MLEngine (subclass)
-            Implements: respond() using neural network
+            Implements: respond() using sentence transformer
             Implements: reset() by clearing history
-            Adds: train(), _make_bow(), _lemmatize_tokens(), etc.
+            Adds: train(), _predict(), _correct_spelling(), _is_khmer(), etc.
 ```
 
-When `app.py` does `engine.respond(user_message)`, it doesn't care whether `engine` is an
-`MLEngine` or a `RuleBasedEngine`. Both guarantee that `respond()` exists. This is called
+When `app.py` does `engine.respond(user_message, context)`, it doesn't care whether `engine` is
+an `MLEngine` or a `RuleBasedEngine`. Both guarantee that `respond()` exists. This is called
 **polymorphism** — "many forms", one interface.
-
-**Superclass method calling (`super().__init__()`):**
-When a subclass defines `__init__`, it should call the parent's `__init__` too:
-```python
-class MLEngine(ChatEngine):
-    def __init__(self):
-        super().__init__()  # calls ChatEngine.__init__()
-        self._model = None
-        self._lemmatizer = WordNetLemmatizer()
-        ...
-```
-Without `super().__init__()`, the parent class's initialization (like setting up `_history`)
-would never run.
 
 ---
 
@@ -835,16 +665,13 @@ from abc import ABC, abstractmethod
 
 class ChatEngine(ABC):
     @abstractmethod
-    def respond(self, user_input: str) -> str:
+    def respond(self, user_input: str, context: dict) -> tuple[str, dict]:
         ...   # No implementation — just a declaration
 
     @abstractmethod
     def reset(self) -> None:
         ...
 ```
-
-If you tried to do `engine = ChatEngine()`, Python would immediately raise:
-`TypeError: Can't instantiate abstract class ChatEngine with abstract method respond`
 
 ---
 
@@ -855,36 +682,36 @@ Flask is a WSGI (Web Server Gateway Interface) micro-framework. It maps URL patt
 functions via route decorators. When the development server receives an HTTP request, it matches
 the URL and method to a registered route, invokes the corresponding view function, and wraps the
 return value in an HTTP response. Flask's `request` proxy object provides thread-local access to
-the current request's data (headers, body, query parameters).
+the current request's data. `flask.session` is a client-side cookie-based session store
+(signed with `SECRET_KEY`) used for per-user conversation context.
 
 **Plain English:**
-HTTP is the language web browsers and servers use to talk. A browser says "GET /chat-page" (a request),
-and the server responds "200 OK, here's the HTML" (a response). Flask is the translator — you write
+HTTP is the language web browsers and servers use to talk. Flask is the translator — you write
 Python functions, and Flask handles all the HTTP plumbing to connect them to URLs.
 
 **HTTP Request Methods:**
 - **GET** — "Give me this resource." Used when you open a URL in a browser. No data body.
 - **POST** — "Here's some data, process it." Used when submitting forms or sending chat messages.
-  Carries a data body (in this case, JSON with the message text).
 
 **HTTP Status Codes:**
 - `200 OK` — everything worked.
-- `400 Bad Request` — the client sent invalid data (used here when message is empty).
-- `404 Not Found` — the URL doesn't exist.
+- `400 Bad Request` — the client sent invalid data (empty message, message too long).
+- `429 Too Many Requests` — rate limit exceeded.
 - `500 Internal Server Error` — something crashed on the server.
 
 **Flask Route Anatomy:**
 ```python
 @app.route("/chat", methods=["POST"])  # URL pattern + allowed methods
-def chat():                             # Python function (called a "view function")
-    data = request.get_json()          # read the POST body as parsed JSON
-    reply = engine.respond(data["message"])
-    return jsonify({"response": reply}) # return JSON with 200 status
+def chat():                             # Python view function
+    if not _check_rate(request.remote_addr):
+        return jsonify({"response": "Rate limit exceeded."}), 429
+    data = request.get_json()
+    reply, ctx = engine.respond(data["message"], session.get("context", {}))
+    session["context"] = ctx
+    chips = _CHIPS.get(ctx.get("last_intent", "out_of_scope"), [])
+    media = RICH_MEDIA.get(ctx.get("last_intent", ""), {})
+    return jsonify({"response": reply, "chips": chips, "media": media})
 ```
-
-**`jsonify()` vs `json.dumps()`:**
-`jsonify()` is Flask's helper — it sets the `Content-Type: application/json` header automatically.
-`json.dumps()` is Python's raw JSON serializer — it just gives you a string.
 
 ---
 
@@ -893,352 +720,163 @@ def chat():                             # Python function (called a "view functi
 **Technical explanation:**
 NLP is the subfield of AI concerned with enabling computers to understand, generate, and manipulate
 human language. In this project, the NLP pipeline performs intent classification — mapping
-free-form natural language input to a predefined set of categories using statistical methods.
+free-form natural language input to a predefined set of categories using semantic similarity
+rather than keyword or bag-of-words matching.
 
 **Plain English:**
-Human language is messy — "What IS the Samphor?", "tell me ABOUT samphor", and "define the samphor
-drum" all mean the same thing but look completely different to a computer. NLP is the set of
-techniques that help computers deal with that messiness.
+Human language is messy — "What IS the Samphor?", "tell me ABOUT samphor", and "define the
+samphor drum" all mean the same thing but look completely different to a computer. The sentence
+transformer model handles this by capturing meaning rather than matching words.
 
-**The NLP pipeline in this project has 3 stages:**
-1. **Tokenization** — split text into pieces.
-2. **Lemmatization** — reduce each piece to its root form.
-3. **Bag-of-Words** — convert the pieces to numbers a neural network can process.
+**The NLP pipeline in this project has 2 stages:**
+1. **Embedding** — convert text to a dense semantic vector.
+2. **Similarity search** — find the training pattern most similar in meaning.
+
+Note: The old pipeline had tokenization (NLTK word_tokenize), lemmatization (WordNetLemmatizer),
+and Bag-of-Words vectorization. These steps are no longer needed — the sentence transformer
+handles its own internal tokenization using a subword vocabulary (WordPiece).
 
 ---
 
-### Tokenization
+### Sentence Transformers and Embeddings
 
 **Technical explanation:**
-Tokenization is the segmentation of a character sequence into a list of tokens (discrete meaningful
-units — typically words and punctuation). NLTK's `word_tokenize()` uses a pre-trained Punkt
-sentence tokenizer followed by a rule-based word tokenizer (TreebankWordTokenizer) that handles
-contractions, punctuation, and special characters correctly.
+A sentence transformer is a neural network (based on BERT/Transformer architecture) fine-tuned
+to map text to a fixed-length dense vector (an "embedding") in a semantic space where similar
+meanings are geometrically close. The model used here —
+`paraphrase-multilingual-MiniLM-L12-v2` — is a 12-layer transformer with 118M parameters
+distilled to 22M, producing 384-dimensional embeddings. It was trained on 50+ languages
+including Khmer using contrastive learning (similar sentences are pulled together, dissimilar
+sentences are pushed apart in the vector space).
 
 **Plain English:**
-Tokenization is like cutting a sentence into individual word-chips. "What is the Samphor?" becomes
-`["What", "is", "the", "Samphor", "?"]`. Each word and punctuation mark is a separate token.
-Computers can't understand "What is the Samphor?" as a whole — they need to look at each piece.
+Think of each sentence as a GPS coordinate in a 384-dimensional space. Sentences that mean
+similar things have similar coordinates. "What is the Samphor?" and "Can you define the Samphor?"
+will end up very close together in this space even though they use different words.
 
-**Examples:**
-```python
-import nltk
-nltk.word_tokenize("What is the Samphor?")
-# → ["What", "is", "the", "Samphor", "?"]
+Training the sentence transformer to understand language took weeks on massive datasets —
+we just use the pre-trained model. Our "training" step is just asking the model to compute
+coordinates for our 460 example questions and saving those coordinates.
 
-nltk.word_tokenize("I'm asking about it.")
-# → ["I", "'m", "asking", "about", "it", "."]
-# Note: contractions are split correctly
+**Embedding dimensions:**
+```
+"What is the Samphor?" → [0.12, -0.45, 0.83, 0.01, -0.22, ...] (384 numbers)
+"Define the Samphor"   → [0.11, -0.44, 0.81, 0.02, -0.23, ...] (very similar)
+"How do I play it?"    → [0.67, 0.23, -0.11, 0.44, 0.15, ...] (very different)
 ```
 
-**Why not just use `.split(" ")`?**
-`"What is the Samphor?".split(" ")` gives `["What", "is", "the", "Samphor?"]` — "Samphor?" has the
-question mark glued to it. NLTK handles edge cases like contractions, hyphens, and punctuation properly.
+**Why 384 dimensions?**
+Higher dimensions can capture more nuance but require more memory and computation.
+384 is a sweet spot for a "small" transformer model (MiniLM) — fast enough for real-time
+chat while still very accurate.
 
 ---
 
-### Lemmatization
+### Cosine Similarity
 
 **Technical explanation:**
-Lemmatization is morphological reduction — mapping inflected word forms to their canonical base
-form (the lemma) using vocabulary and morphological analysis. NLTK's `WordNetLemmatizer` looks up
-words in WordNet (a lexical database) to find their root forms. Unlike stemming (rule-based suffix
-removal), lemmatization always produces a real dictionary word.
+Cosine similarity measures the angle between two vectors: `cos(θ) = (A · B) / (|A| × |B|)`.
+When vectors are L2-normalized (length 1), cosine similarity equals the dot product.
+Values range from -1 (opposite directions) to +1 (identical direction). For text embeddings,
+1.0 means "same meaning", 0.0 means "unrelated", and negative values are uncommon.
 
 **Plain English:**
-"Playing", "plays", "played" all mean the same root concept: "play." Lemmatization reduces all of
-them to "play" so the AI treats them as the same word. Without it, "plays the drum" and "playing
-the drum" would look different to the model because "plays" and "playing" are different strings.
+Cosine similarity asks: "Are these two vectors pointing in the same direction?" Direction
+represents meaning. "What is the Samphor?" and "Define the Samphor" point in nearly the
+same direction (similarity ~0.92). "What is the Samphor?" and "What's the weather?" point
+in very different directions (similarity ~0.05).
 
-**Examples:**
-```python
-from nltk.stem import WordNetLemmatizer
-lem = WordNetLemmatizer()
-
-lem.lemmatize("playing")   # → "playing" (without specifying POS)
-lem.lemmatize("playing", pos="v")  # → "play" (verb form)
-lem.lemmatize("drums")     # → "drum"
-lem.lemmatize("histories") # → "history"
-lem.lemmatize("running", pos="v")  # → "run"
+```
+cos(θ) = 1.0 → identical direction → same meaning
+cos(θ) = 0.9 → nearly same direction → very similar meaning
+cos(θ) = 0.5 → somewhat similar
+cos(θ) = 0.0 → perpendicular → unrelated
+cos(θ) < 0.35 → very different → fallback triggered
 ```
 
-**Stemming vs Lemmatization:**
-- Stemming (e.g., Porter Stemmer): fast, rule-based, often produces non-words. "running" → "run", but "studies" → "studi".
-- Lemmatization: uses a dictionary, always produces real words. Slower but more accurate.
+**The confidence threshold:**
+`CONFIDENCE_THRESHOLD = 0.52` — if the best matching intent scores below 0.52 cosine similarity,
+the bot asks for clarification or returns the fallback response. This threshold was tuned
+empirically to minimize both false positives (wrong intent) and false negatives (unnecessary fallbacks).
 
 ---
 
-### Bag of Words
+### Semantic Search vs Keyword Matching
 
 **Technical explanation:**
-The Bag-of-Words (BoW) model represents a document as a multiset (or binary vector) over a fixed
-vocabulary. Each position in the vector corresponds to one vocabulary word; the value is 1 if the
-word appears (binary BoW) or the count of occurrences (count BoW). Word order and grammar are
-discarded — hence "bag." The result is a fixed-length numerical vector that a neural network can
-consume.
+Keyword matching (TF-IDF, Bag-of-Words) computes similarity based on word overlap.
+Semantic search computes similarity based on meaning regardless of word choice.
+The sentence transformer model has learned that "drum" and "percussion instrument" are related,
+that "play" and "perform" are related, and that Khmer and English phrases about the same topic
+are related — without any explicit synonym lists.
 
 **Plain English:**
-Imagine you have a list of 389 words (the vocabulary). For each message, you create a row of
-389 zeros. For each word in the message, you put a 1 in the matching position. That's it.
-"What is the Samphor?" might produce something like:
-```
-[0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, ...]
-   ^       ^                   ^
-  "a"    "drum"              "samphor"
-```
+Old approach: "Is the word 'samphor' in your question? Is the word 'what'? Yes + yes? Probably ask_definition."
+New approach: "Does your question mean the same thing as our example 'What is the Samphor?' questions? If yes, it's ask_definition."
 
-The neural network then reads these numbers (not the words) to make its prediction.
-
-**Why does order not matter?**
-For intent classification (figuring out the TOPIC), word order is less important than WHICH words
-appear. "What is the Samphor?" and "The Samphor — what is it?" contain the same words and thus
-produce the same BoW vector. The model doesn't lose meaningful information for this task.
-
-**Why binary (0 or 1) instead of counts?**
-In short training patterns (10–20 words each), a word almost never appears more than once. Using 1
-vs. count doesn't change anything, and binary vectors are simpler and faster.
-
----
-
-### Neural Networks from Scratch
-
-**Technical explanation:**
-A feedforward neural network is a directed acyclic graph of computational nodes (neurons) organized
-into layers. Each neuron computes a weighted sum of its inputs plus a bias term, then applies an
-activation function. During training, weights are updated via backpropagation (computing gradients
-with the chain rule) guided by an optimizer (SGD) to minimize a loss function.
-
-**Plain English:**
-Think of a neural network as a voting machine with three rooms:
-
-**Room 1 (128 voters):** Each of the 389 input numbers (the BoW vector) gets sent to all 128 voters.
-Each voter has its own weights — how much they trust each input. They add up their weighted inputs
-and decide a number. That's one "neuron."
-
-**Room 2 (64 voters):** The 128 numbers from Room 1 come in, same process, produces 64 numbers.
-
-**Output Room (14 voters):** Takes the 64 numbers, produces 14 numbers — one for each intent.
-The highest number wins. That intent is the predicted category.
-
-**How the weights get set:**
-At the start, weights are random. During training:
-1. Feed in a pattern → get a prediction (probably wrong at first).
-2. Compare to the correct answer → compute "how wrong" (the loss).
-3. Work backward through the network, adjusting weights to reduce the error.
-4. Repeat 56,000 times (280 patterns × 200 epochs).
-After all that, the weights encode the patterns the network has learned.
-
-**Why "deep" learning?**
-This network has multiple hidden layers (two of them: 128 and 64). "Deep" just means more than one
-hidden layer. More layers allow the network to learn more abstract patterns.
-
-**The network in numbers:**
-```
-Layer 1: 389 inputs × 128 neurons = 49,792 weights + 128 biases = 49,920 parameters
-Layer 2: 128 inputs × 64 neurons  =  8,192 weights +  64 biases =  8,256 parameters
-Output:   64 inputs × 14 neurons  =    896 weights +  14 biases =    910 parameters
-Total trainable parameters: ~59,086
-```
-
----
-
-### Activation Functions: ReLU and Softmax
-
-**Technical explanation:**
-Activation functions introduce non-linearity into neural networks. Without them, stacking multiple
-linear layers would be mathematically equivalent to a single linear layer (and couldn't learn
-non-linear patterns).
-
-**ReLU (Rectified Linear Unit):** `f(x) = max(0, x)`.
-Outputs x if positive, 0 if negative. Computationally cheap, reduces the vanishing gradient problem,
-and empirically performs well on most tasks.
-
-**Softmax:** `f(z_i) = e^{z_i} / Σ e^{z_j}`.
-Converts a vector of raw scores (logits) into a probability distribution — values between 0 and 1
-that sum to exactly 1.0. Used in the output layer for multi-class classification.
-
-**Plain English:**
-
-**ReLU** is like a light switch that can dim. Negative signal? Output zero (neuron is "off").
-Positive signal? Pass it through unchanged. This simple rule lets the network decide which neurons
-should respond to which patterns.
-
-**Softmax** is like a confidence voting system. After all the math, you have 14 raw scores (one per
-intent). Softmax converts them to percentages that add to 100%. So instead of raw numbers like
-`[2.3, 0.1, 5.6, ...]`, you get `[0.08, 0.01, 0.85, ...]` — the model is 85% confident it's
-`ask_definition`.
-
-```
-Before softmax:  [2.1, 0.5, 1.8, 4.2, 0.1, ...]   ← raw scores, hard to interpret
-After softmax:   [0.07, 0.01, 0.05, 0.82, 0.002, ...] ← probabilities, sum = 1.0
-                                         ↑ 82% confident = most likely category
-```
-
----
-
-### Dropout Regularization
-
-**Technical explanation:**
-Dropout is a regularization technique that randomly sets a fraction `p` of neuron activations to
-zero during each training step (but not during inference). This prevents co-adaptation of neurons
-— individual neurons cannot rely on specific other neurons always being present, forcing each to
-learn more independently useful representations. The result is reduced overfitting.
-
-At inference time, all neurons are active, and their outputs are implicitly scaled by `(1-p)` to
-account for the fact that only `(1-p)` fraction were active during training.
-
-**Plain English:**
-Overfitting is when a student memorizes the exact test questions instead of understanding the
-subject. Dropout is like randomly covering some students' notes during each practice session.
-They can't rely on any specific piece of information always being there, so they're forced to
-learn the overall patterns instead of memorizing specific examples.
-
-In this project, `Dropout(0.5)` means 50% of neurons in the previous layer are randomly turned off
-during each training batch. The network has to learn patterns using only half its neurons at a time,
-making it more robust.
-
-**During training vs. inference:**
-```
-Training:   [n1=on, n2=off, n3=on, n4=off, ...]  ← 50% randomly zeroed
-Inference:  [n1=on, n2=on,  n3=on, n4=on,  ...]  ← all active (Keras handles scaling automatically)
-```
-
----
-
-### The SGD Optimizer and Backpropagation
-
-**Technical explanation:**
-Stochastic Gradient Descent (SGD) is an iterative first-order optimization algorithm. At each step
-it computes the gradient of the loss function with respect to the model parameters on a mini-batch
-of training examples (here `batch_size=5`), then updates parameters in the direction that reduces
-loss: `w ← w - lr × ∇L(w)`.
-
-Nesterov momentum computes the gradient at a "look-ahead" position:
-`v_t = γv_{t-1} + lr × ∇L(w - γv_{t-1})`, `w ← w - v_t`.
-This gives faster convergence than standard momentum.
-
-Backpropagation is the algorithm to compute `∇L(w)` — the gradient of the loss with respect to
-every weight. It applies the chain rule of calculus layer-by-layer backward from the output.
-
-**Plain English:**
-
-**Gradient Descent** — imagine you're blindfolded on a hilly landscape, trying to reach the lowest
-valley. You feel which direction is downhill under your feet and take a step that way. The "valley"
-is the minimum loss (fewest errors). Each step is one weight update.
-
-**Stochastic** (SGD) — instead of looking at all 280 training examples before taking a step
-(too slow), you look at just 5 (the mini-batch), take a step, then look at 5 more. It's noisier
-but much faster.
-
-**Momentum** — imagine rolling a ball downhill instead of walking. The ball picks up speed in the
-direction it's rolling. If the gradient keeps pointing the same way (consistent downhill), the
-optimizer takes bigger and bigger steps. If the gradient reverses, it slows down. This helps
-escape "flat" areas in the loss landscape.
-
-**Nesterov** — before computing the gradient, the optimizer "peeks" ahead in the direction momentum
-is taking it. It makes a smarter guess and converges faster.
-
-**Backpropagation** — after the network makes a prediction, we know how wrong it was. To fix it,
-we need to know how each weight contributed to the error. Backpropagation traces the error backward
-through the network, computing each weight's share of the blame (the gradient). Then SGD uses those
-gradients to update the weights.
-
----
-
-### Loss, Accuracy, and Epochs
-
-**Technical explanation:**
-**Loss (Categorical Crossentropy):** `-Σ y_i log(ŷ_i)` where `y_i` are the true one-hot labels
-and `ŷ_i` are the predicted probabilities. Measures the divergence between the predicted
-distribution and the true distribution. Lower is better; zero means perfect prediction.
-
-**Accuracy:** The fraction of samples for which `argmax(ŷ) == argmax(y)`. Ranges from 0.0 to 1.0.
-For this project, anything below 0.70 triggers a FAIL.
-
-**Epoch:** One complete pass through the entire training dataset. With 280 samples and batch_size=5,
-one epoch = 56 gradient updates. After 200 epochs = 11,200 total updates.
-
-**Plain English:**
-
-**Loss** — a number measuring how wrong the model is. If the model is 85% confident the answer is
-"ask_history" but the correct answer was "ask_material", the loss is high. If it's 99% confident
-in the right answer, loss is near zero. The goal of training is to minimize loss.
-
-**Accuracy** — what percentage of the 280 training examples the model gets right. 99% accuracy
-means it gets 277 out of 280 correct. This is the easier-to-understand metric.
-
-**Epoch** — one complete trip through all training data. Like re-reading the same textbook chapter.
-More epochs = more practice. But too many epochs can lead to overfitting (memorizing instead of learning).
-200 epochs was chosen because the model consistently reaches >99% accuracy by then on this dataset.
+The new approach works even if you use completely different words:
+- "Can you explain the Samphor to me?" — no shared keywords, but semantically close to ask_definition → correctly classified.
+- "Sanphor" typo → spell-corrected to "Samphor" before embedding → still works.
+- "ស័មភោ គឺ ជា អ្វី?" (Khmer) → same model handles Khmer natively → correct classification.
 
 ---
 
 ### Pickle and Model Serialization
 
 **Technical explanation:**
-`pickle` is Python's built-in object serialization protocol. It converts Python objects (lists,
-dicts, class instances) to binary byte streams (serialization) and back (deserialization). The
-`.pkl` files store `self._words` (a `list[str]`) and `self._classes` (a `list[str]`).
+`pickle` is Python's built-in object serialization protocol. It converts Python objects
+(lists, dicts, class instances) to binary byte streams (serialization) and back (deserialization).
+The `labels.pkl` file stores `self._labels` (a `list[str]` of 460 intent tags).
 
-The `.h5` format (HDF5 — Hierarchical Data Format version 5) is used by Keras to store model
-architecture (as JSON) and weight tensors (as numerical arrays). It supports large numerical
-datasets efficiently.
+NumPy's `.npy` format stores n-dimensional arrays efficiently as raw binary data with a small
+header describing the shape and dtype. Loading `embeddings.npy` is much faster than loading
+a pickle of the same data because no Python object deserialization is needed.
 
 **Plain English:**
 When your Python script ends, every variable disappears from memory. Pickle is like taking a
-snapshot of a Python object and saving it to a file. When you load it back, the object is
-exactly as you left it.
+snapshot of a Python object and saving it to a file. NumPy's `.npy` is like that, but optimized
+for large arrays of numbers.
 
 ```python
 # Saving
-with open("model/words.pkl", "wb") as f:   # "wb" = write binary
-    pickle.dump(vocabulary_list, f)
+np.save("model/embeddings.npy", embedding_matrix)   # shape (460, 384)
+with open("model/labels.pkl", "wb") as f:
+    pickle.dump(label_list, f)
 
 # Loading
-with open("model/words.pkl", "rb") as f:   # "rb" = read binary
-    vocabulary_list = pickle.load(f)
+embeddings = np.load("model/embeddings.npy")
+with open("model/labels.pkl", "rb") as f:
+    labels = pickle.load(f)
 ```
 
-The `.h5` file is more complex — it's essentially a compressed folder structure inside one file,
-designed for large numerical datasets (like neural network weight matrices with thousands of numbers).
-
 **Security note:** Never load pickle files from untrusted sources — pickle can execute arbitrary
-code during loading. This is safe here because the files are generated by your own code.
+code during loading. This is safe here because the files are generated by your own `train.py`.
 
 ---
 
 ### JSON and Data Exchange
 
 **Technical explanation:**
-JSON (JavaScript Object Notation) is a text-based data interchange format. It is a strict subset
-of JavaScript's object literal syntax. Python's `json` module provides `json.load()` (file to dict),
-`json.loads()` (string to dict), `json.dump()` (dict to file), `json.dumps()` (dict to string).
-Flask's `jsonify()` serializes a dict to a JSON string and wraps it in an HTTP response with
+JSON (JavaScript Object Notation) is a text-based data interchange format. Python's `json`
+module provides `json.load()`, `json.loads()`, `json.dump()`, `json.dumps()`.
+Flask's `jsonify()` serializes a dict to JSON and wraps it in an HTTP response with
 `Content-Type: application/json`.
 
+The `/chat` endpoint now returns a richer JSON structure than before:
+```json
+{
+  "response": "The Samphor is a barrel-shaped drum...",
+  "chips": ["What is it made of?", "How do I play it?", "Where can I learn?"],
+  "media": {
+    "links": [{"label": "Wikipedia: Samphor", "url": "https://..."}]
+  }
+}
+```
+
 **Plain English:**
-JSON is a universal language for data. Both Python and JavaScript can read and write it. When the
-browser sends a message to Flask, it wraps it in JSON:
-```json
-{"message": "What is the Samphor?"}
-```
-When Flask replies, it also uses JSON:
-```json
-{"response": "The Samphor is a barrel-shaped drum..."}
-```
-
-JSON has only 6 data types: string, number, boolean, null, array, and object. That simplicity is
-why almost every web API in the world uses it.
-
-**Python dict vs JSON:**
-```python
-# Python dict
-{"key": "value", "list": [1, 2, 3], "nested": {"a": True}}
-
-# JSON (same data, text format)
-'{"key": "value", "list": [1, 2, 3], "nested": {"a": true}}'
-#                                                       ↑ Python True → JSON true (lowercase)
-```
+JSON is a universal language for data. Both Python and JavaScript can read and write it.
+When the browser sends a message, it uses JSON. When Flask replies, it also uses JSON —
+now with extra fields for chips (suggestion buttons) and media links.
 
 ---
 
@@ -1248,26 +886,27 @@ why almost every web API in the world uses it.
 AJAX (Asynchronous JavaScript and XML — though JSON has replaced XML in practice) refers to
 making HTTP requests from the browser without triggering a full page navigation. The modern
 implementation is the Fetch API (`fetch()`), which returns a `Promise` that resolves to a
-`Response` object. The response body can be consumed as text, JSON, Blob, etc.
+`Response` object.
 
 **Plain English:**
-Normally, clicking a button on a web page reloads the entire page (you see it go blank and reload).
-AJAX lets the browser talk to the server in the background while the page stays visible. The chat
-box works because of AJAX — your messages and the replies appear without any page reload.
+Normally, clicking a button on a web page reloads the entire page. AJAX lets the browser talk
+to the server in the background while the page stays visible. The chat box works because of
+AJAX — your messages and the replies appear without any page reload.
 
 ```javascript
-// "I promise this will eventually return a result" — that's what fetch() does
-const response = await fetch("/chat", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ message: "What is the Samphor?" })
-});
-const data = await response.json();
-console.log(data.response); // "The Samphor is..."
+async function sendMessage() {
+    showTyping();   // Fix 6: show animated dots
+    const res = await fetch("/chat", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ message: text }),
+    });
+    const data = await res.json();
+    hideTyping();
+    addBotMessage(data.response, data.chips, data.media);  // Fix 5, 7
+    saveToStorage();                                        // Fix 8
+}
 ```
-
-`fetch()` returns a Promise — think of it as an IOU. `await` pauses the function until the IOU
-is paid (the response arrives), then continues.
 
 ---
 
@@ -1277,49 +916,30 @@ is paid (the response arrives), then continues.
 JavaScript is single-threaded. Async/await is syntactic sugar over Promises (which wrap callbacks).
 An `async function` always returns a Promise. `await expression` suspends the async function until
 the awaited Promise resolves, without blocking the call stack (the event loop continues to process
-other events). This is cooperative multi-tasking via the microtask queue.
+other events).
 
 **Plain English:**
-Your browser has one thread (one worker). If you make that worker wait for a server response
-(which could take 500ms), the entire page would freeze — you couldn't type, scroll, or click
-anything. `async/await` tells JavaScript: "start this request, but while it's waiting, go do
-other things. Come back when the response arrives." The page stays responsive.
-
-```javascript
-// WITHOUT async/await — the page would freeze
-function badSendMessage() {
-    // This blocks the entire page for 500ms
-    const response = slowFetchRequest(); // can't actually do this — JavaScript doesn't work this way
-}
-
-// WITH async/await — correct and non-blocking
-async function sendMessage() {
-    const response = await fetch("/chat", {...});  // "go do other things while waiting"
-    const data = await response.json();            // "wait for JSON parsing too"
-    addMessage(data.response, "bot");              // now update the UI
-}
-```
+Your browser has one thread. If you make that thread wait for a server response (which could
+take 500ms), the entire page would freeze. `async/await` tells JavaScript: "start this request,
+but while it's waiting, go do other things. Come back when the response arrives."
 
 **`try/catch/finally`:**
 - `try` — attempt the risky code.
-- `catch (err)` — if anything throws an error, run this block. Prevents the whole function from crashing.
-- `finally` — always runs, whether there was an error or not. Used here to re-enable the input button.
+- `catch (err)` — if anything throws an error, run this block.
+- `finally` — always runs, whether there was an error or not. Used here to re-enable input.
 
 ---
 
 ### CSS Flexbox Layout
 
 **Technical explanation:**
-Flexbox (Flexible Box Layout) is a CSS layout model. A **flex container** (element with `display: flex`)
-distributes space among its **flex items** (direct children) along a main axis and cross axis.
-Key properties: `flex-direction` (axis direction), `justify-content` (main axis alignment),
-`align-items` (cross axis alignment), `flex: 1` on an item (grow to fill remaining space),
-`overflow-y: auto` on the container (scroll when content overflows).
+Flexbox (Flexible Box Layout) is a CSS layout model. A **flex container** (`display: flex`)
+distributes space among its **flex items** along a main axis and cross axis.
 
 **Plain English:**
 Flexbox is like a smart shelf system. You tell the shelf "arrange your items in a column, and
-make the middle item stretch to fill all available space." Without Flexbox, you'd need to calculate
-pixel positions for everything. With it, the layout adjusts automatically for different screen sizes.
+make the middle item stretch to fill all available space." Without Flexbox, you'd need to
+calculate pixel positions for everything.
 
 **How it's used in the chat layout:**
 ```css
@@ -1334,27 +954,84 @@ pixel positions for everything. With it, the layout adjusts automatically for di
     overflow-y: auto;        /* Scrollable when messages overflow */
 }
 
-.input-area {
-    display: flex;           /* Put input and buttons side by side */
-    gap: 8px;
-}
-
-#user-input {
-    flex: 1;                 /* Input stretches to fill remaining width */
+.chips-row {
+    display: flex;
+    flex-wrap: wrap;         /* Chips wrap to next line if too many */
+    gap: 6px;
 }
 ```
 
-Without `flex: 1` on `#chat-box`, the chat box would only be as tall as its content, and the
-input area wouldn't be pinned to the bottom.
+---
+
+### localStorage and Session Persistence
+
+**Technical explanation:**
+`localStorage` is a Web Storage API providing a key-value store that persists across page
+refreshes and browser restarts (unlike `sessionStorage`, which is cleared on tab close).
+Data is stored as strings; objects must be serialized with `JSON.stringify()` and deserialized
+with `JSON.parse()`. Storage is scoped to the origin (domain + port).
+
+**Plain English:**
+`localStorage` is like a notebook the browser keeps for a website. When you refresh the page,
+the notebook is still there. The chatbot uses it to save your conversation so it reappears
+exactly as you left it after a refresh — no more losing your chat history.
+
+```javascript
+const STORAGE_KEY = "samphor-chat-v1";
+
+function saveToStorage() {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(chatHistory));
+}
+
+function loadFromStorage() {
+    const saved = localStorage.getItem(STORAGE_KEY);
+    if (!saved) return false;
+    JSON.parse(saved).forEach(msg => renderMessage(msg));
+    return true;
+}
+```
+
+---
+
+### Web Speech API
+
+**Technical explanation:**
+The Web Speech API provides `SpeechRecognition` (speech-to-text) and `SpeechSynthesis`
+(text-to-speech) in modern browsers. `SpeechRecognition` streams audio from the microphone
+to the browser's speech engine (often cloud-based), returns `transcript` strings via the
+`onresult` event. Availability varies by browser; it is widely supported in Chrome.
+
+**Plain English:**
+The mic button uses the browser's built-in speech recognition to convert what you say into text,
+which is then sent to the chatbot as if you typed it. If your browser doesn't support it
+(some do, some don't), the mic button hides itself automatically.
+
+```javascript
+const SpeechRec = window.SpeechRecognition || window.webkitSpeechRecognition;
+if (!SpeechRec) {
+    micBtn.style.display = "none";  // hide if not supported
+} else {
+    const recognition = new SpeechRec();
+    recognition.onresult = (e) => {
+        userInput.value = e.results[0][0].transcript;
+        sendMessage();
+    };
+    micBtn.addEventListener("click", () => recognition.start());
+}
+```
 
 ---
 
 ## 5. Setup — Step by Step
 
 ### Requirements
-- Python **3.13** (not 3.14 — TensorFlow 2.x does not support 3.14 yet)
+- Python **3.11 or 3.12** (not 3.13+ — `sentence-transformers` and its PyTorch dependency
+  require 3.11/3.12 for stable C-extension builds on Windows)
+  ```powershell
+  winget install -e --id Python.Python.3.12
+  ```
 - A terminal / command prompt
-- Internet connection for the first install
+- Internet connection (for downloading `sentence-transformers` and the model weights ~120 MB)
 
 ---
 
@@ -1372,14 +1049,14 @@ cd path\to\samphor-expert
 ### Step 2 — Create the Virtual Environment
 
 ```powershell
-# Windows (PowerShell)
-"C:/Users/YourName/AppData/Local/Programs/Python/Python313/python.exe" -m venv venv
+# Windows (PowerShell) — use & operator if python path contains spaces
+python -m venv .venv
 
 # Mac / Linux
-python3.13 -m venv venv
+python3.12 -m venv .venv
 ```
 
-A new `venv/` folder appears. Do not edit it manually.
+A new `.venv/` folder appears. Do not edit it manually.
 
 ---
 
@@ -1387,13 +1064,14 @@ A new `venv/` folder appears. Do not edit it manually.
 
 ```powershell
 # Windows
-./venv/Scripts/python.exe -m pip install flask nltk numpy scikit-learn pandas tensorflow
+.\.venv\Scripts\python.exe -m pip install -r requirements.txt
 
 # Mac / Linux
-./venv/bin/python -m pip install flask nltk numpy scikit-learn pandas tensorflow
+./.venv/bin/python -m pip install -r requirements.txt
 ```
 
-This takes a few minutes the first time (downloading ~500 MB including TensorFlow).
+This takes several minutes the first time (downloading ~500 MB including PyTorch and the
+sentence-transformers model weights).
 
 ---
 
@@ -1401,10 +1079,10 @@ This takes a few minutes the first time (downloading ~500 MB including TensorFlo
 
 ```powershell
 # Windows
-./venv/Scripts/python.exe train.py
+.\.venv\Scripts\python.exe train.py
 
 # Mac / Linux
-./venv/bin/python train.py
+./.venv/bin/python train.py
 ```
 
 Expected output:
@@ -1412,15 +1090,22 @@ Expected output:
 ============================================================
   Samphor Expert System - Model Training
 ============================================================
-[MLEngine] Loaded 14 intents ...
-[MLEngine] Vocabulary size : 389 words
-[MLEngine] Training ...
-Epoch 1/200 ...
-...
-Final accuracy : 99.29%
-Status         : PASS (>= 70% accuracy threshold)
+[MLEngine] Loaded 14 intents, 460 patterns
+[MLEngine] Encoding patterns with sentence transformer...
+============================================================
+  Training Summary
+============================================================
+  Engine         : Sentence Transformer (Fix 10)
+  Status         : PASS — embeddings generated successfully
+  Note           : Run the chatbot and test with varied phrasings
+============================================================
+  Model artefacts saved to model/
+    - embeddings.npy  (training pattern embeddings)
+    - labels.pkl      (intent label per pattern)
 ============================================================
 ```
+
+The model files will be ~750 KB total (much smaller than the old Keras `.h5` file).
 
 ---
 
@@ -1428,13 +1113,14 @@ Status         : PASS (>= 70% accuracy threshold)
 
 ```powershell
 # Windows
-./venv/Scripts/python.exe app.py
+.\.venv\Scripts\python.exe app.py
 
 # Mac / Linux
-./venv/bin/python app.py
+./.venv/bin/python app.py
 ```
 
 Then open **http://127.0.0.1:5000** in your browser.
+The analytics dashboard is at **http://127.0.0.1:5000/admin**.
 
 ---
 
@@ -1442,15 +1128,123 @@ Then open **http://127.0.0.1:5000** in your browser.
 
 | Task | Command |
 |------|---------|
-| Train the model | `./venv/Scripts/python.exe train.py` |
-| Start the chatbot | `./venv/Scripts/python.exe app.py` |
-| Open in browser | http://127.0.0.1:5000 |
+| Train the model | `.\.venv\Scripts\python.exe train.py` |
+| Start the chatbot | `.\.venv\Scripts\python.exe app.py` |
+| Open chat UI | http://127.0.0.1:5000 |
+| Open admin dashboard | http://127.0.0.1:5000/admin |
 | Stop the server | `Ctrl + C` in terminal |
 | Retrain after changes | Stop server → run `train.py` → restart `app.py` |
 
 ---
 
-## 7. How to Add a New Topic
+## 7. All 17 Improvements Made
+
+This project was upgraded from a basic proof-of-concept to a production-quality chatbot
+through 17 incremental improvements. Here is what each one does:
+
+### Critical — Core Chatbot Capabilities
+
+**Fix 1 — Session Isolation**
+One shared `MLEngine` instance was causing all browser tabs to share conversation history.
+Fixed by storing per-user context in Flask `session` (cookie-based). Each browser tab now has
+independent conversation state.
+
+**Fix 2 — Conversation Context**
+The conversation history was recorded but never used during inference. Added follow-up
+detection ("tell me more", "continue") and pronoun resolution ("what is it made of?" after
+a "Samphor" reply), so the bot can handle multi-turn conversations naturally.
+
+**Fix 3 — Multi-turn Clarification**
+When confidence is in the 0.35–0.52 grey zone (the bot is uncertain between two intents),
+instead of the generic fallback, the bot now asks "Did you mean X or Y?" — enabling it to
+disambiguate with one follow-up question.
+
+**Fix 4 — Wire Fallback Engine**
+`RuleBasedEngine` existed in `chat_engine.py` but was never used. Added automatic fallback:
+if `MLEngine` throws any exception or model files are absent, `app.py` falls back to
+`RuleBasedEngine` so the chatbot always responds.
+
+### High Impact — UX & Discoverability
+
+**Fix 5 — Quick Reply Chips**
+After every bot response, 3–4 clickable topic buttons appear below the reply so users always
+know what they can ask next. Each intent has its own chip set. Clicking a chip sends that
+message automatically.
+
+**Fix 6 — Typing Indicator**
+A bouncing three-dot animation ("...") appears immediately after you send a message and
+disappears when the bot's reply arrives. This prevents the UI from feeling frozen while
+waiting for the server.
+
+**Fix 7 — Rich Media**
+Wikipedia links and external resources relevant to each intent are embedded in bot replies
+as clickable `<a>` buttons. The server returns `media.links` in the JSON response and the
+frontend renders them as a row of link buttons under the reply.
+
+**Fix 8 — Conversation Persistence**
+The full chat history is saved to `localStorage` (key: `samphor-chat-v1`) after every
+message. When you refresh the page or reopen the tab, the previous conversation is restored
+automatically. The reset button clears both the UI and localStorage.
+
+### Medium Impact — Intelligence
+
+**Fix 9 — Spell Correction**
+Common typos for Samphor-related domain terms are automatically corrected before inference.
+Uses `difflib.get_close_matches` with a cutoff of 0.75. Examples: "Sanphor" → "Samphor",
+"Phinpeat" → "Pinpeat". No extra packages required.
+
+**Fix 10 — Better NLP (Sentence Transformers)**
+The old Bag-of-Words + Keras feedforward network was replaced with a pre-trained sentence
+transformer (`paraphrase-multilingual-MiniLM-L12-v2`). This model captures semantic meaning
+rather than just word overlap, handles paraphrases and unseen phrasings much better, and
+natively supports 50+ languages including Khmer. Training time went from ~30 seconds of
+Keras training to ~5 seconds of embedding generation.
+
+**Fix 11 — Data Augmentation**
+Each intent was expanded from ~20 patterns to ~33 by adding synonym-expanded and rephrased
+variants. Khmer patterns (4 per content intent) were also added. The sentence transformer
+generalizes much better than BoW so the extra patterns strengthen coverage at edge cases
+rather than causing overfitting.
+
+**Fix 12 — Feedback Buttons**
+A thumbs-up (👍) and thumbs-down (👎) button appears on every bot message. Clicking posts
+`{msg_id, vote, text}` to `/feedback`, which logs the result to `logs/feedback.jsonl`.
+This data can be used to identify which intents produce unsatisfying replies.
+
+### Advanced — Power Features
+
+**Fix 13 — Khmer Language Support**
+Native Cambodian users can ask questions in Khmer script. The bot detects Khmer Unicode
+characters (range U+1780–U+17FF) and serves replies from `KHMER_RESPONSES` in `samphor_kb.py`.
+The multilingual transformer model handles Khmer tokenization natively, so no separate
+Khmer NLP pipeline is needed.
+
+**Fix 14 — Analytics Dashboard**
+An `/admin` page shows: total messages received, which intents were triggered most (intent
+frequency chart), fallback rate (how often the bot didn't understand), average confidence
+score, and the full active learning review queue. Data is served as JSON from `/admin/stats`
+and `/admin/review` and rendered client-side.
+
+**Fix 15 — Active Learning**
+Low-confidence turns (confidence < 0.35) are automatically saved to `logs/review_queue.jsonl`
+with the user message, predicted intent, and confidence score. A human can review this file,
+correct the intent labels, add the messages as new training patterns, and retrain — gradually
+improving the bot with real user input.
+
+**Fix 16 — Voice Input**
+A microphone button in the input area uses the browser's Web Speech API (`SpeechRecognition`)
+to capture spoken questions and convert them to text. The transcribed text is inserted into
+the input field and sent automatically. The button hides itself if the browser doesn't support
+the API.
+
+**Fix 17 — Rate Limiting**
+The `/chat` endpoint is throttled to 30 requests per minute per IP address using a sliding
+window implemented in an in-memory Python dict (no extra packages). Requests exceeding the
+limit receive HTTP 429. Messages longer than 500 characters are rejected with HTTP 400.
+
+---
+
+## 8. How to Add a New Topic
 
 Example: adding "Who makes the Samphor?" (intent: `ask_makers`)
 
@@ -1466,15 +1260,17 @@ Example: adding "Who makes the Samphor?" (intent: `ask_makers`)
     "Who are the drum makers in Cambodia",
     "How is a Samphor crafted",
     "What craftsmen make the Samphor",
-    "Is Samphor making a family tradition"
+    "Is Samphor making a family tradition",
+    "ជ័ងចម្លាក់ស័មភោ",
+    "អ្នក ណា ផ្លិត ស្គរ ស័មភោ"
   ],
   "responses": ["placeholder — real answers go in samphor_kb.py"]
 }
 ```
 
-More patterns = better classification. Aim for at least 10–15.
+Aim for at least 10–15 English patterns + 2–4 Khmer patterns.
 
-**Step 2 — Add replies to `knowledge/samphor_kb.py`:**
+**Step 2 — Add English replies to `knowledge/samphor_kb.py`:**
 ```python
 "ask_makers": [
     "Samphor drums are crafted by specialist artisans in Phnom Penh and Siem Reap. "
@@ -1484,27 +1280,48 @@ More patterns = better classification. Aim for at least 10–15.
 ],
 ```
 
-Add at least 2 replies so the bot has variety.
-
-**Step 3 — Retrain:**
-```powershell
-./venv/Scripts/python.exe train.py
+**Step 3 — Add Khmer replies to `KHMER_RESPONSES` in `samphor_kb.py`:**
+```python
+"ask_makers": [
+    "ស្គរ ស័មភោ ត្រូវ បាន ផ្លិត ដោយ ជ័ងចម្លាក់ ដ៏ ជំនាញ នៅ ភ្នំ ពេញ...",
+],
 ```
 
-**Step 4 — Restart the server:**
-```powershell
-./venv/Scripts/python.exe app.py
+**Step 4 — Add quick-reply chips to `app.py`:**
+```python
+_CHIPS["ask_makers"] = [
+    "Where can I see them work?",
+    "What tools do they use?",
+    "How long does it take to make one?",
+]
 ```
 
-The bot can now answer questions about Samphor makers.
+**Step 5 — Add Wikipedia/media links to `RICH_MEDIA` in `samphor_kb.py`:**
+```python
+"ask_makers": {
+    "links": [{"label": "Khmer Artisans", "url": "https://..."}]
+},
+```
+
+**Step 6 — Retrain:**
+```powershell
+.\.venv\Scripts\python.exe train.py
+```
+
+**Step 7 — Restart the server:**
+```powershell
+.\.venv\Scripts\python.exe app.py
+```
+
+The bot can now answer questions about Samphor makers in both English and Khmer.
 
 ---
 
-## 8. Switching Engines
+## 9. Switching Engines
 
 Edit two lines in `app.py`:
 
-**Default (ML engine):**
+**Default (sentence transformer ML engine):**
 ```python
 from engine.ml_engine import MLEngine
 engine = MLEngine()
@@ -1519,13 +1336,16 @@ engine = RuleBasedEngine()
 ```
 
 The rule-based engine is useful when:
-- Model files haven't been trained yet.
-- You want to test the website layout without the ML overhead.
+- Model files haven't been trained yet (no `embeddings.npy`).
+- You want to test the website layout without loading the sentence transformer.
 - You're debugging the Flask routes and don't need AI.
+
+Note: `app.py` automatically falls back to `RuleBasedEngine` if `MLEngine` fails to load
+(Fix 4), so you usually don't need to switch manually.
 
 ---
 
-## 9. Learning Roadmap
+## 10. Learning Roadmap
 
 This is a structured plan to go from "I know some basics" to fully understanding and extending
 every part of this project. Each phase builds on the previous one.
@@ -1538,7 +1358,7 @@ These are tools you need to have set up, not topics you need to master first.
 
 | Task | Why | How Long |
 |------|-----|---------|
-| Install Python 3.13 | Everything runs on Python | 30 minutes |
+| Install Python 3.12 | Everything runs on Python | 30 minutes |
 | Install VS Code | Your coding environment | 30 minutes |
 | Learn to use the terminal | Running scripts, navigation | 1–2 days |
 | Understand files and folders | Where everything lives | Already know this |
@@ -1558,11 +1378,11 @@ These are tools you need to have set up, not topics you need to master first.
 | Topic | Where it appears in this project | Priority |
 |-------|----------------------------------|---------|
 | Variables, data types (str, int, float, bool) | Everywhere | Essential |
-| Lists and list comprehensions | `_words`, `_classes`, BoW vectors | Essential |
-| Dictionaries | `INTENT_RESPONSES`, `RULES` | Essential |
-| Tuples | `RULES` keys, `(tokens, tag)` pairs | Essential |
+| Lists and list comprehensions | `_labels`, embedding comparisons | Essential |
+| Dictionaries | `INTENT_RESPONSES`, `KHMER_RESPONSES`, `_CHIPS` | Essential |
+| Tuples | Return types `(reply, context)` | Essential |
 | Functions (def, return, parameters) | All helper methods | Essential |
-| `if/elif/else` and `for` loops | `respond()`, training loop | Essential |
+| `if/elif/else` and `for` loops | `respond()`, inference loop | Essential |
 | `open()`, `with` blocks, `json.load()` | Loading `intents.json` | Essential |
 | `import` and modules | Every file imports other files | Essential |
 | Classes and `__init__` | `ChatEngine`, `MLEngine` | Essential |
@@ -1571,11 +1391,11 @@ These are tools you need to have set up, not topics you need to master first.
 | Abstract classes (`ABC`, `@abstractmethod`) | `ChatEngine` | Important |
 | Decorators (`@something`) | `@app.route`, `@abstractmethod` | Important |
 | Type hints (`str`, `list[str]`, `-> None`) | All function signatures | Good to know |
-| `pickle.dump()` / `pickle.load()` | Saving/loading vocabulary | Important |
-| List comprehensions (`[x for x in y if z]`) | `_lemmatize_tokens`, `_make_bow` | Important |
+| `pickle.dump()` / `pickle.load()` | Saving/loading label list | Important |
 | `random.choice()` | Picking random replies | Easy |
-| `any()`, `all()` built-in functions | RuleBasedEngine keyword matching | Good to know |
+| `any()` built-in function | Khmer detection loop | Good to know |
 | f-strings / template strings | Print statements, logging | Easy |
+| `collections.Counter` | Intent frequency tracking in analytics | Good to know |
 
 **What to build to practice:**
 - A simple command-line quiz program (uses functions, loops, input/output)
@@ -1585,7 +1405,7 @@ These are tools you need to have set up, not topics you need to master first.
 **Resources:**
 - [python.org/about/gettingstarted](https://www.python.org/about/gettingstarted/)
 - *Automate the Boring Stuff with Python* (free online) — Chapters 1–10
-- Search "Python OOP tutorial Corey Schafer" on YouTube (very good series)
+- Search "Python OOP tutorial Corey Schafer" on YouTube
 
 ---
 
@@ -1598,25 +1418,28 @@ These are tools you need to have set up, not topics you need to master first.
 | Topic | Where it appears | Priority |
 |-------|-----------------|---------|
 | HTML document structure (`<html>`, `<head>`, `<body>`) | `index.html` skeleton | Essential |
-| HTML elements: `<div>`, `<h1>`, `<input>`, `<button>` | The chat UI | Essential |
-| HTML attributes: `id`, `class`, `type`, `placeholder` | Chat elements | Essential |
+| HTML elements: `<div>`, `<h1>`, `<input>`, `<button>`, `<a>` | The chat UI | Essential |
+| HTML attributes: `id`, `class`, `type`, `placeholder`, `href` | Chat elements | Essential |
 | CSS selectors (`.class`, `#id`, element) | Styling in `<style>` | Essential |
 | CSS Box Model (margin, padding, border) | Spacing and layout | Essential |
 | CSS Flexbox (`display: flex`, `flex-direction`, `flex: 1`) | Chat layout | Essential |
+| CSS animations (`@keyframes`, `animation`) | Typing indicator bounce | Important |
 | CSS Colors (`#hex`, `rgb()`) | Color palette | Easy |
 | CSS `overflow-y: auto` | Scrollable chat box | Important |
 | JavaScript variables (`const`, `let`) | All JS code | Essential |
-| JavaScript functions | `addMessage()`, `sendMessage()` | Essential |
+| JavaScript functions | `addBotMessage()`, `sendMessage()` | Essential |
 | `document.getElementById()` | Getting DOM elements | Essential |
-| `document.createElement()` | Creating message bubbles | Essential |
+| `document.createElement()` | Creating message bubbles, chips | Essential |
 | `.appendChild()` | Adding bubbles to chat box | Essential |
 | `.textContent` vs `.innerHTML` | Security: use textContent | Essential |
 | Event listeners (`.addEventListener()`) | Click and keydown events | Essential |
-| `e.key === "Enter"` | Enter to send | Easy |
+| `localStorage.setItem()` / `getItem()` | Chat persistence (Fix 8) | Important |
+| `JSON.stringify()` / `JSON.parse()` | Storing objects in localStorage | Important |
 
 **What to build to practice:**
 - A static HTML/CSS page (a personal profile or simple webpage)
 - A simple interactive page (a to-do list that adds/removes items with JavaScript)
+- Add `localStorage` to the to-do list so tasks survive a refresh
 
 **Resources:**
 - [MDN Web Docs — Learn HTML](https://developer.mozilla.org/en-US/docs/Learn/HTML)
@@ -1634,7 +1457,7 @@ These are tools you need to have set up, not topics you need to master first.
 | Topic | Where it appears | Priority |
 |-------|-----------------|---------|
 | HTTP GET vs POST | `/` uses GET, `/chat` uses POST | Essential |
-| HTTP status codes (200, 400, 404, 500) | Flask responses | Important |
+| HTTP status codes (200, 400, 429, 500) | Flask responses | Important |
 | HTTP headers (`Content-Type: application/json`) | fetch() headers | Important |
 | JSON structure and data types | `{"message": "..."}` | Essential |
 | `JSON.stringify()` in JavaScript | Sending data to Flask | Essential |
@@ -1643,18 +1466,19 @@ These are tools you need to have set up, not topics you need to master first.
 | Flask `request.get_json()` | Reading POST body | Essential |
 | Flask `jsonify()` | Returning JSON responses | Essential |
 | Flask `render_template()` | Serving index.html | Essential |
+| Flask `session` | Per-user conversation context (Fix 1) | Important |
+| `request.remote_addr` | IP address for rate limiting (Fix 17) | Good to know |
 | Async functions in JavaScript | `async function sendMessage()` | Essential |
 | `await` keyword | Waiting for fetch results | Essential |
 | Promises (what `async/await` wraps) | Under the hood of fetch | Important |
 | `try/catch/finally` | Error handling in sendMessage | Essential |
 | AJAX concept (no page reload) | The whole chat flow | Essential |
 | Python `if __name__ == "__main__"` | app.py entry point | Important |
-| Flask `debug=True` | Auto-reload during development | Easy |
 
 **What to build to practice:**
-- A simple Flask app with 2 routes that returns JSON
+- A simple Flask app with 3 routes that returns JSON
 - Connect that Flask app to a frontend with JavaScript fetch()
-- Build a simple number guessing game: frontend sends a guess, backend validates it
+- Build a simple feedback system: frontend posts a rating, backend logs it
 
 **Resources:**
 - [Flask Quickstart](https://flask.palletsprojects.com/en/stable/quickstart/)
@@ -1663,112 +1487,57 @@ These are tools you need to have set up, not topics you need to master first.
 
 ---
 
-### Phase 4 — Natural Language Processing (Week 7)
+### Phase 4 — Natural Language Processing and Embeddings (Week 7)
 
-**Goal:** Understand how human text gets converted to numbers the neural network can read.
-
-**Topics to master:**
-
-| Topic | Where it appears | Priority |
-|-------|-----------------|---------|
-| What NLP is | The whole ML pipeline | Essential |
-| Tokenization concept | `nltk.word_tokenize()` | Essential |
-| `nltk.word_tokenize()` in practice | Training and inference | Essential |
-| Lemmatization vs stemming | `WordNetLemmatizer` | Essential |
-| `WordNetLemmatizer.lemmatize()` | `_lemmatize_tokens()` | Essential |
-| Vocabulary / corpus concept | `self._words` (389 words) | Essential |
-| Bag-of-Words model | `_make_bow()` | Essential |
-| Why word order doesn't matter for intent | BoW design decision | Important |
-| One-hot encoding for class labels | `to_categorical()` | Essential |
-| `nltk.download()` (required for NLTK data) | First-time setup | Important |
-| Stop words (and why we don't remove them here) | NLP preprocessing choice | Good to know |
-
-**What to build to practice:**
-- Write a script that tokenizes and lemmatizes a paragraph of text
-- Write a script that builds a vocabulary from a set of sentences
-- Write a script that converts sentences to bag-of-words vectors manually
-
-**Resources:**
-- [NLTK Book — Chapter 1 & 2](https://www.nltk.org/book/) (free online)
-- Search "bag of words NLP explained" on YouTube
-- Search "tokenization lemmatization Python tutorial"
-
----
-
-### Phase 5 — Neural Networks and Deep Learning (Weeks 8–10)
-
-**Goal:** Understand what the neural network is doing, why it works, and how to tweak it.
+**Goal:** Understand how human text gets converted to semantic vectors and compared.
 
 **Topics to master:**
 
 | Topic | Where it appears | Priority |
 |-------|-----------------|---------|
-| What a neuron is (weighted sum + activation) | Every Dense layer | Essential |
-| What a layer is (collection of neurons) | `Dense(128, ...)` | Essential |
-| Forward pass (input → prediction) | Inference in `respond()` | Essential |
-| Loss functions — categorical crossentropy | `model.compile(loss=...)` | Essential |
-| What accuracy measures | `metrics=["accuracy"]` | Essential |
-| Backpropagation concept | How weights are updated | Essential |
-| Gradient descent intuition | The optimizer's job | Essential |
-| Stochastic vs batch gradient descent | `batch_size=5` | Important |
-| Momentum in SGD | `momentum=0.9` | Important |
-| Nesterov momentum | `nesterov=True` | Good to know |
-| Learning rate | `learning_rate=0.01` | Essential |
-| Overfitting — when the model memorizes | Why Dropout is needed | Essential |
-| Dropout regularization | `Dropout(0.5)` | Essential |
-| ReLU activation function | Hidden layers | Essential |
-| Softmax activation function | Output layer | Essential |
-| `np.argmax()` — finding the highest value | Intent prediction | Essential |
-| Epochs — multiple passes through data | `epochs=200` | Essential |
-| `model.fit()` | Training call | Essential |
-| `model.predict()` | Inference call | Essential |
-| Keras Sequential API | Model building | Essential |
-| `Dense()` layer | Each layer in the model | Essential |
-| `model.compile()` | Setting up training | Essential |
-| `model.save()` / `load_model()` | Persisting the model | Essential |
+| What NLP is and why it's hard | The whole ML pipeline | Essential |
+| What an embedding/vector is | `embeddings.npy` | Essential |
+| High-dimensional vector spaces | 384-dim embedding space | Essential |
+| Cosine similarity concept | `_predict()` inference | Essential |
+| `sklearn.metrics.pairwise.cosine_similarity` | Inference in ml_engine.py | Essential |
+| Pre-trained models concept | Using paraphrase-multilingual-MiniLM-L12-v2 | Essential |
+| `SentenceTransformer.encode()` | Training and inference | Essential |
+| L2 normalization (`normalize_embeddings=True`) | Why dot product = cosine | Important |
+| NumPy arrays and shapes | `embeddings.npy` shape (460, 384) | Essential |
+| `np.save()` / `np.load()` | Persisting embeddings | Important |
+| `difflib.get_close_matches()` | Spell correction (Fix 9) | Good to know |
+| Unicode and Khmer script | `_is_khmer()` detection | Good to know |
+| Intent classification concept | The prediction task | Essential |
+| Confidence thresholds | `CONFIDENCE_THRESHOLD = 0.52` | Essential |
 
 **What to build to practice:**
-- Build a simple Keras model that classifies handwritten digits (MNIST — the "hello world" of ML)
-- Modify this project: change the number of hidden neurons and observe the effect on accuracy
-- Try training with different learning rates and compare results
+- Use `SentenceTransformer.encode()` to compute similarity between 5 sentences you write
+- Build a tiny semantic FAQ system (5 questions, answer the closest one)
+- Experiment with different `cutoff` values and see how they affect matches
 
 **Resources:**
-- [3Blue1Brown — Neural Networks playlist](https://www.youtube.com/playlist?list=PLZHQObOWTQDNU6R1_67000Dx_ZCJB-3pi) — WATCH FIRST, best visual explanation
-- [keras.io — Getting Started](https://keras.io/getting_started/)
-- [Google ML Crash Course](https://developers.google.com/machine-learning/crash-course)
-- *Deep Learning with Python* by François Chollet (the Keras creator) — the definitive book
+- [SBERT.net Documentation](https://www.sbert.net/) — official sentence transformers docs
+- [HuggingFace Model Card: paraphrase-multilingual-MiniLM-L12-v2](https://huggingface.co/sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2)
+- Search "sentence transformers tutorial Python" on YouTube
+- [3Blue1Brown — Essence of Linear Algebra](https://www.youtube.com/playlist?list=PLZHQObOWTQDPD3MizzM2xVFitgF8hE_ab) — for understanding vectors
 
 ---
 
-### Phase 6 — Putting It All Together (Week 11)
-
-**Goal:** Be able to extend, modify, and debug every part of this project.
-
-**Exercises:**
-1. **Add 3 new intents** to `intents.json` and `samphor_kb.py`. Retrain and verify they work.
-2. **Change the neural network architecture**: Add a third hidden layer. Observe the effect.
-3. **Change the confidence threshold** from 70% to 85%. Test edge cases.
-4. **Add a new API endpoint** to Flask, e.g. `GET /history` that returns the conversation log as JSON.
-5. **Style the frontend**: Change the color scheme, add the Cambodian flag emoji, change the font.
-6. **Add typing indicators**: Show "Bot is typing..." while waiting for the server response.
-7. **Implement conversation context**: Modify `respond()` to include the last 3 messages when generating a reply.
-
----
-
-### Phase 7 — Going Further (Month 3+)
+### Phase 5 — Going Further (Month 2+)
 
 After mastering this project, these are natural next steps:
 
 | Next Topic | Why It Builds on This Project |
 |-----------|-------------------------------|
+| **Transformer architecture (Attention)** | Understand what's inside the sentence transformer model |
+| **Fine-tuning pre-trained models** | Improve the model on Samphor-specific data |
 | **REST API design** | Make the chatbot an API others can call |
-| **Database integration (SQLite/PostgreSQL)** | Persist conversation history across restarts |
-| **Transformer models (BERT, GPT)** | Replace the bag-of-words + Dense model with state-of-the-art NLP |
-| **Hugging Face Transformers library** | Pre-trained models for intent classification |
+| **Database integration (SQLite/PostgreSQL)** | Persist conversation history and feedback across restarts |
 | **Deployment (Heroku, Railway, AWS)** | Put your chatbot on the internet |
 | **Docker** | Package the whole project into a container for reliable deployment |
-| **Unit testing (pytest)** | Test `_make_bow()`, `_lemmatize_tokens()` in isolation |
-| **CI/CD (GitHub Actions)** | Automatically test and retrain when you push changes |
+| **Unit testing (pytest)** | Test `_correct_spelling()`, `_is_khmer()`, `_predict()` in isolation |
+| **CI/CD (GitHub Actions)** | Automatically retrain and test when you push changes to intents.json |
+| **Authentication (Flask-Login)** | Protect the `/admin` dashboard from public access |
 
 ---
 
@@ -1780,67 +1549,56 @@ After mastering this project, these are natural next steps:
 | 1 | Python foundations | 2–3 weeks |
 | 2 | HTML + CSS + basic JS | 1–2 weeks |
 | 3 | HTTP + Flask + async JS | 1 week |
-| 4 | NLP (tokenization, lemmatization, BoW) | 1 week |
-| 5 | Neural networks + Keras | 2–3 weeks |
-| 6 | Integration + extensions | 1 week |
-| **Total** | | **8–11 weeks** |
+| 4 | NLP + embeddings + cosine similarity | 1 week |
+| 5 | Deeper AI topics + deployment | 2–3 weeks |
+| **Total** | | **7–10 weeks** |
 
 "Consistent daily practice" means 1–2 hours per day, 5 days per week.
-If you do more, you'll finish faster. The ML phase (Phase 5) is the hardest and takes the longest.
 
 ---
 
-## 10. Glossary
+## 11. Glossary
 
 | Term | Technical meaning | Plain English |
 |------|--------------------|---------------|
 | **Abstract Base Class (ABC)** | A class with `@abstractmethod` declarations that cannot be instantiated directly; enforces interface contracts on subclasses | A "contract class" — it says "you must implement these methods" without saying how |
-| **Accuracy** | The fraction of predictions that match the true labels. `correct / total` | What percentage of the training questions the model answered correctly |
-| **Activation function** | A non-linear function applied to a neuron's output, enabling the network to learn non-linear patterns | The rule a neuron uses to decide how loud its output is |
 | **AJAX** | Asynchronous JavaScript and XML — sending HTTP requests without page reload | Making the browser talk to the server silently in the background |
 | **Async/Await** | JavaScript syntax for writing asynchronous code that looks synchronous; built on Promises | "Start this task, go do other things while waiting, come back when it's done" |
-| **Backpropagation** | Algorithm to compute the gradient of the loss with respect to every weight, using the chain rule of calculus | The math that figures out how much each weight contributed to the error |
-| **Bag of Words (BoW)** | Representing a document as a binary or count vector over a fixed vocabulary, discarding word order | Converting a sentence to a row of 0s and 1s — 1 for each word that appears |
-| **Batch size** | The number of training examples used to compute one gradient update | How many questions the network studies before adjusting its weights |
-| **Categorical crossentropy** | Loss function for multi-class classification: `-Σ y log(ŷ)`. Measures divergence between true and predicted distributions | A number measuring how wrong the predictions are for classification tasks |
-| **Confidence threshold** | The minimum prediction probability required to return a non-fallback response | The minimum certainty required before the bot commits to an answer |
-| **Dense layer** | A fully connected neural network layer where every input connects to every output neuron | A layer where every neuron talks to every neuron in the next layer |
+| **Chips (quick-reply)** | Clickable suggestion buttons shown below a bot reply | Pre-written topic buttons that appear after each answer so you know what to ask next |
+| **Confidence threshold** | The minimum cosine similarity required to return a non-fallback response | The minimum certainty required before the bot commits to an answer |
+| **Cosine similarity** | `(A · B) / (|A| × |B|)` — measures the angle between two vectors; 1.0 = identical direction | A score for "how similar in meaning are these two things?" — 1.0 = same, 0.0 = unrelated |
 | **Decorator** | A Python function that wraps another function, adding behavior before or after it runs (`@decorator`) | A label above a function that gives it extra powers |
-| **Dropout** | Regularization technique that randomly zeroes some neuron outputs during training to prevent overfitting | Randomly turning off neurons during practice so the network learns to be robust |
-| **Epoch** | One complete pass through all training data | One full study session through all training examples |
-| **Feature vector** | A fixed-length numerical representation of an input sample (here: the BoW vector) | The list of numbers that represents a piece of text for the neural network |
+| **Embedding** | A dense fixed-length vector (array of floats) representing the semantic meaning of text | A list of numbers that captures the meaning of a sentence in a way the computer can compare |
+| **Feature vector** | A fixed-length numerical representation of an input (here: a 384-dim embedding) | The list of numbers that represents a sentence for the AI |
 | **Flask** | A Python WSGI micro-framework for building web applications | The software that creates the website and handles browser requests |
+| **Flask session** | A signed cookie-based client-side store for per-user state | A private notebook the server keeps for each browser tab |
 | **GET request** | HTTP method to retrieve a resource without side effects | "Give me this page" — what the browser does when you type a URL |
-| **Gradient descent** | Iterative optimization: update parameters in the direction that reduces the loss | Rolling downhill in the error landscape until you reach the bottom |
-| **Inference** | Running a trained model on new input to get a prediction | Using the trained AI to answer a question |
+| **Inference** | Running a trained/pre-trained model on new input to get a prediction | Using the AI to answer a question |
 | **Intent** | The category of user request (e.g., `ask_history` = user wants historical information) | The topic category of what the user is asking about |
 | **JSON** | JavaScript Object Notation — a text format for structured data using `{}`, `[]`, strings, numbers | A universal text format for sending structured data between programs |
-| **Keras** | High-level deep learning API (runs on top of TensorFlow) | The simpler, friendlier way to build neural networks |
-| **Lemmatization** | Morphological reduction of an inflected word to its canonical base form (lemma) using a vocabulary | Reducing words like "playing" to their root "play" |
-| **Lemma** | The base dictionary form of a word (e.g., "play" is the lemma of "playing", "plays", "played") | The root/base form of a word |
-| **Loss** | A scalar measuring how wrong the model's predictions are on a batch; minimized during training | A score for "how badly is the model doing" — lower is better |
-| **Momentum** | SGD enhancement that accumulates a velocity vector in the gradient direction across updates | The optimizer remembers which direction it was heading and keeps going that way |
-| **Neural network** | A parameterized function composed of layers of neurons, trained to map inputs to outputs | A multi-layer voting machine that learned patterns from examples |
-| **Neuron** | A computational unit: weighted sum of inputs + bias → activation function | One voter in the network that takes numbers in and outputs a single number |
-| **Nesterov momentum** | A variant of momentum that computes the gradient at a look-ahead position | An improved version of momentum that peeks ahead before taking a step |
-| **NLTK** | Natural Language Toolkit — Python library for NLP tasks (tokenization, lemmatization, parsing, etc.) | Python's Swiss army knife for working with human language |
+| **Khmer script** | The writing system used for the Cambodian language (Unicode range U+1780–U+17FF) | The alphabet used to write Cambodian |
+| **L2 normalization** | Dividing a vector by its length so that `|v| = 1` | Making all vectors the same length so comparisons are fair |
+| **localStorage** | Browser-side key-value storage that persists across page refreshes | A notebook the browser keeps for a website that survives closing the tab |
+| **Multilingual model** | A language model trained on data from 50+ languages, capable of handling them all | An AI that understands many human languages without needing separate models for each |
+| **NLP (Natural Language Processing)** | The subfield of AI concerned with understanding and generating human language | Teaching computers to understand the messiness of human language |
 | **NumPy** | Numerical Python — library for fast multi-dimensional array operations | The math library for working with arrays and matrices of numbers |
 | **One-hot encoding** | Representing a categorical label as a binary vector with a single 1 at the label's index | A way to represent categories as rows of zeros with one 1 |
-| **Overfitting** | When a model performs well on training data but poorly on new data — memorized instead of learned | The model memorized the training examples instead of learning the underlying pattern |
+| **Overfitting** | When a model performs well on training data but poorly on new data | The model memorized the training examples instead of learning the underlying pattern |
 | **Pattern** | An example user query associated with an intent in `intents.json` | One example of how a user might phrase a question about a topic |
 | **Pickle** | Python's binary serialization protocol (`pickle.dump()` / `pickle.load()`) | Python's way of saving objects to files and loading them back later |
 | **Polymorphism** | The ability of different classes to implement the same interface (`respond()`) while behaving differently | Different objects responding to the same method call in their own way |
 | **POST request** | HTTP method that sends data in the request body to the server | "Here's some data — process it" — used when submitting a form or sending a chat message |
+| **Pre-trained model** | A model already trained on large datasets by someone else; reused rather than trained from scratch | An AI that has already learned from millions of examples; we use its knowledge without retraining |
 | **Promise** | JavaScript object representing the eventual result of an async operation | A JavaScript "IOU" — a guarantee that a result will come later |
-| **ReLU** | Rectified Linear Unit: `f(x) = max(0, x)`. Introduces non-linearity into hidden layers | "If positive, pass it through; if negative, output zero" |
+| **Rate limiting** | Throttling requests per user/IP to prevent abuse | Limiting how many messages someone can send per minute |
+| **Review queue** | A JSONL log of low-confidence turns saved for human review and correction | A list of conversations the bot wasn't sure about, for a human to improve later |
+| **Rich media** | Images, links, and other non-text content embedded in bot replies | Wikipedia links and external resources shown as clickable buttons under each reply |
 | **Route** | A URL pattern registered with Flask that maps to a Python view function | A specific URL address that Flask knows how to handle |
-| **Softmax** | `f(z_i) = e^{z_i} / Σ e^{z_j}` — converts logits to a probability distribution summing to 1 | Converts raw numbers to confidence percentages (0–100%) that add up to 100 |
-| **Stochastic Gradient Descent (SGD)** | Gradient descent with mini-batches rather than the full dataset per update | Updating weights using a small random sample of training data each step |
-| **Tokenization** | Segmenting a text string into discrete tokens (words, punctuation, subwords) | Cutting a sentence into individual word pieces |
-| **Training** | Iteratively updating model weights to minimize loss on labeled training data | Teaching the neural network by showing it examples and correcting its mistakes |
+| **Semantic similarity** | A measure of how similar the *meaning* of two texts is, regardless of exact wording | How close in meaning two sentences are, even if they use completely different words |
+| **Sentence transformer** | A neural network that maps full sentences to dense semantic embeddings | An AI that converts sentences into lists of numbers where similar meanings are close together |
+| **Sliding window rate limit** | Counting requests within a rolling time window rather than a fixed period | Checking "how many messages in the last 60 seconds?" rather than "how many this minute?" |
+| **SpeechRecognition API** | Browser API for converting microphone input to text | The browser's built-in speech-to-text feature |
 | **Virtual environment (venv)** | An isolated Python interpreter and `site-packages` directory for one project | A private kitchen with its own ingredients just for this project |
-| **Vocabulary** | The set of unique words (after lemmatization) seen in all training patterns | The master word list the model knows about (389 words) |
-| **Weight** | A learnable parameter in a neural network that scales an input | A number the network adjusts during training to get better at predictions |
 | **WSGI** | Web Server Gateway Interface — the standard Python interface between web servers and web apps | The standard "plug shape" that connects Python web frameworks to web servers |
 | **XSS (Cross-Site Scripting)** | An attack where malicious script is injected into a web page | Why `textContent` is used instead of `innerHTML` — prevents injected code from running |
 

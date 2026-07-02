@@ -61,22 +61,26 @@ def main() -> None:
     print("\n" + "=" * 60)
     print("  Training Summary")
     print("=" * 60)
-    print(f"  Final accuracy : {final_acc * 100:.2f}%")
-    print(f"  Final loss     : {final_loss:.4f}")
 
-    # Check whether we hit the 70% accuracy target.
-    if final_acc >= 0.70:
-        print(f"  Status         : PASS (>= 70% accuracy threshold)")
+    # Sentence transformer training returns (1.0, 0.0) as sentinels
+    # because cosine-similarity models don't expose a loss/accuracy metric.
+    if final_loss == 0.0 and final_acc == 1.0:
+        print("  Engine         : Sentence Transformer (Fix 10)")
+        print("  Status         : PASS — embeddings generated successfully")
+        print("  Note           : Run the chatbot and test with varied phrasings")
     else:
-        print(f"  Status         : WARN - accuracy below 70% target")
-        print("  Consider increasing epochs or adding more training patterns.")
+        print(f"  Final accuracy : {final_acc * 100:.2f}%")
+        print(f"  Final loss     : {final_loss:.4f}")
+        if final_acc >= 0.70:
+            print("  Status         : PASS (>= 70% accuracy threshold)")
+        else:
+            print("  Status         : WARN - accuracy below 70% target")
+            print("  Consider adding more training patterns to data/intents.json.")
 
-    # Remind the user where the saved files went.
     print("=" * 60)
     print("  Model artefacts saved to model/")
-    print("    - samphor_model.h5")
-    print("    - words.pkl")
-    print("    - classes.pkl")
+    print("    - embeddings.npy  (training pattern embeddings)")
+    print("    - labels.pkl      (intent label per pattern)")
     print("=" * 60)
 
 

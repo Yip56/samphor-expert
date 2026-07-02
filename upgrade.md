@@ -7,20 +7,20 @@
 - [x] **Fix 4 — Wire Fallback Engine**: `RuleBasedEngine` exists in `chat_engine.py` but is never used. Auto-fallback to it if `MLEngine` throws or model is absent.
 
 ## High Impact (UX & Discoverability)
-- [ ] **Fix 5 — Quick Reply Chips**: after every bot response show 3–4 clickable topic buttons so users know what they can ask.
-- [ ] **Fix 6 — Typing Indicator**: show "..." animation while waiting for the server.
-- [ ] **Fix 7 — Rich Media**: embed images, Wikipedia links, and audio samples in bot replies.
-- [ ] **Fix 8 — Conversation Persistence**: save chat to `localStorage` so a page refresh doesn't wipe history.
+- [x] **Fix 5 — Quick Reply Chips**: after every bot response show 3–4 clickable topic buttons so users know what they can ask.
+- [x] **Fix 6 — Typing Indicator**: show "..." animation while waiting for the server.
+- [x] **Fix 7 — Rich Media**: embed images, Wikipedia links, and audio samples in bot replies.
+- [x] **Fix 8 — Conversation Persistence**: save chat to `localStorage` so a page refresh doesn't wipe history.
 
 ## Medium Impact (Intelligence)
-- [ ] **Fix 9 — Spell Correction**: handle "Samhor", "Sanphor" typos with `pyspellchecker` or fuzzy matching.
-- [ ] **Fix 10 — Better NLP**: replace Bag-of-Words with sentence transformers for semantic understanding.
-- [ ] **Fix 11 — Data Augmentation**: expand beyond 20 patterns per intent using synonym expansion.
-- [ ] **Fix 12 — Feedback Buttons**: thumbs-up / thumbs-down on each reply to collect retraining data.
+- [x] **Fix 9 — Spell Correction**: handle "Samhor", "Sanphor" typos with `pyspellchecker` or fuzzy matching.
+- [x] **Fix 10 — Better NLP**: replace Bag-of-Words with sentence transformers for semantic understanding.
+- [x] **Fix 11 — Data Augmentation**: expand beyond 20 patterns per intent using synonym expansion.
+- [x] **Fix 12 — Feedback Buttons**: thumbs-up / thumbs-down on each reply to collect retraining data.
 
 ## Advanced (Power Features)
-- [ ] **Fix 13 — Khmer Language Support**: add Khmer-script patterns and replies for native Cambodian users.
-- [ ] **Fix 14 — Analytics Dashboard**: `/admin` page showing most-asked topics, fallback rate, confidence distribution.
-- [ ] **Fix 15 — Active Learning**: save low-confidence turns to a review queue for human correction.
-- [ ] **Fix 16 — Voice Input**: Web Speech API in the browser for hands-free querying.
-- [ ] **Fix 17 — Rate Limiting**: throttle `/chat` to prevent abuse; add input length cap.
+- [x] **Fix 13 — Khmer Language Support**: add Khmer-script patterns and replies for native Cambodian users.
+- [x] **Fix 14 — Analytics Dashboard**: `/admin` page showing most-asked topics, fallback rate, confidence distribution.
+- [x] **Fix 15 — Active Learning**: save low-confidence turns to a review queue for human correction.
+- [x] **Fix 16 — Voice Input**: Web Speech API in the browser for hands-free querying.
+- [x] **Fix 17 — Rate Limiting**: throttle `/chat` to prevent abuse; add input length cap.

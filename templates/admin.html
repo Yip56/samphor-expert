@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<!--
+  templates/admin.html
+  ====================
+  Fix 14 — Analytics dashboard
+  Fix 15 — Active-learning review queue
+
+  Add authentication before exposing this page publicly.
+  Accessible at: /admin
+-->
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Samphor Admin</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      background: #f4f1ec;
+      color: #333;
+      padding: 28px 20px;
+      max-width: 960px;
+      margin: 0 auto;
+    }
+
+    header {
+      background: #8b3a0f;
+      color: #fff;
+      padding: 18px 24px;
+      border-radius: 10px;
+      margin-bottom: 24px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    header h1   { font-size: 1.2rem; }
+    header p    { font-size: 0.82rem; opacity: 0.75; margin-top: 3px; }
+    .back-link  { color: #fff; opacity: 0.8; text-decoration: none; font-size: 0.85rem; }
+    .back-link:hover { opacity: 1; text-decoration: underline; }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+      gap: 14px;
+      margin-bottom: 26px;
+    }
+    .card {
+      background: #fff;
+      border-radius: 10px;
+      padding: 20px 16px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.07);
+      text-align: center;
+    }
+    .card .value { font-size: 2rem; font-weight: 700; color: #8b3a0f; }
+    .card .label { font-size: 0.78rem; color: #999; margin-top: 4px; text-transform: uppercase; letter-spacing: 0.04em; }
+
+    section {
+      background: #fff;
+      border-radius: 10px;
+      padding: 20px 22px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.07);
+      margin-bottom: 22px;
+    }
+    .section-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 14px;
+    }
+    section h2 { font-size: 0.95rem; color: #555; }
+
+    .refresh-btn {
+      background: #8b3a0f;
+      color: #fff;
+      border: none;
+      padding: 5px 14px;
+      border-radius: 20px;
+      font-size: 0.8rem;
+      cursor: pointer;
+    }
+    .refresh-btn:hover { background: #a84510; }
+
+    table { width: 100%; border-collapse: collapse; font-size: 0.88rem; }
+    th, td { text-align: left; padding: 8px 10px; border-bottom: 1px solid #f0e6d3; }
+    th { color: #aaa; font-weight: 600; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.04em; }
+    tr:last-child td { border-bottom: none; }
+
+    .bar-wrap { background: #f4f1ec; border-radius: 4px; height: 8px; min-width: 80px; }
+    .bar-fill  { background: #8b3a0f; border-radius: 4px; height: 8px; transition: width 0.4s; }
+
+    .badge {
+      display: inline-block;
+      border-radius: 4px;
+      padding: 2px 7px;
+      font-size: 0.78rem;
+      font-weight: 600;
+    }
+    .badge-low  { background: #fdecea; color: #c0392b; }
+    .badge-ok   { background: #eafaf1; color: #27ae60; }
+
+    .empty { color: #ccc; font-style: italic; text-align: center; padding: 20px 0; }
+    .note  { font-size: 0.78rem; color: #bbb; margin-top: 10px; }
+  </style>
+</head>
+<body>
+
+<header>
+  <div>
+    <h1>Samphor Expert — Admin</h1>
+    <p>Analytics &amp; active-learning review (Fix 14 / 15) · stats reset on server restart</p>
+  </div>
+  <a href="/" class="back-link">← Back to chat</a>
+</header>
+
+<!-- Summary cards -->
+<div class="grid">
+  <div class="card"><div class="value" id="v-total">—</div><div class="label">Messages</div></div>
+  <div class="card"><div class="value" id="v-fallback">—</div><div class="label">Fallback Rate</div></div>
+  <div class="card"><div class="value" id="v-conf">—</div><div class="label">Avg Confidence</div></div>
+  <div class="card"><div class="value" id="v-review">—</div><div class="label">Review Queue</div></div>
+</div>
+
+<!-- Intent distribution -->
+<section>
+  <div class="section-header">
+    <h2>Intent Distribution</h2>
+    <button class="refresh-btn" onclick="load()">↺ Refresh</button>
+  </div>
+  <table>
+    <thead><tr><th>Intent</th><th>Count</th><th style="width:40%">Share</th></tr></thead>
+    <tbody id="intents-body">
+      <tr><td colspan="3" class="empty">Loading…</td></tr>
+    </tbody>
+  </table>
+</section>
+
+<!-- Active-learning review queue -->
+<section>
+  <div class="section-header">
+    <h2>Active Learning — Low-Confidence Turns</h2>
+  </div>
+  <table>
+    <thead><tr><th>Time</th><th>Session</th><th>User Message</th><th>Confidence</th></tr></thead>
+    <tbody id="review-body">
+      <tr><td colspan="4" class="empty">Loading…</td></tr>
+    </tbody>
+  </table>
+  <p class="note">Turns saved when model confidence &lt; 45%. Stored in logs/review_queue.jsonl — use these to add new patterns in data/intents.json and retrain.</p>
+</section>
+
+<script>
+  async function load() {
+    // ── Stats ──
+    const stats = await fetch('/admin/stats').then(r => r.json()).catch(() => null);
+    if (!stats) return;
+
+    document.getElementById('v-total').textContent    = stats.total;
+    document.getElementById('v-fallback').textContent = stats.fallback_rate + '%';
+    document.getElementById('v-conf').textContent     = stats.avg_confidence + '%';
+
+    const maxCount = stats.top_intents[0]?.count || 1;
+    const tbody    = document.getElementById('intents-body');
+    if (!stats.top_intents.length) {
+      tbody.innerHTML = '<tr><td colspan="3" class="empty">No messages yet.</td></tr>';
+    } else {
+      tbody.innerHTML = stats.top_intents.map(item => `
+        <tr>
+          <td>${item.intent}</td>
+          <td>${item.count}</td>
+          <td>
+            <div class="bar-wrap">
+              <div class="bar-fill" style="width:${Math.round(item.count / maxCount * 100)}%"></div>
+            </div>
+          </td>
+        </tr>
+      `).join('');
+    }
+
+    // ── Review queue ──
+    const rev   = await fetch('/admin/review').then(r => r.json()).catch(() => ({ total: 0, entries: [] }));
+    document.getElementById('v-review').textContent = rev.total;
+    const rbody = document.getElementById('review-body');
+    if (!rev.entries.length) {
+      rbody.innerHTML = '<tr><td colspan="4" class="empty">No low-confidence turns recorded yet.</td></tr>';
+    } else {
+      rbody.innerHTML = [...rev.entries].reverse().map(e => {
+        const pct = Math.round(e.confidence * 100);
+        const cls = pct < 30 ? 'badge-low' : 'badge-ok';
+        return `
+          <tr>
+            <td>${e.ts.replace('T', ' ')}</td>
+            <td>${e.sid}</td>
+            <td>${e.message}</td>
+            <td><span class="badge ${cls}">${pct}%</span></td>
+          </tr>
+        `;
+      }).join('');
+    }
+  }
+
+  load();
+</script>
+</body>
+</html>

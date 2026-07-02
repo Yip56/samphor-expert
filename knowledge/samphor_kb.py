@@ -175,6 +175,125 @@ FALLBACK_RESPONSE = (
 # INTENT_LABELS maps internal tag names to plain-English topic descriptions.
 # Used by ml_engine.py to build human-readable clarification questions when
 # the model is uncertain between two candidate intents.
+# Fix 13 — Khmer-language responses served when the user writes in Khmer script.
+# Keys match intent tags in INTENT_RESPONSES above.
+KHMER_RESPONSES: dict[str, list[str]] = {
+
+    "ask_definition": [
+        "ស័មភោ (ស័មភោ) គឺ ជា ស្ករ ពីរ ក្បាល ដែល ជា ស្នូល ចង្វាក់ ក្នុង ភ្លេង ខ្មែរ បុរាណ។ "
+        "ស្ករ នេះ ធ្វើ ឡើង ពី ឈើ ខ្ទមសែ ហើយ មាន ស្បែក គោ ឬ ពពែ នៅ ចុង ទាំង ពីរ។ "
+        "វា មាន ប្រវែង ប្រហែល ៥០–៦០ ស.ម។",
+        "ស័មភោ ជា ឧបករណ៍ ដំ ប្រពៃណី ខ្មែរ ដែល ប្រើ ក្នុង ភ្លេង ចាក្រព ខ្មែរ "
+        "និង ក្នុង ពិណ ពាទ្យ។ ស្ករ នេះ មាន ក្បាល ពីរ ដែល ខ្នាត ខ្លះ ខ្នាត ទ្រ ខ្លះ។",
+    ],
+
+    "ask_history": [
+        "ស័មភោ មាន ប្រវត្តិ ចាប់ ពី សម័យ អង្គរ (ឆ្នាំ ៨០២–១៤៣១)។ "
+        "រូប ចម្លាក់ ស្ករ នេះ ត្រូវ បាន ឃើញ នៅ ប្រាសាទ អង្គរ វត្ត និង ប្រាសាទ បាយ័ន "
+        "ដែល បញ្ជាក់ ថា ស្ករ ខ្មែរ មាន អាយុ ជាង ១ ០០០ ឆ្នាំ ហើយ។",
+        "ការ ស្រាវជ្រាវ ប្រវត្តិ សាស្ត្រ បញ្ជាក់ ថា ស័មភោ ត្រូវ បាន ប្រើ ក្នុង ព្រះ ពូជ ខ្មែរ "
+        "ចាប់ ពី សតវត្ស ទី ៩ ម.គ.ស.។ ស្ករ នេះ ដើរ តួ ជា ឧបករណ៍ ភ្លេង ក្នុង ព្រះ រាជ ព្រំ ដំ ចាំ ថ្ងៃ។",
+    ],
+
+    "ask_material": [
+        "ស័មភោ ធ្វើ ឡើង ពី ឈើ ខ្ទមសែ (Artocarpus heterophyllus) ដែល ល្បី ព្រោះ ជ្រៅ ថ្ងន់ ល្អ។ "
+        "ក្បាល ស្ករ ធ្វើ ពី ស្បែក គោ ឬ ស្បែក ពពែ ហើយ ចង ជាប់ ដោយ ចំណង រណ្ដំ ឬ ស្បែក តែ ម្ដង។",
+        "ច្នៃ ប្រឌិត ស័មភោ ប្រើ ឈើ ខ្ទមសែ ដែល ចោះ ពី ឈើ ដ ព ម្ដង ដើម្បី បាន ប្រអប់ ស្ករ មួយ។ "
+        "ស្បែក គោ ត្រូវ បាន ស្ករ ហើយ ផ្ចង់ ទៅ លើ ទទឹង ចុង ពីរ ដោយ ប្រើ ចំណង រណ្ដំ។",
+    ],
+
+    "ask_playing": [
+        "ស័មភោ លេង ដោយ ប្រើ ដៃ ទទេ ប្រ ការ ដំ។ ដៃ ស្ដាំ ដំ ក្បាល ធំ ឲ្យ ឮ សំឡេង ទន់ ថ្មើរ "
+        "ហើយ ដៃ ឆ្វេង ម្រាម ដៃ ដំ ក្បាល តូច ឲ្យ ស្ដាប់ ឮ សំឡេង ខ្ពស់ ជាង ។",
+        "ការ លេង ស័មភោ ត្រូវ ប្រើ ដៃ ទាំង ពីរ ដោយ ចម្លែក ពី គ្នា។ "
+        "ស្ករ ខ្មែរ នេះ ដើរ ជា ចង្វាក់ ចាក្រព ក្នុង ពិណ ពាទ្យ ខ្មែរ។",
+    ],
+
+    "ask_ceremonies": [
+        "ស័មភោ ត្រូវ ប្រើ ក្នុង ពិធី ជាច្រើន ដូច ជា ពិធី ចូល ឆ្នាំ ខ្មែរ ពិធី អាពាហ៍ពិពាហ៍ "
+        "ពិធី ខ្មោច ខ្មែរ និង ពិធីកម្ម ព្រះ ពុទ្ធ សាសនា នៅ វត្ត ។",
+        "ក្នុង ពិធីការ ស័មភោ ធ្វើ ជា អ្នក ដឹកនាំ ចង្វាក់ ហើយ ប្រើ ស្ទ្រង់ ចុះ ឡើង (ចំណង) "
+        "ដែល ជំ នួន ដំណើរ ការ ពិធី ទៅ ដំណាក់ ថ្មី ។",
+    ],
+
+    "ask_pinpeat": [
+        "ពិណ ពាទ្យ គឺ ជា វង់ ភ្លេង ចាក្រព ខ្មែរ ដែល មាន ស័មភោ រនាត រ៉ង ស្ករ ធំ ខ្នាក់ "
+        "ស្រឡៃ និង ភ្លុក ។ ស័មភោ ជា អ្នក ដឹកនាំ ចង្វាក់ ភ្លេង ទាំង មូល ក្នុង វង់ ភ្លេង នេះ ។",
+        "ស័មភោ ដើរ ជា អ្នក ចង្វាក់ ពិណ ពាទ្យ ។ ឧបករណ៍ ផ្សេង ៗ ដូច ជា រ នាត ឯក រ នាត ធុង "
+        "រ៉ង វ៉ង ភ្លុក ស្រឡៃ ត្រូវ ធ្វើ តាម ចង្វាក់ ដែល ស័មភោ កំណត់ ។",
+    ],
+
+    "ask_learning": [
+        "ជា ប្រពៃណី ការ រៀន ស័មភោ ចាប់ ផ្ដើម ពី អាយុ ៨–១០ ឆ្នាំ នៅ ក្នុង វត្ត "
+        "ឬ នៅ មហាវិទ្យាល័យ វិចិត្រ សិល្ប៍ ភ្នំ ពេញ (RUFA) ។ "
+        "ការ បង្ហាត់ ចូល ចិត្ត ប្រើ ប្រព័ន្ធ ឆ្ល ើយ ឆ្លង អ្នក គ្រូ-សិស្ស ។",
+        "ដើម្បី រៀន ស័មភោ ត្រូវ ជ្ញ ា ប ការ ដំ ជា មុន ហើយ ក្រោយ មក ទៅ រៀន ទំ នុក ចង្វាក់ "
+        "ពេញ ។ ខ្ញុំ ណែ នាំ ឱ្យ ទៅ ព្រះ ទ្រ RUFA ក្នុង ភ្នំ ពេញ ។",
+    ],
+
+    "ask_preservation": [
+        "ក្រោយ ពី ការ ប្រហារ ប្រជាជន ខ្មែរ ក្រហម (១៩៧៥–១៩៧៩) ស ន្ត តំ ណ តន្ត្រី ខ្មែរ ត្រូវ "
+        "ស ន្ដ ប ំ ឡើង វិញ ដោយ ជំ នួ យ ជា មួយ UNESCO ។ ស័មភោ ឥ ឡូ វ នេះ ជា ភ្នំ ជើង "
+        "ក្នុង បញ្ជី ស្នា ដៃ វប្ប ធម៌ អ រូបី UNESCO ។",
+        "អង្គ ការ Cambodian Living Arts និង RUFA ខ ច ំ ខ ន ការ អប់ រំ ស័មភោ ។ "
+        "ការ ថ ត ភ្លេង ស ង្គ្រោះ នា ពេ ល ខ្លះ ត្រូ វ ប ន្ថែ ម ដើម្បី ការ ព ណ៌ ។",
+    ],
+
+    "greeting": [
+        "សួស្ដី! ខ្ញុំ ជា អ្នក ជំ នាញ ស័មភោ ។ សូម សួរ ខ្ញុំ ពី ស្ករ ប្រពៃណី ខ្មែរ នេះ!",
+        "ជំ រាប សួរ! ស ូ ម ស្វាគ មន៍ ។ ខ្ញុំ ត្រៀម ខ្លួន ជ ួ យ អ្ន ក ស្វែ ង យល់ ពី ស័ម ភោ ។",
+    ],
+
+    "farewell": [
+        "លា ហើយ! ស ូ ម ឲ្យ ចង្វាក់ ស័ម ភោ ស្ថិ ត ជាមួ យ អ្ន ក ។",
+        "ជំ រាប លា! អ រ គុ ណ ដែ ល ស ិ ក្សា ពី ប ប្ប ធ ម៌ ខ្មែ រ ។",
+    ],
+}
+
+
+# Fix 7 — Rich media: Wikipedia / external links shown below bot replies.
+# Key = intent tag; value = dict with optional "links" list of {label, url}.
+RICH_MEDIA: dict[str, dict] = {
+    "ask_definition": {"links": [
+        {"label": "Samphor — Wikipedia", "url": "https://en.wikipedia.org/wiki/Samphor"},
+        {"label": "Music of Cambodia — Wikipedia", "url": "https://en.wikipedia.org/wiki/Music_of_Cambodia"},
+    ]},
+    "ask_history": {"links": [
+        {"label": "Khmer Empire — Wikipedia", "url": "https://en.wikipedia.org/wiki/Khmer_Empire"},
+        {"label": "Angkor Wat — Wikipedia", "url": "https://en.wikipedia.org/wiki/Angkor_Wat"},
+    ]},
+    "ask_material": {"links": [
+        {"label": "Jackfruit — Wikipedia", "url": "https://en.wikipedia.org/wiki/Jackfruit"},
+    ]},
+    "ask_playing": {"links": [
+        {"label": "Pinpeat ensemble — Wikipedia", "url": "https://en.wikipedia.org/wiki/Pinpeat"},
+    ]},
+    "ask_tuning": {"links": [
+        {"label": "Drum tuning — Wikipedia", "url": "https://en.wikipedia.org/wiki/Drum_tuning"},
+    ]},
+    "ask_ceremonies": {"links": [
+        {"label": "Khmer New Year — Wikipedia", "url": "https://en.wikipedia.org/wiki/Khmer_New_Year"},
+        {"label": "Buddhism in Cambodia — Wikipedia", "url": "https://en.wikipedia.org/wiki/Buddhism_in_Cambodia"},
+    ]},
+    "ask_pinpeat": {"links": [
+        {"label": "Pinpeat — Wikipedia", "url": "https://en.wikipedia.org/wiki/Pinpeat"},
+        {"label": "Cambodian classical dance — Wikipedia", "url": "https://en.wikipedia.org/wiki/Cambodian_classical_dance"},
+    ]},
+    "ask_compare": {"links": [
+        {"label": "Tabla — Wikipedia", "url": "https://en.wikipedia.org/wiki/Tabla"},
+        {"label": "Taiko — Wikipedia", "url": "https://en.wikipedia.org/wiki/Taiko"},
+    ]},
+    "ask_learning": {"links": [
+        {"label": "Royal University of Fine Arts — Wikipedia", "url": "https://en.wikipedia.org/wiki/Royal_University_of_Fine_Arts"},
+        {"label": "Cambodian Living Arts", "url": "https://cambodianlivingarts.org"},
+    ]},
+    "ask_preservation": {"links": [
+        {"label": "UNESCO Intangible Cultural Heritage", "url": "https://ich.unesco.org/en/RL/royal-ballet-of-cambodia-00097"},
+        {"label": "Khmer Rouge — Wikipedia", "url": "https://en.wikipedia.org/wiki/Khmer_Rouge"},
+    ]},
+}
+
+
 INTENT_LABELS: dict[str, str] = {
     "ask_definition":   "what the Samphor is",
     "ask_history":      "the history of the Samphor",
