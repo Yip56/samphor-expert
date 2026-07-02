@@ -166,10 +166,28 @@ INTENT_RESPONSES = {
 
 # FALLBACK_RESPONSE is used by ml_engine.py when the neural network's confidence
 # score is below 0.7 — meaning the model isn't sure which category fits best.
-# This is different from "out_of_scope": the model understood the message was
-# off-topic for "out_of_scope", but for FALLBACK it simply doesn't know.
 FALLBACK_RESPONSE = (
     "I'm not confident I understood that. Could you rephrase? "
     "You can ask about the Samphor's definition, history, materials, shape, playing technique, "
     "tuning, ceremonies, the Pinpeat ensemble, comparisons, learning, or preservation."
 )
+
+# INTENT_LABELS maps internal tag names to plain-English topic descriptions.
+# Used by ml_engine.py to build human-readable clarification questions when
+# the model is uncertain between two candidate intents.
+INTENT_LABELS: dict[str, str] = {
+    "ask_definition":   "what the Samphor is",
+    "ask_history":      "the history of the Samphor",
+    "ask_material":     "the materials it is made from",
+    "ask_shape":        "its physical shape and dimensions",
+    "ask_playing":      "how to play it",
+    "ask_tuning":       "how it is tuned",
+    "ask_ceremonies":   "its ceremonial and ritual uses",
+    "ask_pinpeat":      "the Pinpeat ensemble",
+    "ask_compare":      "how it compares to other drums",
+    "ask_learning":     "how to learn the Samphor",
+    "ask_preservation": "preservation and cultural survival efforts",
+    "greeting":         "a greeting",
+    "farewell":         "a farewell",
+    "out_of_scope":     "an off-topic question",
+}
