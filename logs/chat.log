@@ -169,3 +169,62 @@ AttributeError: 'MLEngine' object has no attribute '_model'
 2026-07-12 23:24:26  127.0.0.1 - - [12/Jul/2026 23:24:26] "POST /chat HTTP/1.1" 200 -
 2026-07-12 23:24:27  [c37f2c96] USER: 'How is it preserved?'  |  INTENT: ask_preservation  |  CONF: 61%  |  REPLY: 'After the Khmer Rouge genocide (1975–1979) decimated the artistic community, sur'
 2026-07-12 23:24:27  127.0.0.1 - - [12/Jul/2026 23:24:27] "POST /chat HTTP/1.1" 200 -
+2026-07-13 12:03:36  [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5000
+ * Running on http://192.168.1.50:5000
+2026-07-13 12:03:36  [33mPress CTRL+C to quit[0m
+2026-07-13 12:03:42  127.0.0.1 - - [13/Jul/2026 12:03:42] "GET / HTTP/1.1" 200 -
+2026-07-13 12:03:42  127.0.0.1 - - [13/Jul/2026 12:03:42] "[33mGET /favicon.ico HTTP/1.1[0m" 404 -
+2026-07-13 12:04:39  [c4e89125] Session reset
+2026-07-13 12:04:39  127.0.0.1 - - [13/Jul/2026 12:04:39] "POST /reset HTTP/1.1" 200 -
+2026-07-13 12:05:05  [c4e89125] Session reset
+2026-07-13 12:05:05  127.0.0.1 - - [13/Jul/2026 12:05:05] "POST /reset HTTP/1.1" 200 -
+2026-07-13 12:05:05  [c4e89125] Session reset
+2026-07-13 12:05:05  127.0.0.1 - - [13/Jul/2026 12:05:05] "POST /reset HTTP/1.1" 200 -
+2026-07-13 12:05:06  [c4e89125] Session reset
+2026-07-13 12:05:06  127.0.0.1 - - [13/Jul/2026 12:05:06] "POST /reset HTTP/1.1" 200 -
+2026-07-13 12:05:06  [c4e89125] Session reset
+2026-07-13 12:05:06  127.0.0.1 - - [13/Jul/2026 12:05:06] "POST /reset HTTP/1.1" 200 -
+2026-07-13 12:09:07  [c4e89125] USER: 'Im yip'  |  INTENT: fallback/clarify  |  CONF: 0%  |  REPLY: "Lovely to meet you, Yip! What do you do for a living, if you don't mind me askin"
+2026-07-13 12:09:07  127.0.0.1 - - [13/Jul/2026 12:09:07] "POST /chat HTTP/1.1" 200 -
+2026-07-13 12:38:00  [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5000
+ * Running on http://192.168.1.50:5000
+2026-07-13 12:38:00  [33mPress CTRL+C to quit[0m
+2026-07-13 12:38:03  127.0.0.1 - - [13/Jul/2026 12:38:03] "GET / HTTP/1.1" 200 -
+2026-07-13 12:38:03  127.0.0.1 - - [13/Jul/2026 12:38:03] "[33mGET /favicon.ico HTTP/1.1[0m" 404 -
+2026-07-13 12:38:06  [c4e89125] Session reset
+2026-07-13 12:38:06  127.0.0.1 - - [13/Jul/2026 12:38:06] "POST /reset HTTP/1.1" 200 -
+2026-07-13 12:38:06  [c4e89125] Session reset
+2026-07-13 12:38:06  127.0.0.1 - - [13/Jul/2026 12:38:06] "POST /reset HTTP/1.1" 200 -
+2026-07-13 12:38:06  [c4e89125] Session reset
+2026-07-13 12:38:06  127.0.0.1 - - [13/Jul/2026 12:38:06] "POST /reset HTTP/1.1" 200 -
+2026-07-13 12:38:52  127.0.0.1 - - [13/Jul/2026 12:38:52] "GET / HTTP/1.1" 200 -
+2026-07-13 12:38:52  127.0.0.1 - - [13/Jul/2026 12:38:52] "[33mGET /favicon.ico HTTP/1.1[0m" 404 -
+2026-07-13 12:44:01  127.0.0.1 - - [13/Jul/2026 12:44:01] "GET / HTTP/1.1" 200 -
+2026-07-13 12:44:03  127.0.0.1 - - [13/Jul/2026 12:44:03] "GET / HTTP/1.1" 200 -
+2026-07-13 12:44:03  127.0.0.1 - - [13/Jul/2026 12:44:03] "GET / HTTP/1.1" 200 -
+2026-07-13 12:44:04  127.0.0.1 - - [13/Jul/2026 12:44:04] "GET / HTTP/1.1" 200 -
+2026-07-13 12:46:55  127.0.0.1 - - [13/Jul/2026 12:46:55] "GET / HTTP/1.1" 200 -
+2026-07-13 12:55:53  [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5000
+ * Running on http://192.168.1.50:5000
+2026-07-13 12:55:53  [33mPress CTRL+C to quit[0m
+2026-07-13 12:55:56  127.0.0.1 - - [13/Jul/2026 12:55:56] "GET / HTTP/1.1" 200 -
+2026-07-13 12:56:46  [0f2dffe3] USER: 'How is the Samphor played?'  |  INTENT: fallback/clarify  |  CONF: 0%  |  REPLY: "Lovely to meet you, How Is! What do you do for a living, if you don't mind me as"
+2026-07-13 12:56:46  127.0.0.1 - - [13/Jul/2026 12:56:46] "POST /chat HTTP/1.1" 200 -
+2026-07-13 12:56:48  [0f2dffe3] Session reset
+2026-07-13 12:56:48  127.0.0.1 - - [13/Jul/2026 12:56:48] "POST /reset HTTP/1.1" 200 -
+2026-07-13 13:05:25  [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5000
+ * Running on http://192.168.1.50:5000
+2026-07-13 13:05:25  [33mPress CTRL+C to quit[0m
+2026-07-13 13:05:26  127.0.0.1 - - [13/Jul/2026 13:05:26] "GET / HTTP/1.1" 200 -
+2026-07-13 13:05:27  [0f2dffe3] USER: 'What is the Samphor drum?'  |  INTENT: fallback/clarify  |  CONF: 0%  |  REPLY: "Lovely to meet you, What Is! What do you do for a living, if you don't mind me a"
+2026-07-13 13:05:27  127.0.0.1 - - [13/Jul/2026 13:05:27] "POST /chat HTTP/1.1" 200 -
+2026-07-13 13:05:28  [0f2dffe3] Session reset
+2026-07-13 13:05:28  127.0.0.1 - - [13/Jul/2026 13:05:28] "POST /reset HTTP/1.1" 200 -

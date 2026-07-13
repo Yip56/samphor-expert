@@ -1,482 +1,959 @@
 <!DOCTYPE html>
-<!--
-  templates/index.html
-  ====================
-  Chat UI for the Samphor Expert chatbot.
-
-  Upgrades applied:
-    Fix 5  — Quick reply chips after every bot response
-    Fix 6  — Typing indicator ("..." animation) while server replies
-    Fix 8  — localStorage persistence: chat survives a page refresh
-    Fix 12 — Thumbs-up / thumbs-down feedback buttons on bot replies
-    Fix 16 — Voice input via Web Speech API (hidden if browser unsupported)
--->
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
+  <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Samphor Expert System</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700&family=DM+Sans:opsz,wght@9..40,400;9..40,500&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
-  <style>
-    * { box-sizing: border-box; margin: 0; padding: 0; }
+:root {
+  --red:        #CC0001;
+  --navy:       #032EA1;
+  --ink:        #160211;
+  --ink-mid:    rgba(22,2,17,0.55);
+  --ink-faint:  rgba(22,2,17,0.07);
+  --glass:      rgba(255,255,255,0.60);
+  --glass-b:    rgba(255,255,255,0.88);
+  --bub-shadow: 0 2px 12px rgba(3,46,161,0.08), 0 0 0 1px rgba(22,2,17,0.055);
+}
 
-    body {
-      font-family: 'Segoe UI', sans-serif;
-      background: #f4f1ec;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      min-height: 100vh;
-    }
+html, body {
+  height: 100%; overflow: hidden;
+  font-family: 'Manrope', sans-serif;
+  background: #f7f7fb;
+}
 
-    .chat-wrapper {
-      width: 100%;
-      max-width: 700px;
-      display: flex;
-      flex-direction: column;
-      height: 90vh;
-      background: #fff;
-      border-radius: 12px;
-      box-shadow: 0 4px 24px rgba(0,0,0,0.12);
-      overflow: hidden;
-    }
+/* ─── BUBBLE CANVAS ─────────────────────────────────────────────── */
+#bubble-canvas {
+  position: fixed; inset: 0;
+  pointer-events: none; z-index: 0;
+  overflow: hidden;
+}
+.b-bubble {
+  position: absolute;
+  border-radius: 50%;
+  will-change: transform, opacity, background;
+  animation: bubbleRise linear forwards;
+}
+@keyframes bubbleRise {
+  0%   { transform: translateY(0)   scale(1);    opacity: 0; }
+  8%   { opacity: 1; }
+  40%  { transform: translateY(calc(var(--dist) * 0.4)) scale(0.95); opacity: 0.85; }
+  55%  { transform: translateY(calc(var(--dist) * 0.55)) scale(0.7);  opacity: 0.4; }
+  100% { transform: translateY(var(--dist))             scale(0.08); opacity: 0; }
+}
 
-    header {
-      background: #8b3a0f;
-      color: #fff;
-      padding: 18px 24px;
-    }
-    header h1 { font-size: 1.3rem; }
-    header p  { font-size: 0.85rem; opacity: 0.8; margin-top: 2px; }
+/* ─── APP SHELL ─────────────────────────────────────────────────── */
+.app {
+  position: relative; z-index: 1;
+  width: 100%; max-width: 860px;
+  height: 100vh; margin: 0 auto;
+  display: flex; flex-direction: column;
+}
 
-    #chat-box {
-      flex: 1;
-      overflow-y: auto;
-      padding: 20px;
-      display: flex;
-      flex-direction: column;
-      gap: 8px;
-    }
+/* ─── INTRO OVERLAY ─────────────────────────────────────────────── */
+#intro-overlay {
+  position: fixed; inset: 0; z-index: 50;
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  background: #f7f7fb;
+  transition: opacity 0.6s ease;
+}
+#intro-overlay.hidden { opacity: 0; pointer-events: none; }
 
-    .msg {
-      max-width: 80%;
-      padding: 10px 15px;
-      border-radius: 18px;
-      line-height: 1.5;
-      font-size: 0.95rem;
-    }
-    .msg.user {
-      align-self: flex-end;
-      background: #8b3a0f;
-      color: #fff;
-      border-bottom-right-radius: 4px;
-    }
-    .msg.bot {
-      align-self: flex-start;
-      background: #f0e6d3;
-      color: #333;
-      border-bottom-left-radius: 4px;
-    }
+/* Icon wrapper */
+#intro-icon {
+  position: relative;
+  display: flex; align-items: center; justify-content: center;
+  opacity: 0;
+  transform: translateY(-60px);
+  transition: transform 0.7s cubic-bezier(0.34,1.56,0.64,1), opacity 0.5s ease;
+  margin-bottom: 40px;
+}
+#intro-icon.dropped {
+  opacity: 1;
+  transform: translateY(0);
+}
 
-    /* ── Fix 6: Typing indicator ── */
-    .typing-indicator {
-      align-self: flex-start;
-      background: #f0e6d3;
-      border-radius: 18px;
-      border-bottom-left-radius: 4px;
-      padding: 12px 18px;
-      display: none;
-      gap: 4px;
-    }
-    .typing-indicator span {
-      display: inline-block;
-      width: 7px;
-      height: 7px;
-      background: #8b3a0f;
-      border-radius: 50%;
-      animation: bounce 1.2s infinite;
-    }
-    .typing-indicator span:nth-child(2) { animation-delay: 0.2s; }
-    .typing-indicator span:nth-child(3) { animation-delay: 0.4s; }
-    @keyframes bounce {
-      0%, 60%, 100% { transform: translateY(0); }
-      30%           { transform: translateY(-6px); }
-    }
+/* The icon box itself */
+.intro-logo {
+  width: 72px; height: 72px;
+  background: linear-gradient(135deg, var(--navy) 0%, #1a4fd6 100%);
+  border-radius: 22px;
+  display: flex; align-items: center; justify-content: center;
+  box-shadow: 0 8px 32px rgba(3,46,161,0.30);
+  position: relative; z-index: 2;
+}
 
-    /* ── Fix 12: Feedback buttons ── */
-    .feedback-row {
-      align-self: flex-start;
-      display: flex;
-      gap: 2px;
-      margin-top: -2px;
-    }
-    .feedback-row .fb-btn {
-      background: none;
-      border: none;
-      font-size: 1rem;
-      cursor: pointer;
-      opacity: 0.3;
-      padding: 2px 6px;
-      border-radius: 8px;
-      transition: opacity 0.15s, background 0.15s;
-      line-height: 1;
-    }
-    .feedback-row .fb-btn:hover  { opacity: 0.9; background: #f0e6d3; }
-    .feedback-row .fb-btn.active { opacity: 1; }
-    .feedback-row.voted .fb-btn  { cursor: default; }
+/* Light beams */
+.beam-ring {
+  position: absolute;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(3,46,161,0.18) 0%, transparent 70%);
+  animation: none;
+  opacity: 0;
+  z-index: 1;
+}
+.beam-ring.active {
+  animation: beamPulse 1.8s ease-out forwards;
+}
+.beam-ring:nth-child(1) { width: 160px; height: 160px; animation-delay: 0s; }
+.beam-ring:nth-child(2) { width: 260px; height: 260px; animation-delay: 0.2s; background: radial-gradient(circle, rgba(204,0,1,0.10) 0%, transparent 70%); }
+.beam-ring:nth-child(3) { width: 380px; height: 380px; animation-delay: 0.4s; }
+@keyframes beamPulse {
+  0%   { opacity: 0;    transform: scale(0.3); }
+  30%  { opacity: 1; }
+  100% { opacity: 0;    transform: scale(1); }
+}
 
-    /* ── Fix 5: Quick reply chips ── */
-    .chips {
-      align-self: flex-start;
-      display: flex;
-      flex-wrap: wrap;
-      gap: 6px;
-      padding: 2px 0 4px;
-    }
-    .chips .chip {
-      background: #fff;
-      border: 1.5px solid #8b3a0f;
-      color: #8b3a0f;
-      border-radius: 16px;
-      padding: 5px 13px;
-      font-size: 0.82rem;
-      cursor: pointer;
-      font-family: inherit;
-      transition: background 0.15s, color 0.15s;
-    }
-    .chips .chip:hover {
-      background: #8b3a0f;
-      color: #fff;
-    }
+/* Typewriter text */
+#intro-text {
+  font-size: 15px; font-weight: 400;
+  color: var(--ink-mid); text-align: center;
+  min-height: 22px; max-width: 380px;
+  opacity: 0; transition: opacity 0.4s ease;
+  line-height: 1.6; margin-bottom: 0;
+}
+#intro-text.visible { opacity: 1; }
+#intro-text .cursor {
+  display: inline-block; width: 2px; height: 1em;
+  background: var(--navy); margin-left: 1px;
+  vertical-align: text-bottom;
+  animation: blink 0.8s step-end infinite;
+}
+@keyframes blink { 0%,100%{opacity:1} 50%{opacity:0} }
 
-    /* ── Input row ── */
-    .input-area {
-      display: flex;
-      padding: 14px 16px;
-      border-top: 1px solid #eee;
-      gap: 8px;
-      background: #fafafa;
-    }
-    #user-input {
-      flex: 1;
-      padding: 10px 14px;
-      border: 1px solid #ddd;
-      border-radius: 24px;
-      font-size: 0.95rem;
-      outline: none;
-    }
-    #user-input:focus { border-color: #8b3a0f; }
+/* Rapport questions in intro */
+#intro-questions {
+  margin-top: 28px;
+  display: flex; flex-direction: column; gap: 10px;
+  align-items: center; width: 100%; max-width: 440px;
+  opacity: 0; transition: opacity 0.4s ease;
+  padding: 0 24px;
+}
+#intro-questions.visible { opacity: 1; }
 
-    button {
-      background: #8b3a0f;
-      color: #fff;
-      border: none;
-      padding: 10px 20px;
-      border-radius: 24px;
-      cursor: pointer;
-      font-size: 0.9rem;
-    }
-    button:hover { background: #a84510; }
+.intro-input-wrap {
+  display: flex; gap: 8px; width: 100%;
+  background: #fff;
+  border: 1.5px solid rgba(3,46,161,0.22);
+  border-radius: 12px; padding: 6px 8px 6px 14px;
+  box-shadow: 0 2px 12px rgba(3,46,161,0.08);
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+.intro-input-wrap:focus-within {
+  border-color: rgba(3,46,161,0.45);
+  box-shadow: 0 2px 20px rgba(3,46,161,0.14), 0 0 0 3px rgba(3,46,161,0.06);
+}
+#intro-answer {
+  flex: 1; border: none; outline: none;
+  font-size: 14px; font-family: 'Manrope', sans-serif;
+  color: var(--ink); background: transparent; padding: 6px 0;
+}
+#intro-answer::placeholder { color: #9aa3b2; }
+#intro-submit {
+  background: var(--navy);
+  border: none; border-radius: 8px;
+  width: 34px; height: 34px;
+  display: flex; align-items: center; justify-content: center;
+  cursor: pointer;
+  box-shadow: 0 2px 8px rgba(3,46,161,0.28);
+  transition: background 0.18s, transform 0.12s;
+  flex-shrink: 0;
+}
+#intro-submit:hover { background: #1a4fd6; transform: scale(1.07); }
+#intro-submit:active { background: #021f80; transform: scale(0.95); }
 
-    #reset-btn    { background: #bbb; padding: 10px 14px; }
-    #reset-btn:hover { background: #999; }
+/* ─── LANDING ────────────────────────────────────────────────────── */
+#landing {
+  position: absolute; inset: 0;
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  padding: 40px 24px 20px;
+  transition: opacity 0.3s ease, transform 0.3s ease;
+}
+.logo-mark {
+  width: 52px; height: 52px;
+  background: linear-gradient(135deg, var(--navy) 0%, #1a4fd6 100%);
+  border-radius: 16px;
+  display: flex; align-items: center; justify-content: center;
+  margin-bottom: 20px; flex-shrink: 0;
+  box-shadow: 0 4px 20px rgba(3,46,161,0.26);
+}
+.heading {
+  font-size: 26px; font-weight: 500;
+  color: var(--ink); text-align: center;
+  margin-bottom: 6px; letter-spacing: -0.3px;
+}
+.subheading {
+  font-size: 14px; color: var(--ink-mid);
+  text-align: center; margin-bottom: 32px; font-weight: 400;
+}
+.suggestions-label {
+  font-size: 11px; font-weight: 700;
+  color: var(--ink-mid); text-transform: uppercase;
+  letter-spacing: 0.08em; margin-bottom: 12px; text-align: center;
+}
+.landing-chips {
+  display: flex; flex-wrap: wrap;
+  gap: 8px; justify-content: center; max-width: 620px;
+}
 
-    #download-btn { background: #4a7c59; padding: 10px 14px; font-size: 1rem; }
-    #download-btn:hover { background: #3a6347; }
+body.chat-active #landing {
+  opacity: 0; transform: translateY(-20px); pointer-events: none;
+}
 
-    /* Fix 7: Rich media links */
-    .media-links {
-      align-self: flex-start;
-      display: flex;
-      flex-direction: column;
-      gap: 3px;
-      padding: 0 0 4px;
-    }
-    .media-link {
-      font-size: 0.8rem;
-      color: #5a6ea8;
-      text-decoration: none;
-    }
-    .media-link:hover { text-decoration: underline; }
+/* ─── CHAT BOX ───────────────────────────────────────────────────── */
+#chat-box {
+  position: absolute; inset: 0;
+  display: flex; flex-direction: column;
+  overflow-y: auto; padding: 20px 24px 8px;
+  gap: 4px; opacity: 0; pointer-events: none;
+  transition: opacity 0.3s ease; scroll-behavior: smooth;
+}
+#chat-box::-webkit-scrollbar { width: 3px; }
+#chat-box::-webkit-scrollbar-thumb { background: rgba(3,46,161,0.15); border-radius: 3px; }
+body.chat-active #chat-box { opacity: 1; pointer-events: auto; }
 
-    /* Fix 16: Mic button */
-    #mic-btn { background: #5a6ea8; padding: 10px 14px; font-size: 1rem; }
-    #mic-btn:hover { background: #4a5e98; }
-    #mic-btn.listening { background: #c0392b; animation: pulse 1s infinite; }
-    @keyframes pulse {
-      0%, 100% { opacity: 1; }
-      50%       { opacity: 0.6; }
-    }
-  </style>
+/* ─── FLOATING ACTION BUTTONS ────────────────────────────────────── */
+.action-bar {
+  position: fixed; bottom: 96px;
+  right: calc(50% - 430px + 16px);
+  display: none; gap: 6px; z-index: 10;
+  flex-direction: column; align-items: flex-end;
+}
+body.chat-active .action-bar { display: flex; }
+@media (max-width: 900px) { .action-bar { right: 16px; } }
+
+.action-btn {
+  background: var(--glass); border: 1px solid var(--glass-b);
+  backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
+  border-radius: 20px; padding: 7px 14px;
+  font-family: 'Manrope', sans-serif; font-size: 11px;
+  font-weight: 600; color: var(--ink-mid);
+  letter-spacing: 0.06em; text-transform: uppercase;
+  cursor: pointer; white-space: nowrap;
+  box-shadow: 0 2px 8px rgba(3,46,161,0.10);
+  transition: background 0.18s, color 0.18s, box-shadow 0.18s, transform 0.12s;
+}
+.action-btn:hover {
+  background: #fff; color: var(--navy);
+  box-shadow: 0 4px 16px rgba(3,46,161,0.18); transform: translateY(-1px);
+}
+.action-btn:active { transform: translateY(0); }
+.action-btn.danger:hover { color: var(--red); }
+
+/* ─── MESSAGES ───────────────────────────────────────────────────── */
+@keyframes floatUp {
+  from { opacity: 0; transform: translateY(14px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+.msg-group {
+  display: flex; flex-direction: column;
+  max-width: 76%; gap: 4px;
+  animation: floatUp 0.28s cubic-bezier(0.22,0.61,0.36,1) both;
+}
+.msg-group.user { align-self: flex-end; align-items: flex-end; }
+.msg-group.bot  { align-self: flex-start; align-items: flex-start; }
+
+/* Bot label row — icon + text */
+.msg-label {
+  display: flex; align-items: center; gap: 5px;
+  font-size: 10px; font-weight: 600;
+  color: var(--ink-mid); text-transform: uppercase;
+  letter-spacing: 0.09em; padding: 0 2px;
+}
+.msg-label .bot-icon {
+  width: 16px; height: 16px;
+  background: linear-gradient(135deg, var(--navy) 0%, #1a4fd6 100%);
+  border-radius: 5px;
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0;
+}
+
+.msg-bubble {
+  padding: 11px 14px; font-size: 14px;
+  color: var(--ink); font-weight: 400;
+  line-height: 1.65; word-break: break-word;
+  box-shadow: var(--bub-shadow);
+  transition: box-shadow 0.2s;
+}
+.msg-bubble:hover { box-shadow: 0 4px 18px rgba(3,46,161,0.11), 0 0 0 1px rgba(22,2,17,0.07); }
+.msg-group.user .msg-bubble {
+  background: linear-gradient(135deg, rgba(204,0,1,0.07) 0%, rgba(204,0,1,0.03) 100%);
+  border: 1px solid rgba(204,0,1,0.14);
+  border-radius: 14px 14px 4px 14px;
+}
+.msg-group.bot .msg-bubble {
+  background: linear-gradient(135deg, rgba(3,46,161,0.07) 0%, rgba(3,46,161,0.03) 100%);
+  border: 1px solid rgba(3,46,161,0.12);
+  border-radius: 14px 14px 14px 4px;
+}
+.msg-bubble p { margin: 0 0 4px; }
+.msg-bubble p:last-child { margin-bottom: 0; }
+.msg-bubble ol { padding-left: 18px; margin: 4px 0; }
+.msg-bubble li { margin: 3px 0; }
+
+.confidence-score {
+  font-size: 10px; color: rgba(3,46,161,0.42);
+  padding: 0 2px; font-weight: 500;
+}
+
+/* ─── FEEDBACK ───────────────────────────────────────────────────── */
+.feedback-row { display: flex; gap: 2px; margin-top: 1px; }
+.fb-btn {
+  background: none; border: none; cursor: pointer;
+  width: 26px; height: 26px;
+  display: flex; align-items: center; justify-content: center;
+  border-radius: 6px; opacity: 0.28;
+  transition: opacity 0.15s, background 0.15s, transform 0.12s;
+}
+.fb-btn:hover { opacity: 0.75; background: var(--ink-faint); transform: scale(1.15); }
+.fb-btn.active { opacity: 1; }
+.feedback-row.voted .fb-btn { cursor: default; }
+
+/* ─── CHIPS ──────────────────────────────────────────────────────── */
+.chip {
+  background: var(--glass); border: 1px solid var(--glass-b);
+  backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
+  border-radius: 20px; padding: 9px 16px;
+  font-size: 13px; font-family: 'DM Sans', sans-serif;
+  color: var(--ink); cursor: pointer; font-weight: 500;
+  box-shadow: 0 1px 6px rgba(3,46,161,0.07), 0 0 0 1px rgba(22,2,17,0.05);
+  transition: background 0.18s, box-shadow 0.18s, transform 0.12s, border-color 0.18s;
+}
+.chip:hover {
+  background: #fff; border-color: rgba(3,46,161,0.24);
+  box-shadow: 0 3px 14px rgba(3,46,161,0.13); transform: translateY(-2px);
+}
+.chip:active { transform: translateY(0); }
+.reply-chips {
+  display: flex; flex-wrap: wrap; gap: 6px; padding: 4px 0 6px;
+  animation: floatUp 0.28s cubic-bezier(0.22,0.61,0.36,1) both;
+  animation-delay: 0.08s;
+}
+
+/* ─── TYPING INDICATOR ───────────────────────────────────────────── */
+.typing-indicator {
+  align-self: flex-start; display: none; gap: 5px; align-items: center;
+  padding: 12px 16px;
+  background: linear-gradient(135deg, rgba(3,46,161,0.07) 0%, rgba(3,46,161,0.03) 100%);
+  border: 1px solid rgba(3,46,161,0.12);
+  border-radius: 14px 14px 14px 4px;
+  box-shadow: var(--bub-shadow); margin-top: 2px;
+}
+.typing-indicator span {
+  display: inline-block; width: 7px; height: 7px;
+  background: rgba(3,46,161,0.42); border-radius: 50%;
+  animation: bounce 1.2s infinite;
+}
+.typing-indicator span:nth-child(2) { animation-delay: 0.2s; }
+.typing-indicator span:nth-child(3) { animation-delay: 0.4s; }
+@keyframes bounce {
+  0%,60%,100% { transform: translateY(0); }
+  30%          { transform: translateY(-6px); }
+}
+
+/* ─── MEDIA LINKS ────────────────────────────────────────────────── */
+.media-links { display: flex; flex-direction: column; gap: 3px; padding: 2px 0; }
+.media-link { font-size: 12px; color: var(--navy); text-decoration: none; opacity: 0.75; transition: opacity 0.15s; }
+.media-link:hover { opacity: 1; text-decoration: underline; }
+
+/* ─── INPUT BAR ──────────────────────────────────────────────────── */
+.content-area { flex: 1; position: relative; min-height: 0; overflow: hidden; }
+.input-bar-wrapper { flex-shrink: 0; padding: 10px 24px 24px; }
+.input-bar {
+  display: flex; align-items: center; gap: 2px;
+  background: #fff;
+  border: 1.5px solid rgba(22,2,17,0.20);
+  border-radius: 14px; padding: 6px 8px 6px 16px;
+  box-shadow: 0 2px 16px rgba(3,46,161,0.07);
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+.input-bar:focus-within {
+  border-color: rgba(3,46,161,0.40);
+  box-shadow: 0 2px 20px rgba(3,46,161,0.14), 0 0 0 3px rgba(3,46,161,0.06);
+}
+#user-input {
+  flex: 1; border: none; outline: none;
+  font-size: 14px; font-family: 'Manrope', sans-serif;
+  color: var(--ink); background: transparent; padding: 7px 0;
+}
+#user-input::placeholder { color: #9aa3b2; }
+#user-input:disabled { opacity: 0.45; }
+
+.icon-btn {
+  background: none; border: none; cursor: pointer;
+  width: 36px; height: 36px;
+  display: flex; align-items: center; justify-content: center;
+  border-radius: 8px; flex-shrink: 0; padding: 0;
+  transition: background 0.15s, transform 0.12s;
+}
+.icon-btn:hover { background: var(--ink-faint); transform: scale(1.08); }
+.icon-btn:active { transform: scale(0.96); }
+.icon-btn:disabled { opacity: 0.35; cursor: default; }
+.icon-btn:disabled:hover { background: none; transform: none; }
+
+#send-btn {
+  background: var(--navy); border-radius: 10px;
+  width: 36px; height: 36px;
+  box-shadow: 0 2px 8px rgba(3,46,161,0.28);
+  transition: background 0.18s, box-shadow 0.18s, transform 0.12s;
+}
+#send-btn:hover { background: #1a4fd6; box-shadow: 0 4px 16px rgba(3,46,161,0.40); transform: scale(1.08); }
+#send-btn:active { background: #021f80; transform: scale(0.95); box-shadow: 0 1px 6px rgba(3,46,161,0.20); }
+#send-btn:disabled { background: rgba(3,46,161,0.22); box-shadow: none; transform: none; }
+#send-btn svg { stroke: #fff; }
+
+#mic-btn.listening { animation: pulse 1.0s infinite; }
+#mic-btn.listening svg { stroke: var(--red); }
+@keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.45} }
+</style>
 </head>
 <body>
 
-<div class="chat-wrapper">
+<!-- Floating bubble canvas -->
+<div id="bubble-canvas" aria-hidden="true"></div>
 
-  <header>
-    <h1>Samphor Expert System</h1>
-    <p>Ask me anything about the traditional Cambodian drum</p>
-  </header>
-
-  <!-- Scrollable message area. JS populates this on load. -->
-  <div id="chat-box">
-    <!-- Fix 6: Typing indicator lives here, always last child -->
-    <div id="typing" class="typing-indicator">
-      <span></span><span></span><span></span>
+<!-- Intro overlay -->
+<div id="intro-overlay">
+  <div id="intro-icon">
+    <div class="beam-ring"></div>
+    <div class="beam-ring"></div>
+    <div class="beam-ring"></div>
+    <div class="intro-logo">
+      <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"/>
+      </svg>
     </div>
   </div>
+  <p id="intro-text"><span class="cursor"></span></p>
+  <div id="intro-questions">
+    <div class="intro-input-wrap">
+      <input id="intro-answer" type="text" autocomplete="off" placeholder="Type your answer..."/>
+      <button id="intro-submit" aria-label="Submit answer">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M5 12h14"/><path d="M12 5l7 7-7 7"/>
+        </svg>
+      </button>
+    </div>
+  </div>
+</div>
 
-  <div class="input-area">
-    <input id="user-input" type="text" placeholder="Ask about the Samphor..." autocomplete="off"/>
-    <!-- Fix 16: Mic button (hidden by JS if browser doesn't support Speech API) -->
-    <button id="mic-btn" title="Voice input">&#127908;</button>
-    <button id="send-btn">Send</button>
-    <button id="reset-btn" title="Reset session">&#8635;</button>
-    <button id="download-btn" title="Download chat history">&#8659;</button>
+<!-- Floating action buttons -->
+<div class="action-bar" aria-label="Chat actions">
+  <button id="download-btn" class="action-btn" title="Download chat history">Save history</button>
+  <button id="reset-btn"    class="action-btn danger" title="Reset session">Reset</button>
+</div>
+
+<div class="app">
+  <div class="content-area">
+
+    <!-- Landing -->
+    <div id="landing">
+      <div class="logo-mark" aria-hidden="true">
+        <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"/>
+        </svg>
+      </div>
+      <h1 class="heading">Ask our AI anything</h1>
+      <p class="subheading">Your guide to the Samphor, Cambodia's sacred barrel drum</p>
+      <p class="suggestions-label">Try asking</p>
+      <div class="landing-chips">
+        <button class="chip landing-chip">What is the Samphor drum?</button>
+        <button class="chip landing-chip">How is the Samphor played?</button>
+        <button class="chip landing-chip">What ceremonies use the Samphor?</button>
+        <button class="chip landing-chip">Tell me about Angkor and the Samphor</button>
+      </div>
+    </div>
+
+    <!-- Chat thread -->
+    <div id="chat-box">
+      <div id="typing" class="typing-indicator" aria-label="Samphor AI is typing" aria-live="polite">
+        <span></span><span></span><span></span>
+      </div>
+    </div>
+
   </div>
 
+  <!-- Input bar -->
+  <div class="input-bar-wrapper">
+    <div class="input-bar">
+      <input id="user-input" type="text"
+        placeholder="Ask me anything about the Samphor drum"
+        autocomplete="off" aria-label="Message input"/>
+      <button id="mic-btn" class="icon-btn" title="Voice input" aria-label="Toggle voice input">
+        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#56637e" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/>
+          <path d="M19 10v2a7 7 0 0 1-14 0v-2"/>
+          <line x1="12" y1="19" x2="12" y2="23"/>
+          <line x1="8"  y1="23" x2="16" y2="23"/>
+        </svg>
+      </button>
+      <button id="send-btn" class="icon-btn" title="Send message" aria-label="Send message">
+        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <path d="M5 12h14"/><path d="M12 5l7 7-7 7"/>
+        </svg>
+      </button>
+    </div>
+  </div>
 </div>
 
 <script>
-  const chatBox   = document.getElementById('chat-box');
-  const typing    = document.getElementById('typing');
-  const input     = document.getElementById('user-input');
-  const sendBtn   = document.getElementById('send-btn');
-  const resetBtn  = document.getElementById('reset-btn');
-  const micBtn    = document.getElementById('mic-btn');
+/* ═══════════════════════════════════════════════════════════════════
+   BUBBLE SYSTEM
+   Rising bubbles: random sizes, red+navy colours, fade+shrink at 40%
+═══════════════════════════════════════════════════════════════════ */
+(function() {
+  const canvas  = document.getElementById('bubble-canvas');
+  const COLORS  = [
+    'rgba(230,0,0,VAL)',
+    'rgba(10,60,210,VAL)',
+    'rgba(255,30,30,VAL)',
+    'rgba(30,90,235,VAL)',
+    'rgba(210,0,0,VAL)',
+    'rgba(0,50,200,VAL)',
+    'rgba(255,60,60,VAL)',
+    'rgba(50,100,255,VAL)',
+  ];
 
-  const STORAGE_KEY   = 'samphor-chat-v1';
-  const askedQuestions = new Set();   // tracks every message the user has sent
+  function spawnBubble() {
+    const size   = 80 + Math.random() * 240;    // 80–320 px — larger bubbles
+    const left   = Math.random() * 100;         // % across screen
+    const dur    = 7 + Math.random() * 9;       // 7–16 s
+    const blur   = 10 + Math.random() * 24;     // less blur = more visible
+    const op     = (0.22 + Math.random() * 0.24).toFixed(3); // 0.22–0.46
+    const colorT = COLORS[Math.floor(Math.random() * COLORS.length)].replace('VAL', op);
 
-  // ── Fix 6: Typing indicator ──────────────────────────────────────────────
-  function showTyping() {
-    chatBox.appendChild(typing);          // keep it as last child
-    typing.style.display = 'flex';
-    chatBox.scrollTop = chatBox.scrollHeight;
+    const dist   = -(window.innerHeight * 1.1); // travel distance upward
+
+    const el     = document.createElement('div');
+    el.className = 'b-bubble';
+    el.style.cssText = [
+      `width:${size}px`, `height:${size}px`,
+      `left:${left}%`,
+      `bottom:-${size}px`,
+      `background:radial-gradient(circle, ${colorT} 0%, transparent 72%)`,
+      `filter:blur(${blur}px)`,
+      `--dist:${dist}px`,
+      `animation-duration:${dur}s`,
+      `animation-delay:${(Math.random() * 3).toFixed(2)}s`,
+    ].join(';');
+
+    canvas.appendChild(el);
+    const totalMs = (dur + 3) * 1000;
+    setTimeout(() => el.remove(), totalMs);
   }
-  function hideTyping() {
-    typing.style.display = 'none';
-  }
 
-  // ── Message builders ─────────────────────────────────────────────────────
-  function addUserMessage(text) {
-    const div = document.createElement('div');
-    div.className = 'msg user';
-    div.textContent = text;
-    chatBox.insertBefore(div, typing);
-    chatBox.scrollTop = chatBox.scrollHeight;
-  }
+  // Spawn initial batch then keep feeding
+  for (let i = 0; i < 8; i++) setTimeout(spawnBubble, i * 600);
+  setInterval(spawnBubble, 1800);
+})();
 
-  function addBotMessage(text, chips, media) {
-    // Main reply bubble
-    const div = document.createElement('div');
-    div.className = 'msg bot';
-    div.textContent = text;
-    chatBox.insertBefore(div, typing);
+/* ═══════════════════════════════════════════════════════════════════
+   INTRO SEQUENCE
+═══════════════════════════════════════════════════════════════════ */
+const RAPPORT_QUESTIONS = [
+  { q: 'How are you doing today?',         key: 'mood'       },
+  { q: 'What is your name?',               key: 'name'       },
+  { q: 'What do you do for a living?',     key: 'occupation' },
+  { q: 'Have you heard of the Samphor drum before?', key: 'familiarity' },
+];
+const INTRO_DONE_KEY = 'samphor-intro-v1';
+const userData = {};
+let introQIdx  = 0;
 
-    // Fix 12: Feedback row
-    const fbRow = document.createElement('div');
-    fbRow.className = 'feedback-row';
-    ['up', 'down'].forEach(vote => {
-      const btn = document.createElement('button');
-      btn.className = 'fb-btn';
-      btn.title = vote === 'up' ? 'Helpful' : 'Not helpful';
-      btn.textContent = vote === 'up' ? '👍' : '👎';
-      btn.addEventListener('click', async () => {
-        if (fbRow.classList.contains('voted')) return;
-        fbRow.classList.add('voted');
-        btn.classList.add('active');
-        await fetch('/feedback', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ vote, text }),
-        }).catch(() => {});
-      });
-      fbRow.appendChild(btn);
-    });
-    chatBox.insertBefore(fbRow, typing);
+const introOverlay   = document.getElementById('intro-overlay');
+const introIcon      = document.getElementById('intro-icon');
+const introText      = document.getElementById('intro-text');
+const introQuestions = document.getElementById('intro-questions');
+const introAnswer    = document.getElementById('intro-answer');
+const introSubmit    = document.getElementById('intro-submit');
 
-    // Fix 5: Quick reply chips — filter out already-asked questions
-    if (chips && chips.length) {
-      const freshChips = chips.filter(c => !askedQuestions.has(c));
-      const allAsked   = freshChips.length === 0;
-      const toShow     = allAsked ? chips : freshChips;
+function delay(ms) { return new Promise(r => setTimeout(r, ms)); }
 
-      if (allAsked) {
-        const notice = document.createElement('div');
-        notice.className = 'msg bot';
-        notice.style.cssText = 'font-size:0.82rem;opacity:0.75;font-style:italic;';
-        notice.textContent = "You've explored all the suggested questions for this topic! Here they are again in case you'd like to revisit:";
-        chatBox.insertBefore(notice, typing);
+function typeText(el, text, speed = 28) {
+  return new Promise(resolve => {
+    el.classList.add('visible');
+    let i = 0;
+    const cursor = el.querySelector('.cursor');
+    el.textContent = '';
+    if (cursor) el.appendChild(cursor);
+    const interval = setInterval(() => {
+      if (i < text.length) {
+        const span = document.createElement('span');
+        span.textContent = text[i];
+        el.insertBefore(span, cursor);
+        i++;
+      } else {
+        clearInterval(interval);
+        resolve();
       }
+    }, speed);
+  });
+}
 
-      const chipsDiv = document.createElement('div');
-      chipsDiv.className = 'chips';
-      toShow.forEach(label => {
-        const chip = document.createElement('button');
-        chip.className = 'chip';
-        chip.textContent = label;
-        chip.addEventListener('click', () => {
-          chipsDiv.remove();
-          sendMessage(label);
-        });
-        chipsDiv.appendChild(chip);
-      });
-      chatBox.insertBefore(chipsDiv, typing);
+async function runIntroSequence() {
+  // Step 1: icon slides down
+  await delay(300);
+  introIcon.classList.add('dropped');
+  await delay(750);
+
+  // Step 2: light beams
+  introIcon.querySelectorAll('.beam-ring').forEach((r, i) => {
+    setTimeout(() => r.classList.add('active'), i * 200);
+  });
+  await delay(1200);
+
+  // Step 3: typewriter description
+  await typeText(introText, 'Your intelligent guide to the Samphor — Cambodia\'s sacred barrel drum.', 30);
+  await delay(600);
+
+  // Step 4: rapport questions
+  introQuestions.classList.add('visible');
+  await delay(200);
+  await askNextQuestion();
+}
+
+async function askNextQuestion() {
+  const q = RAPPORT_QUESTIONS[introQIdx];
+  introText.classList.remove('visible');
+  introText.textContent = '';
+  const cursor = document.createElement('span');
+  cursor.className = 'cursor';
+  introText.appendChild(cursor);
+  await delay(100);
+  await typeText(introText, q.q, 32);
+  introAnswer.value = '';
+  introAnswer.focus();
+}
+
+async function submitIntroAnswer() {
+  const val = introAnswer.value.trim();
+  if (!val) return;
+  userData[RAPPORT_QUESTIONS[introQIdx].key] = val;
+  introQIdx++;
+
+  if (introQIdx < RAPPORT_QUESTIONS.length) {
+    introAnswer.value = '';
+    await askNextQuestion();
+  } else {
+    // All done — dismiss intro, then greet by name + occupation
+    await delay(200);
+    introText.classList.remove('visible');
+    introText.textContent = '';
+    introQuestions.classList.remove('visible');
+    await delay(300);
+    try { localStorage.setItem(INTRO_DONE_KEY, JSON.stringify(userData)); } catch(e) {}
+    dismissIntro();
+
+    // Build a personalised greeting using only name + occupation
+    const name = (userData.name || '').trim();
+    const occ  = (userData.occupation || '').trim();
+    let greeting = name ? `Hello, ${name}!` : 'Hello!';
+    greeting += ' I\'m the Samphor AI — your guide to Cambodia\'s sacred barrel drum.';
+    if (occ) {
+      greeting += ` As a ${occ}, you might find the instrument's deep ties to Cambodian court music and ceremonial ritual especially fascinating.`;
     }
+    greeting += ' What would you like to know?';
 
-    // Fix 7: Rich media links
-    if (media && media.links && media.links.length) {
-      const linksDiv = document.createElement('div');
-      linksDiv.className = 'media-links';
-      media.links.forEach(({ label, url }) => {
-        const a = document.createElement('a');
-        a.href = url;
-        a.target = '_blank';
-        a.rel = 'noopener noreferrer';
-        a.className = 'media-link';
-        a.textContent = '🔗 ' + label;
-        linksDiv.appendChild(a);
-      });
-      chatBox.insertBefore(linksDiv, typing);
+    setTimeout(() => {
+      enterChatState();
+      addBotMessage(greeting, [
+        'What is the Samphor drum?',
+        'How is the Samphor played?',
+        'What ceremonies use the Samphor?',
+      ], null);
+    }, 700);
+  }
+}
+
+function dismissIntro() {
+  introOverlay.classList.add('hidden');
+  setTimeout(() => { introOverlay.style.display = 'none'; }, 650);
+}
+
+introSubmit.addEventListener('click', submitIntroAnswer);
+introAnswer.addEventListener('keydown', e => {
+  if (e.key === 'Enter') { e.preventDefault(); submitIntroAnswer(); }
+});
+
+/* ═══════════════════════════════════════════════════════════════════
+   MAIN CHAT LOGIC
+═══════════════════════════════════════════════════════════════════ */
+const chatBox  = document.getElementById('chat-box');
+const typing   = document.getElementById('typing');
+const input    = document.getElementById('user-input');
+const sendBtn  = document.getElementById('send-btn');
+const resetBtn = document.getElementById('reset-btn');
+const micBtn   = document.getElementById('mic-btn');
+
+const STORAGE_KEY    = 'samphor-chat-v1';
+const askedQuestions = new Set();
+
+function enterChatState() { document.body.classList.add('chat-active'); }
+function exitChatState()  { document.body.classList.remove('chat-active'); }
+
+function showTyping() {
+  chatBox.appendChild(typing);
+  typing.style.display = 'flex';
+  chatBox.scrollTop = chatBox.scrollHeight;
+}
+function hideTyping() { typing.style.display = 'none'; }
+
+function escapeHTML(str) {
+  return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+function parseMessageText(text) {
+  const escaped = escapeHTML(text);
+  if (/^\d+\.\s/m.test(escaped)) {
+    const lines = escaped.split(/\n/);
+    let html = '', inList = false;
+    for (const line of lines) {
+      if (/^\d+\.\s/.test(line)) {
+        if (!inList) { html += '<ol>'; inList = true; }
+        html += '<li>' + line.replace(/^\d+\.\s/,'') + '</li>';
+      } else {
+        if (inList) { html += '</ol>'; inList = false; }
+        if (line.trim()) html += '<p>' + line + '</p>';
+      }
     }
-
-    chatBox.scrollTop = chatBox.scrollHeight;
+    if (inList) html += '</ol>';
+    return html;
   }
+  return escaped.replace(/\n/g,'<br>');
+}
 
-  // ── Fix 8: localStorage persistence ──────────────────────────────────────
-  function saveToStorage() {
-    const msgs = [...chatBox.querySelectorAll('.msg')].map(m => ({
-      role: m.classList.contains('user') ? 'user' : 'bot',
-      text: m.textContent.trim(),
-    }));
-    try { localStorage.setItem(STORAGE_KEY, JSON.stringify(msgs)); } catch(e) {}
+const BOT_ICON_HTML = `<span class="bot-icon"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"/></svg></span>`;
+const SVG_THUMB_UP  = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#56637e" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 9V5a3 3 0 0 0-3-3l-4 9v11h11.28a2 2 0 0 0 2-1.7l1.38-9a2 2 0 0 0-2-2.3H14z"/><path d="M7 22H4a2 2 0 0 1-2-2v-7a2 2 0 0 1 2-2h3"/></svg>`;
+const SVG_THUMB_DN  = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#56637e" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 15v4a3 3 0 0 0 3 3l4-9V2H5.72a2 2 0 0 0-2 1.7l-1.38 9a2 2 0 0 0 2 2.3H10z"/><path d="M17 2h2.67A2.31 2.31 0 0 1 22 4v7a2.31 2.31 0 0 1-2.33 2H17"/></svg>`;
+
+function addUserMessage(text) {
+  const group = document.createElement('div');
+  group.className = 'msg-group user';
+  group.innerHTML =
+    '<div class="msg-label">Me</div>' +
+    '<div class="msg-bubble">' + escapeHTML(text) + '</div>';
+  chatBox.insertBefore(group, typing);
+  chatBox.scrollTop = chatBox.scrollHeight;
+}
+
+function addBotMessage(text, chips, media, confidence) {
+  const group = document.createElement('div');
+  group.className = 'msg-group bot';
+
+  let html =
+    '<div class="msg-label">' + BOT_ICON_HTML + 'Samphor AI</div>' +
+    '<div class="msg-bubble">' + parseMessageText(text) + '</div>';
+
+  if (confidence !== undefined && confidence !== null) {
+    html += '<div class="confidence-score">' + Math.round(confidence) + '% confidence</div>';
   }
+  html +=
+    '<div class="feedback-row">' +
+      '<button class="fb-btn" data-vote="up" title="Helpful">'     + SVG_THUMB_UP + '</button>' +
+      '<button class="fb-btn" data-vote="down" title="Not helpful">' + SVG_THUMB_DN + '</button>' +
+    '</div>';
 
-  function loadFromStorage() {
-    try {
-      const saved = localStorage.getItem(STORAGE_KEY);
-      if (!saved) return false;
-      const msgs = JSON.parse(saved);
-      if (!msgs.length) return false;
-      msgs.forEach(({ role, text }) => {
-        if (role === 'user') {
-          addUserMessage(text);
-          askedQuestions.add(text);   // rebuild tracking from saved history
-        } else {
-          addBotMessage(text, [], null);   // no chips/media for restored messages
-        }
-      });
-      return true;
-    } catch(e) { return false; }
-  }
+  group.innerHTML = html;
+  chatBox.insertBefore(group, typing);
 
-  function clearStorage() {
-    try { localStorage.removeItem(STORAGE_KEY); } catch(e) {}
-  }
-
-  // ── Send message ──────────────────────────────────────────────────────────
-  async function sendMessage(overrideText) {
-    const text = typeof overrideText === 'string' ? overrideText : input.value.trim();
-    if (!text) return;
-
-    askedQuestions.add(text);   // remember every question sent
-    addUserMessage(text);
-    input.value = '';
-    input.disabled = true;
-    sendBtn.disabled = true;
-    showTyping();
-
-    try {
-      const res  = await fetch('/chat', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ message: text }),
-      });
-      const data = await res.json();
-      hideTyping();
-      addBotMessage(data.response, data.chips || [], data.media || null);
-      saveToStorage();
-    } catch(err) {
-      hideTyping();
-      addBotMessage('Error connecting to the server. Please try again.', []);
-    } finally {
-      input.disabled = false;
-      sendBtn.disabled = false;
-      input.focus();
-    }
-  }
-
-  sendBtn.addEventListener('click', sendMessage);
-  input.addEventListener('keydown', e => { if (e.key === 'Enter') sendMessage(); });
-
-  // ── Download history ──────────────────────────────────────────────────────
-  function downloadHistory() {
-    const messages = chatBox.querySelectorAll('.msg');
-    if (!messages.length) { alert('No chat history to download yet.'); return; }
-    const lines = [];
-    const now = new Date().toLocaleString();
-    lines.push('Samphor Expert System — Chat History');
-    lines.push('Downloaded: ' + now);
-    lines.push('='.repeat(50));
-    lines.push('');
-    messages.forEach(msg => {
-      const role = msg.classList.contains('user') ? 'You' : 'Samphor Expert';
-      lines.push(role + ': ' + msg.textContent.trim());
-      lines.push('');
+  const fbRow = group.querySelector('.feedback-row');
+  fbRow.querySelectorAll('.fb-btn').forEach(btn => {
+    btn.addEventListener('click', async () => {
+      if (fbRow.classList.contains('voted')) return;
+      fbRow.classList.add('voted');
+      btn.classList.add('active');
+      await fetch('/feedback', {
+        method: 'POST', headers: {'Content-Type':'application/json'},
+        body: JSON.stringify({ vote: btn.dataset.vote, text }),
+      }).catch(() => {});
     });
-    const blob = new Blob([lines.join('\n')], { type: 'text/plain;charset=utf-8' });
-    const url  = URL.createObjectURL(blob);
-    const ts   = new Date().toISOString().slice(0,16).replace('T','_').replace(/:/g,'-');
-    const a    = document.createElement('a');
-    a.href = url; a.download = 'samphor-chat-' + ts + '.txt';
-    document.body.appendChild(a); a.click();
-    document.body.removeChild(a); URL.revokeObjectURL(url);
-  }
-  document.getElementById('download-btn').addEventListener('click', downloadHistory);
-
-  // ── Reset ────────────────────────────────────────────────────────────────
-  resetBtn.addEventListener('click', async () => {
-    const res  = await fetch('/reset', { method: 'POST' });
-    const data = await res.json();
-    [...chatBox.querySelectorAll('.msg, .feedback-row, .chips')].forEach(el => el.remove());
-    clearStorage();
-    askedQuestions.clear();   // reset chip tracking for new session
-    addBotMessage(data.greeting, [], null);
   });
 
-  // ── Fix 16: Voice input ───────────────────────────────────────────────────
-  const SpeechRec = window.SpeechRecognition || window.webkitSpeechRecognition;
-  if (!SpeechRec) {
-    micBtn.style.display = 'none';
-  } else {
-    const rec = new SpeechRec();
-    rec.lang = 'en-US';
-    rec.interimResults = false;
-    rec.onresult = e => {
-      input.value = e.results[0][0].transcript;
-      micBtn.classList.remove('listening');
-      input.focus();
-    };
-    rec.onend  = () => micBtn.classList.remove('listening');
-    rec.onerror = () => micBtn.classList.remove('listening');
-    micBtn.addEventListener('click', () => {
-      if (micBtn.classList.contains('listening')) {
-        rec.stop();
-      } else {
-        rec.start();
-        micBtn.classList.add('listening');
-      }
+  if (chips && chips.length) {
+    const freshChips = chips.filter(c => !askedQuestions.has(c));
+    const allAsked   = freshChips.length === 0;
+    const toShow     = allAsked ? chips : freshChips;
+    if (allAsked) {
+      const notice = document.createElement('div');
+      notice.className = 'msg-group bot';
+      notice.innerHTML = '<div class="msg-bubble" style="font-size:13px;opacity:0.72;font-style:italic;">You\'ve explored all suggestions for this topic. Here they are again to revisit.</div>';
+      chatBox.insertBefore(notice, typing);
+    }
+    const chipsDiv = document.createElement('div');
+    chipsDiv.className = 'reply-chips';
+    toShow.forEach(label => {
+      const chip = document.createElement('button');
+      chip.className = 'chip'; chip.textContent = label;
+      chip.addEventListener('click', () => { chipsDiv.remove(); sendMessage(label); });
+      chipsDiv.appendChild(chip);
     });
+    chatBox.insertBefore(chipsDiv, typing);
   }
 
-  // ── Init: restore saved chat or show fresh greeting ───────────────────────
-  if (!loadFromStorage()) {
-    addBotMessage(
-      'Hello! I am the Samphor Expert — your guide to Cambodia\'s iconic drum. Before we dive in, may I know your name?',
-      [], null
-    );
+  if (media && media.links && media.links.length) {
+    const linksDiv = document.createElement('div');
+    linksDiv.className = 'media-links';
+    media.links.forEach(({ label, url }) => {
+      const a = document.createElement('a');
+      a.href = url; a.target = '_blank'; a.rel = 'noopener noreferrer';
+      a.className = 'media-link'; a.textContent = label;
+      linksDiv.appendChild(a);
+    });
+    chatBox.insertBefore(linksDiv, typing);
   }
+
+  chatBox.scrollTop = chatBox.scrollHeight;
+}
+
+// ── localStorage ────────────────────────────────────────────────────────────
+function saveToStorage() {
+  const msgs = [...chatBox.querySelectorAll('.msg-group')].map(g => ({
+    role: g.classList.contains('user') ? 'user' : 'bot',
+    text: g.querySelector('.msg-bubble') ? g.querySelector('.msg-bubble').textContent.trim() : '',
+  })).filter(m => m.text);
+  try { localStorage.setItem(STORAGE_KEY, JSON.stringify(msgs)); } catch(e) {}
+}
+
+function loadFromStorage() {
+  try {
+    const saved = localStorage.getItem(STORAGE_KEY);
+    if (!saved) return false;
+    const msgs = JSON.parse(saved);
+    if (!msgs.length) return false;
+    msgs.forEach(({ role, text }) => {
+      if (role === 'user') { addUserMessage(text); askedQuestions.add(text); }
+      else                  { addBotMessage(text, [], null); }
+    });
+    return true;
+  } catch(e) { return false; }
+}
+
+function clearStorage() { try { localStorage.removeItem(STORAGE_KEY); } catch(e) {} }
+
+// ── Send ────────────────────────────────────────────────────────────────────
+async function sendMessage(overrideText) {
+  const text = typeof overrideText === 'string' ? overrideText : input.value.trim();
+  if (!text) return;
+  enterChatState();
+  askedQuestions.add(text);
+  input.value = '';
+  addUserMessage(text);
+  input.disabled = true; sendBtn.disabled = true;
+  showTyping();
+  try {
+    const res  = await fetch('/chat', {
+      method: 'POST', headers: {'Content-Type':'application/json'},
+      body: JSON.stringify({ message: text }),
+    });
+    const data = await res.json();
+    hideTyping();
+    if (res.status === 429) {
+      addBotMessage(data.response || 'Too many messages — please wait a moment.', [], null);
+    } else {
+      addBotMessage(data.response, data.chips || [], data.media || null, data.confidence);
+      saveToStorage();
+    }
+  } catch(err) {
+    hideTyping();
+    addBotMessage('Could not reach the server. Check your connection and try again.', [], null);
+  } finally {
+    input.disabled = false; sendBtn.disabled = false; input.focus();
+  }
+}
+
+sendBtn.addEventListener('click', sendMessage);
+input.addEventListener('keydown', e => {
+  if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendMessage(); }
+});
+document.querySelectorAll('.landing-chip').forEach(chip => {
+  chip.addEventListener('click', () => sendMessage(chip.textContent));
+});
+
+// ── Download ────────────────────────────────────────────────────────────────
+document.getElementById('download-btn').addEventListener('click', () => {
+  const groups = chatBox.querySelectorAll('.msg-group');
+  if (!groups.length) return;
+  const lines = ['Samphor Expert System — Chat History', 'Downloaded: ' + new Date().toLocaleString(), '='.repeat(50), ''];
+  groups.forEach(g => {
+    const label  = g.querySelector('.msg-label');
+    const bubble = g.querySelector('.msg-bubble');
+    if (label && bubble) { lines.push(label.textContent.trim() + ': ' + bubble.textContent.trim(), ''); }
+  });
+  const blob = new Blob([lines.join('\n')], {type:'text/plain;charset=utf-8'});
+  const url  = URL.createObjectURL(blob);
+  const ts   = new Date().toISOString().slice(0,16).replace('T','_').replace(/:/g,'-');
+  const a    = document.createElement('a');
+  a.href = url; a.download = 'samphor-chat-' + ts + '.txt';
+  document.body.appendChild(a); a.click(); document.body.removeChild(a); URL.revokeObjectURL(url);
+});
+
+// ── Reset — clears chat AND replays intro ───────────────────────────────────
+resetBtn.addEventListener('click', async () => {
+  try {
+    await fetch('/reset', { method: 'POST' }).catch(() => {});
+    [...chatBox.querySelectorAll('.msg-group, .reply-chips, .media-links')].forEach(el => el.remove());
+    clearStorage();
+    localStorage.removeItem(INTRO_DONE_KEY);
+    askedQuestions.clear();
+    exitChatState();
+    // Reset intro elements and replay
+    introQIdx = 0;
+    introIcon.classList.remove('dropped');
+    introOverlay.classList.remove('hidden');
+    introOverlay.style.display = '';
+    introText.classList.remove('visible');
+    introText.textContent = '';
+    const cur = document.createElement('span'); cur.className = 'cursor';
+    introText.appendChild(cur);
+    introQuestions.classList.remove('visible');
+    introAnswer.value = '';
+    introIcon.querySelectorAll('.beam-ring').forEach(r => r.classList.remove('active'));
+    await delay(200);
+    runIntroSequence();
+  } catch(e) {
+    addBotMessage('Error resetting. Please refresh the page.', [], null);
+    enterChatState();
+  }
+});
+
+// ── Voice input ─────────────────────────────────────────────────────────────
+const SpeechRec = window.SpeechRecognition || window.webkitSpeechRecognition;
+if (!SpeechRec) {
+  micBtn.style.display = 'none';
+} else {
+  const rec = new SpeechRec();
+  rec.lang = 'en-US'; rec.interimResults = false;
+  rec.onresult = e => { input.value = e.results[0][0].transcript; micBtn.classList.remove('listening'); input.focus(); };
+  rec.onend  = () => micBtn.classList.remove('listening');
+  rec.onerror = () => micBtn.classList.remove('listening');
+  micBtn.addEventListener('click', () => {
+    if (micBtn.classList.contains('listening')) { rec.stop(); }
+    else { rec.start(); micBtn.classList.add('listening'); }
+  });
+}
+
+// ── Init ────────────────────────────────────────────────────────────────────
+const hasHistory   = loadFromStorage();
+const introDone    = localStorage.getItem(INTRO_DONE_KEY);
+
+if (hasHistory) {
+  // Returning user with history — skip intro, go to chat
+  introOverlay.style.display = 'none';
+  enterChatState();
+} else if (introDone) {
+  // Intro done before but no history — show landing
+  introOverlay.style.display = 'none';
+} else {
+  // First-time user — run intro
+  runIntroSequence();
+}
 </script>
 </body>
 </html>
