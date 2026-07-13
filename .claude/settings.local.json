@@ -34,7 +34,9 @@
       "PowerShell(Get-ChildItem -Path C:\\\\Users\\\\YLX\\\\samphor-expert -Force | Select-Object Name, @{Name=\"Type\";Expression={if\\($_.PSIsContainer\\){\"Folder\"}else{\"File\"}}})",
       "PowerShell(Get-ChildItem -Path C:\\\\Users\\\\YLX\\\\samphor-expert -Recurse -Force | Where-Object {$_.PSIsContainer} | Select-Object FullName | Sort-Object FullName)",
       "PowerShell(head *)",
-      "Bash(Get-ChildItem *)"
+      "Bash(Get-ChildItem *)",
+      "Bash(python -c \"import json; data=json.load\\(open\\('data/intents.json',encoding='utf-8'\\)\\); tags=[i['tag'] for i in data['intents']]; print\\(f'Valid JSON — {len\\(data[\\\\\"intents\\\\\"]\\)} intents: {tags}'\\)\")",
+      "Bash(python -c ' *)"
     ]
   }
 }

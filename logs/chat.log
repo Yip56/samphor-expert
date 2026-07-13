@@ -1,0 +1,171 @@
+2026-07-12 23:02:30  [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5000
+ * Running on http://192.168.1.50:5000
+2026-07-12 23:02:30  [33mPress CTRL+C to quit[0m
+2026-07-12 23:03:33  [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5000
+ * Running on http://192.168.1.50:5000
+2026-07-12 23:03:33  [33mPress CTRL+C to quit[0m
+2026-07-12 23:03:40  127.0.0.1 - - [12/Jul/2026 23:03:40] "GET / HTTP/1.1" 200 -
+2026-07-12 23:03:40  127.0.0.1 - - [12/Jul/2026 23:03:40] "[33mGET /favicon.ico HTTP/1.1[0m" 404 -
+2026-07-12 23:03:44  127.0.0.1 - - [12/Jul/2026 23:03:44] "GET / HTTP/1.1" 200 -
+2026-07-12 23:04:29  Exception on /chat [POST]
+Traceback (most recent call last):
+  File "C:\Users\YLX\samphor-expert\.venv\Lib\site-packages\flask\app.py", line 1511, in wsgi_app
+    response = self.full_dispatch_request()
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\YLX\samphor-expert\.venv\Lib\site-packages\flask\app.py", line 919, in full_dispatch_request
+    rv = self.handle_user_exception(e)
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\YLX\samphor-expert\.venv\Lib\site-packages\flask\app.py", line 917, in full_dispatch_request
+    rv = self.dispatch_request()
+         ^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\YLX\samphor-expert\.venv\Lib\site-packages\flask\app.py", line 902, in dispatch_request
+    return self.ensure_sync(self.view_functions[rule.endpoint])(**view_args)  # type: ignore[no-any-return]
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\YLX\samphor-expert\app.py", line 187, in chat
+    reply, updated_context = _get_reply(user_message, context)
+                             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\YLX\samphor-expert\app.py", line 104, in _get_reply
+    if _ml._model is not None:
+       ^^^^^^^^^^
+AttributeError: 'MLEngine' object has no attribute '_model'
+2026-07-12 23:04:29  127.0.0.1 - - [12/Jul/2026 23:04:29] "[35m[1mPOST /chat HTTP/1.1[0m" 500 -
+2026-07-12 23:04:40  Exception on /chat [POST]
+Traceback (most recent call last):
+  File "C:\Users\YLX\samphor-expert\.venv\Lib\site-packages\flask\app.py", line 1511, in wsgi_app
+    response = self.full_dispatch_request()
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\YLX\samphor-expert\.venv\Lib\site-packages\flask\app.py", line 919, in full_dispatch_request
+    rv = self.handle_user_exception(e)
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\YLX\samphor-expert\.venv\Lib\site-packages\flask\app.py", line 917, in full_dispatch_request
+    rv = self.dispatch_request()
+         ^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\YLX\samphor-expert\.venv\Lib\site-packages\flask\app.py", line 902, in dispatch_request
+    return self.ensure_sync(self.view_functions[rule.endpoint])(**view_args)  # type: ignore[no-any-return]
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\YLX\samphor-expert\app.py", line 187, in chat
+    reply, updated_context = _get_reply(user_message, context)
+                             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\YLX\samphor-expert\app.py", line 104, in _get_reply
+    if _ml._model is not None:
+       ^^^^^^^^^^
+AttributeError: 'MLEngine' object has no attribute '_model'
+2026-07-12 23:04:40  127.0.0.1 - - [12/Jul/2026 23:04:40] "[35m[1mPOST /chat HTTP/1.1[0m" 500 -
+2026-07-12 23:05:07  127.0.0.1 - - [12/Jul/2026 23:05:07] "GET / HTTP/1.1" 200 -
+2026-07-12 23:05:12  Exception on /chat [POST]
+Traceback (most recent call last):
+  File "C:\Users\YLX\samphor-expert\.venv\Lib\site-packages\flask\app.py", line 1511, in wsgi_app
+    response = self.full_dispatch_request()
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\YLX\samphor-expert\.venv\Lib\site-packages\flask\app.py", line 919, in full_dispatch_request
+    rv = self.handle_user_exception(e)
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\YLX\samphor-expert\.venv\Lib\site-packages\flask\app.py", line 917, in full_dispatch_request
+    rv = self.dispatch_request()
+         ^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\YLX\samphor-expert\.venv\Lib\site-packages\flask\app.py", line 902, in dispatch_request
+    return self.ensure_sync(self.view_functions[rule.endpoint])(**view_args)  # type: ignore[no-any-return]
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\YLX\samphor-expert\app.py", line 187, in chat
+    reply, updated_context = _get_reply(user_message, context)
+                             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\YLX\samphor-expert\app.py", line 104, in _get_reply
+    if _ml._model is not None:
+       ^^^^^^^^^^
+AttributeError: 'MLEngine' object has no attribute '_model'
+2026-07-12 23:05:12  127.0.0.1 - - [12/Jul/2026 23:05:12] "[35m[1mPOST /chat HTTP/1.1[0m" 500 -
+2026-07-12 23:05:30  127.0.0.1 - - [12/Jul/2026 23:05:30] "GET / HTTP/1.1" 200 -
+2026-07-12 23:05:31  127.0.0.1 - - [12/Jul/2026 23:05:31] "[33mGET /favicon.ico HTTP/1.1[0m" 404 -
+2026-07-12 23:05:39  127.0.0.1 - - [12/Jul/2026 23:05:39] "GET / HTTP/1.1" 200 -
+2026-07-12 23:05:39  127.0.0.1 - - [12/Jul/2026 23:05:39] "GET / HTTP/1.1" 200 -
+2026-07-12 23:05:39  127.0.0.1 - - [12/Jul/2026 23:05:39] "GET / HTTP/1.1" 200 -
+2026-07-12 23:05:41  [9aa4b058] Session reset
+2026-07-12 23:05:41  127.0.0.1 - - [12/Jul/2026 23:05:41] "POST /reset HTTP/1.1" 200 -
+2026-07-12 23:05:48  Exception on /chat [POST]
+Traceback (most recent call last):
+  File "C:\Users\YLX\samphor-expert\.venv\Lib\site-packages\flask\app.py", line 1511, in wsgi_app
+    response = self.full_dispatch_request()
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\YLX\samphor-expert\.venv\Lib\site-packages\flask\app.py", line 919, in full_dispatch_request
+    rv = self.handle_user_exception(e)
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\YLX\samphor-expert\.venv\Lib\site-packages\flask\app.py", line 917, in full_dispatch_request
+    rv = self.dispatch_request()
+         ^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\YLX\samphor-expert\.venv\Lib\site-packages\flask\app.py", line 902, in dispatch_request
+    return self.ensure_sync(self.view_functions[rule.endpoint])(**view_args)  # type: ignore[no-any-return]
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\YLX\samphor-expert\app.py", line 187, in chat
+    reply, updated_context = _get_reply(user_message, context)
+                             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\YLX\samphor-expert\app.py", line 104, in _get_reply
+    if _ml._model is not None:
+       ^^^^^^^^^^
+AttributeError: 'MLEngine' object has no attribute '_model'
+2026-07-12 23:05:48  127.0.0.1 - - [12/Jul/2026 23:05:48] "[35m[1mPOST /chat HTTP/1.1[0m" 500 -
+2026-07-12 23:08:34  [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5000
+ * Running on http://192.168.1.50:5000
+2026-07-12 23:08:34  [33mPress CTRL+C to quit[0m
+2026-07-12 23:08:38  127.0.0.1 - - [12/Jul/2026 23:08:38] "GET / HTTP/1.1" 200 -
+2026-07-12 23:08:43  [c37f2c96] USER: 'im yip'  |  INTENT: fallback/clarify  |  CONF: 0%  |  REPLY: "Lovely to meet you, Im Yip! What do you do for a living, if you don't mind me as"
+2026-07-12 23:08:43  127.0.0.1 - - [12/Jul/2026 23:08:43] "POST /chat HTTP/1.1" 200 -
+2026-07-12 23:09:03  [c37f2c96] USER: 'my name is yip not im yip'  |  INTENT: fallback/clarify  |  CONF: 0%  |  REPLY: 'How interesting, Im Yip! I am delighted to have you here. Feel free to ask me an'
+2026-07-12 23:09:03  127.0.0.1 - - [12/Jul/2026 23:09:03] "POST /chat HTTP/1.1" 200 -
+2026-07-12 23:09:24  [c37f2c96] USER: 'what is samphor'  |  INTENT: ask_definition  |  CONF: 85%  |  REPLY: 'The Samphor (ស័មភោ) is a barrel-shaped, double-headed drum that serves as the rh'
+2026-07-12 23:09:24  127.0.0.1 - - [12/Jul/2026 23:09:24] "POST /chat HTTP/1.1" 200 -
+2026-07-12 23:09:58  [c37f2c96] USER: 'What is it made of?'  |  INTENT: ask_material  |  CONF: 77%  |  REPLY: 'Traditional Samphor craftsmanship uses jackfruit wood for the body. The skins ar'
+2026-07-12 23:09:58  127.0.0.1 - - [12/Jul/2026 23:09:58] "POST /chat HTTP/1.1" 200 -
+2026-07-12 23:10:03  [c37f2c96] USER: 'How is it tuned?'  |  INTENT: ask_tuning  |  CONF: 79%  |  REPLY: 'Tuning is achieved by tightening or loosening the rattan lacing that runs betwee'
+2026-07-12 23:10:03  127.0.0.1 - - [12/Jul/2026 23:10:03] "POST /chat HTTP/1.1" 200 -
+2026-07-12 23:10:08  [c37f2c96] USER: 'How do I learn to play it?'  |  INTENT: ask_learning  |  CONF: 84%  |  REPLY: 'The Royal University of Fine Arts (RUFA) in Phnom Penh offers formal Samphor tra'
+2026-07-12 23:10:08  127.0.0.1 - - [12/Jul/2026 23:10:08] "POST /chat HTTP/1.1" 200 -
+2026-07-12 23:10:35  [c37f2c96] USER: 'What is the Pinpeat ensemble?'  |  INTENT: ask_pinpeat  |  CONF: 98%  |  REPLY: 'Within the Pinpeat ensemble, the Samphor player holds a leadership role similar '
+2026-07-12 23:10:35  127.0.0.1 - - [12/Jul/2026 23:10:35] "POST /chat HTTP/1.1" 200 -
+2026-07-12 23:11:28  [c37f2c96] USER: 'what is pinpeat?'  |  INTENT: ask_pinpeat  |  CONF: 84%  |  REPLY: "The Pinpeat is Cambodia's classical court orchestra, typically consisting of: Sa"
+2026-07-12 23:11:28  127.0.0.1 - - [12/Jul/2026 23:11:28] "POST /chat HTTP/1.1" 200 -
+2026-07-12 23:11:55  [c37f2c96] USER: 'When did it originate?'  |  INTENT: ask_history  |  CONF: 78%  |  REPLY: 'Historical evidence places the Samphor in Cambodian culture at least as far back'
+2026-07-12 23:11:55  127.0.0.1 - - [12/Jul/2026 23:11:55] "POST /chat HTTP/1.1" 200 -
+2026-07-12 23:12:08  [c37f2c96] USER: 'What does it look like?'  |  INTENT: ask_shape  |  CONF: 72%  |  REPLY: 'The Samphor has a barrel (or bobbin) shape — wider in the middle and narrowing t'
+2026-07-12 23:12:08  127.0.0.1 - - [12/Jul/2026 23:12:08] "POST /chat HTTP/1.1" 200 -
+2026-07-12 23:12:16  [c37f2c96] USER: 'How does it compare to other drums?'  |  INTENT: ask_compare  |  CONF: 89%  |  REPLY: 'The Samphor shares its barrel shape with the Korean buk and the Sri Lankan yak b'
+2026-07-12 23:12:16  127.0.0.1 - - [12/Jul/2026 23:12:16] "POST /chat HTTP/1.1" 200 -
+2026-07-12 23:23:34  127.0.0.1 - - [12/Jul/2026 23:23:34] "GET / HTTP/1.1" 200 -
+2026-07-12 23:23:34  127.0.0.1 - - [12/Jul/2026 23:23:34] "[33mGET /favicon.ico HTTP/1.1[0m" 404 -
+2026-07-12 23:23:59  [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5000
+ * Running on http://192.168.1.50:5000
+2026-07-12 23:23:59  [33mPress CTRL+C to quit[0m
+2026-07-12 23:24:07  127.0.0.1 - - [12/Jul/2026 23:24:07] "GET / HTTP/1.1" 200 -
+2026-07-12 23:24:09  [c37f2c96] Session reset
+2026-07-12 23:24:09  127.0.0.1 - - [12/Jul/2026 23:24:09] "POST /reset HTTP/1.1" 200 -
+2026-07-12 23:24:14  [c37f2c96] USER: 'im yip'  |  INTENT: fallback/clarify  |  CONF: 0%  |  REPLY: "Lovely to meet you, Yip! What do you do for a living, if you don't mind me askin"
+2026-07-12 23:24:14  127.0.0.1 - - [12/Jul/2026 23:24:14] "POST /chat HTTP/1.1" 200 -
+2026-07-12 23:24:19  [c37f2c96] USER: 'What is the Samphor?'  |  INTENT: fallback/clarify  |  CONF: 0%  |  REPLY: 'How interesting, Yip! I am delighted to have you here. Feel free to ask me anyth'
+2026-07-12 23:24:19  127.0.0.1 - - [12/Jul/2026 23:24:19] "POST /chat HTTP/1.1" 200 -
+2026-07-12 23:24:20  [c37f2c96] USER: 'How is it played?'  |  INTENT: ask_ceremonies  |  CONF: 79%  |  REPLY: 'In ceremonial contexts the Samphor does more than keep time — specific rhythmic '
+2026-07-12 23:24:20  127.0.0.1 - - [12/Jul/2026 23:24:20] "POST /chat HTTP/1.1" 200 -
+2026-07-12 23:24:21  [c37f2c96] USER: 'What is the Pinpeat ensemble?'  |  INTENT: ask_pinpeat  |  CONF: 98%  |  REPLY: "The Pinpeat is Cambodia's classical court orchestra, typically consisting of: Sa"
+2026-07-12 23:24:21  127.0.0.1 - - [12/Jul/2026 23:24:21] "POST /chat HTTP/1.1" 200 -
+2026-07-12 23:24:22  [c37f2c96] USER: 'Where is it used?'  |  INTENT: ask_pinpeat  |  CONF: 47%  |  REPLY: 'Within the Pinpeat ensemble, the Samphor player holds a leadership role similar '
+2026-07-12 23:24:22  127.0.0.1 - - [12/Jul/2026 23:24:22] "POST /chat HTTP/1.1" 200 -
+2026-07-12 23:24:23  [c37f2c96] USER: 'How do I learn to play?'  |  INTENT: ask_learning  |  CONF: 78%  |  REPLY: 'Learning the Samphor traditionally begins around age 8-10 at pagoda schools or a'
+2026-07-12 23:24:23  127.0.0.1 - - [12/Jul/2026 23:24:23] "POST /chat HTTP/1.1" 200 -
+2026-07-12 23:24:23  [c37f2c96] USER: 'How is it tuned?'  |  INTENT: ask_tuning  |  CONF: 79%  |  REPLY: 'Tuning is achieved by tightening or loosening the rattan lacing that runs betwee'
+2026-07-12 23:24:23  127.0.0.1 - - [12/Jul/2026 23:24:23] "POST /chat HTTP/1.1" 200 -
+2026-07-12 23:24:24  [c37f2c96] USER: 'What is it made of?'  |  INTENT: ask_material  |  CONF: 77%  |  REPLY: 'The shell of the Samphor is carved from a single piece of jackfruit (Artocarpus '
+2026-07-12 23:24:24  127.0.0.1 - - [12/Jul/2026 23:24:24] "POST /chat HTTP/1.1" 200 -
+2026-07-12 23:24:24  [c37f2c96] USER: 'What does it look like?'  |  INTENT: ask_shape  |  CONF: 72%  |  REPLY: 'The Samphor has a barrel (or bobbin) shape — wider in the middle and narrowing t'
+2026-07-12 23:24:24  127.0.0.1 - - [12/Jul/2026 23:24:24] "POST /chat HTTP/1.1" 200 -
+2026-07-12 23:24:25  [c37f2c96] USER: 'How does it compare to other drums?'  |  INTENT: ask_compare  |  CONF: 89%  |  REPLY: 'Compared to the Indian tabla, the Samphor is a single-piece barrel drum rather t'
+2026-07-12 23:24:25  127.0.0.1 - - [12/Jul/2026 23:24:25] "POST /chat HTTP/1.1" 200 -
+2026-07-12 23:24:26  [c37f2c96] USER: 'When did it originate?'  |  INTENT: ask_history  |  CONF: 78%  |  REPLY: 'Historical evidence places the Samphor in Cambodian culture at least as far back'
+2026-07-12 23:24:26  127.0.0.1 - - [12/Jul/2026 23:24:26] "POST /chat HTTP/1.1" 200 -
+2026-07-12 23:24:27  [c37f2c96] USER: 'How is it preserved?'  |  INTENT: ask_preservation  |  CONF: 61%  |  REPLY: 'After the Khmer Rouge genocide (1975–1979) decimated the artistic community, sur'
+2026-07-12 23:24:27  127.0.0.1 - - [12/Jul/2026 23:24:27] "POST /chat HTTP/1.1" 200 -

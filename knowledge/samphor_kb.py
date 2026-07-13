@@ -160,6 +160,101 @@ INTENT_RESPONSES = {
         "tuning, or its role in ceremonies.",
         "That's outside my area of expertise. I can answer questions about the Samphor — "
         "what it is, how it's played, its cultural role, or preservation efforts.",
+        "I only specialise in the Samphor drum. The instrument or topic you mentioned is different — "
+        "I cannot help with that, but I am happy to answer any Samphor questions!",
+    ],
+
+    # ---------- Related terms mentioned in bot responses --------------------
+    "ask_roneat": [
+        "The Roneat is a Cambodian xylophone with hardwood bars arranged over a carved boat-shaped resonating box. "
+        "The Roneat Ek plays the higher melody and the Roneat Thung plays the lower. "
+        "Both are key melody instruments in the Pinpeat ensemble alongside the Samphor.",
+        "There are two Roneat types in the Pinpeat ensemble: the Roneat Ek (higher pitch) and Roneat Thung (lower pitch). "
+        "They provide the main melodic lines while the Samphor sets the rhythmic framework.",
+    ],
+
+    "ask_khmer": [
+        "Khmer refers to the dominant ethnic group of Cambodia, their language, and their ancient civilization. "
+        "The Khmer Empire (802–1431 CE) was one of Southeast Asia's most powerful empires. "
+        "'Khmer' and 'Cambodian' are often used interchangeably when referring to the culture and language.",
+        "The Khmer people are the builders of Angkor Wat and the custodians of traditions like the Pinpeat ensemble "
+        "and the Samphor drum. The Khmer language is written in its own script and is the official language of Cambodia.",
+    ],
+
+    "ask_angkor": [
+        "Angkor Wat is a 12th-century temple complex in Siem Reap, Cambodia — the world's largest religious monument, "
+        "built by the Khmer Empire. Its bas-relief carvings depict royal court scenes and musicians, "
+        "including barrel drum players believed to be early ancestors of the Samphor.",
+        "The Angkor Empire (802–1431 CE) was the civilisation that created the Samphor's earliest known depictions. "
+        "Temple carvings at both Angkor Wat and the Bayon show musicians playing barrel drums "
+        "in royal and religious ceremonies — direct evidence of the Samphor's ancient roots.",
+    ],
+
+    "ask_sralai": [
+        "The Sralai is a Cambodian quadruple-reed oboe — a wind instrument with a loud, penetrating tone. "
+        "It leads the melody in the Pinpeat ensemble and is distinctively bright and reedy in sound. "
+        "It works alongside the percussion section led by the Samphor.",
+        "The Sralai is sometimes called the 'voice' of the Pinpeat ensemble because it carries the main melody. "
+        "It has a conical bore and four reeds, producing a sound louder and more piercing than a Western oboe.",
+    ],
+
+    "ask_chhing": [
+        "Chhing are small finger cymbals used in Cambodian classical music. "
+        "Played in pairs, they produce a bright open tone ('chhing') and a muted closed tone ('chhet') "
+        "that marks the rhythmic cycle. They are one of the most fundamental timekeeping instruments "
+        "in Khmer music, working alongside the Samphor.",
+        "The Chhing player divides the rhythmic cycle into equal beats, providing a steady pulse "
+        "that locks together with the Samphor's more complex patterns. Their 'chhing–chhet' pattern "
+        "is the most recognisable sound in Cambodian classical music.",
+    ],
+
+    "ask_skor_thom": [
+        "Skor Thom means 'large drum' in Khmer. It refers to a pair of large barrel drums in the Pinpeat ensemble, "
+        "each struck with a padded mallet. While the Samphor controls tempo and signals transitions, "
+        "the Skor Thom provides the deep rhythmic foundation and reinforces the main beat.",
+        "The Skor Thom are the largest drums in the Pinpeat ensemble. Unlike the Samphor which is played with bare hands, "
+        "the Skor Thom are struck with padded beaters. They add weight and volume to ceremonial performances.",
+    ],
+
+    "ask_sbek_thom": [
+        "Sbek Thom is Cambodia's large-scale shadow puppet theatre, performed with elaborately carved leather puppets "
+        "up to 1.5 metres tall. It depicts stories from the Reamker (the Khmer Ramayana). "
+        "The Pinpeat ensemble — led by the Samphor — provides all the music for Sbek Thom performances. "
+        "It is listed on UNESCO's Intangible Cultural Heritage list.",
+        "In Sbek Thom performances, the Samphor plays a central narrative role — its rhythmic patterns cue "
+        "the puppeteers and signal changes in the story. The tradition nearly disappeared after the Khmer Rouge "
+        "period but has been revived with UNESCO and NGO support.",
+    ],
+
+    "ask_robam": [
+        "Robam Kbach Boran ('ancient gesture dance') is Cambodia's classical court dance — its equivalent of royal ballet. "
+        "It features elaborate costumes, slow stylised hand gestures (kbach), and depicts stories from Hindu mythology. "
+        "The Pinpeat ensemble, led by the Samphor, always accompanies performances. "
+        "It was inscribed on UNESCO's Intangible Cultural Heritage list in 2003.",
+        "Classical Khmer dance is one of the most refined art forms in Southeast Asia. "
+        "Every gesture in Robam Kbach Boran has a specific meaning, and the Samphor's rhythmic signals "
+        "guide the dancers through each section of the performance.",
+    ],
+
+    "ask_rufa": [
+        "RUFA stands for the Royal University of Fine Arts in Phnom Penh, Cambodia. "
+        "It is the country's premier institution for traditional arts, offering formal training in "
+        "classical dance, music (including the Samphor and Pinpeat), and visual arts. "
+        "After the Khmer Rouge devastated Cambodia's artistic community, RUFA played a central role "
+        "in reviving and preserving traditional Khmer music.",
+        "The Royal University of Fine Arts (RUFA) runs master-apprentice programs where senior Samphor players "
+        "pass their knowledge to the next generation. It is the main institutional home for the preservation "
+        "of the Pinpeat ensemble tradition in Cambodia.",
+    ],
+
+    "ask_kroeung": [
+        "Kroeung (in drum-making) is the black tuning paste applied to the centre of the Samphor's smaller drum head. "
+        "It is made from cooked rice mixed with charcoal ash. The paste adds weight to the drum head, "
+        "lowering its pitch and allowing fine tonal adjustment — a technique similar to the syahi paste "
+        "used on the Indian tabla.",
+        "The kroeung paste is applied and adjusted by the Samphor maker or player to achieve the correct pitch relationship "
+        "between the two drum heads. More paste lowers the pitch; scraping some off raises it. "
+        "The exact recipe and thickness is part of the craft knowledge passed from master to apprentice.",
     ],
 }
 
@@ -291,6 +386,42 @@ RICH_MEDIA: dict[str, dict] = {
         {"label": "UNESCO Intangible Cultural Heritage", "url": "https://ich.unesco.org/en/RL/royal-ballet-of-cambodia-00097"},
         {"label": "Khmer Rouge — Wikipedia", "url": "https://en.wikipedia.org/wiki/Khmer_Rouge"},
     ]},
+    "ask_roneat": {"links": [
+        {"label": "Roneat — Wikipedia", "url": "https://en.wikipedia.org/wiki/Roneat"},
+        {"label": "Pinpeat — Wikipedia", "url": "https://en.wikipedia.org/wiki/Pinpeat"},
+    ]},
+    "ask_khmer": {"links": [
+        {"label": "Khmer people — Wikipedia", "url": "https://en.wikipedia.org/wiki/Khmer_people"},
+        {"label": "Khmer language — Wikipedia", "url": "https://en.wikipedia.org/wiki/Khmer_language"},
+    ]},
+    "ask_angkor": {"links": [
+        {"label": "Angkor Wat — Wikipedia", "url": "https://en.wikipedia.org/wiki/Angkor_Wat"},
+        {"label": "Khmer Empire — Wikipedia", "url": "https://en.wikipedia.org/wiki/Khmer_Empire"},
+    ]},
+    "ask_sralai": {"links": [
+        {"label": "Sralai — Wikipedia", "url": "https://en.wikipedia.org/wiki/Sralai"},
+    ]},
+    "ask_chhing": {"links": [
+        {"label": "Ching (instrument) — Wikipedia", "url": "https://en.wikipedia.org/wiki/Ching_(instrument)"},
+    ]},
+    "ask_skor_thom": {"links": [
+        {"label": "Pinpeat — Wikipedia", "url": "https://en.wikipedia.org/wiki/Pinpeat"},
+    ]},
+    "ask_sbek_thom": {"links": [
+        {"label": "Sbek Thom — Wikipedia", "url": "https://en.wikipedia.org/wiki/Sbek_Thom"},
+        {"label": "UNESCO — Sbek Thom", "url": "https://ich.unesco.org/en/RL/sbek-thom-khmer-shadow-theatre-00108"},
+    ]},
+    "ask_robam": {"links": [
+        {"label": "Cambodian classical dance — Wikipedia", "url": "https://en.wikipedia.org/wiki/Cambodian_classical_dance"},
+        {"label": "UNESCO — Royal Ballet of Cambodia", "url": "https://ich.unesco.org/en/RL/royal-ballet-of-cambodia-00097"},
+    ]},
+    "ask_rufa": {"links": [
+        {"label": "Royal University of Fine Arts — Wikipedia", "url": "https://en.wikipedia.org/wiki/Royal_University_of_Fine_Arts"},
+    ]},
+    "ask_kroeung": {"links": [
+        {"label": "Drum tuning — Wikipedia", "url": "https://en.wikipedia.org/wiki/Drum_tuning"},
+        {"label": "Tabla syahi — Wikipedia", "url": "https://en.wikipedia.org/wiki/Tabla"},
+    ]},
 }
 
 
@@ -309,4 +440,14 @@ INTENT_LABELS: dict[str, str] = {
     "greeting":         "a greeting",
     "farewell":         "a farewell",
     "out_of_scope":     "an off-topic question",
+    "ask_roneat":       "the Roneat xylophone instrument",
+    "ask_khmer":        "the Khmer people and civilization",
+    "ask_angkor":       "Angkor Wat and the Angkor Empire",
+    "ask_sralai":       "the Sralai oboe instrument",
+    "ask_chhing":       "the Chhing finger cymbals",
+    "ask_skor_thom":    "the Skor Thom large drums",
+    "ask_sbek_thom":    "Sbek Thom shadow puppet theatre",
+    "ask_robam":        "Robam Kbach Boran classical dance",
+    "ask_rufa":         "the Royal University of Fine Arts (RUFA)",
+    "ask_kroeung":      "the kroeung tuning paste",
 }

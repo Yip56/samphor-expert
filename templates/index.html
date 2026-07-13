@@ -245,7 +245,8 @@
   const resetBtn  = document.getElementById('reset-btn');
   const micBtn    = document.getElementById('mic-btn');
 
-  const STORAGE_KEY = 'samphor-chat-v1';
+  const STORAGE_KEY   = 'samphor-chat-v1';
+  const askedQuestions = new Set();   // tracks every message the user has sent
 
   // ── Fix 6: Typing indicator ──────────────────────────────────────────────
   function showTyping() {
@@ -295,11 +296,23 @@
     });
     chatBox.insertBefore(fbRow, typing);
 
-    // Fix 5: Quick reply chips
+    // Fix 5: Quick reply chips — filter out already-asked questions
     if (chips && chips.length) {
+      const freshChips = chips.filter(c => !askedQuestions.has(c));
+      const allAsked   = freshChips.length === 0;
+      const toShow     = allAsked ? chips : freshChips;
+
+      if (allAsked) {
+        const notice = document.createElement('div');
+        notice.className = 'msg bot';
+        notice.style.cssText = 'font-size:0.82rem;opacity:0.75;font-style:italic;';
+        notice.textContent = "You've explored all the suggested questions for this topic! Here they are again in case you'd like to revisit:";
+        chatBox.insertBefore(notice, typing);
+      }
+
       const chipsDiv = document.createElement('div');
       chipsDiv.className = 'chips';
-      chips.forEach(label => {
+      toShow.forEach(label => {
         const chip = document.createElement('button');
         chip.className = 'chip';
         chip.textContent = label;
@@ -347,8 +360,12 @@
       const msgs = JSON.parse(saved);
       if (!msgs.length) return false;
       msgs.forEach(({ role, text }) => {
-        if (role === 'user') addUserMessage(text);
-        else addBotMessage(text, [], null);   // no chips/media for restored messages
+        if (role === 'user') {
+          addUserMessage(text);
+          askedQuestions.add(text);   // rebuild tracking from saved history
+        } else {
+          addBotMessage(text, [], null);   // no chips/media for restored messages
+        }
       });
       return true;
     } catch(e) { return false; }
@@ -363,6 +380,7 @@
     const text = typeof overrideText === 'string' ? overrideText : input.value.trim();
     if (!text) return;
 
+    askedQuestions.add(text);   // remember every question sent
     addUserMessage(text);
     input.value = '';
     input.disabled = true;
@@ -423,6 +441,7 @@
     const data = await res.json();
     [...chatBox.querySelectorAll('.msg, .feedback-row, .chips')].forEach(el => el.remove());
     clearStorage();
+    askedQuestions.clear();   // reset chip tracking for new session
     addBotMessage(data.greeting, [], null);
   });
 

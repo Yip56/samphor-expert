@@ -61,6 +61,10 @@ _DOMAIN_TERMS = [
     "samphor", "pinpeat", "roneat", "khmer", "angkor", "cambodia",
     "cambodian", "sralai", "chhing", "skor", "ensemble",
     "percussion", "ceremony", "preservation", "xylophones",
+    # topic words — so typos like "signnificance" correct to "significance"
+    "significance", "cultural", "history", "origin", "material",
+    "technique", "tradition", "heritage", "instrument", "kroeung",
+    "robam", "sbek", "rufa", "reamker",
 ]
 
 IGNORE_CHARS = set("?!.,;:'\"")
@@ -143,6 +147,13 @@ class MLEngine(ChatEngine):
     def respond(self, user_input: str, context: dict | None = None) -> tuple[str, dict]:
 
         ctx        = context or {}
+        # Expand single-letter abbreviations before spell correction
+        _lower_stripped = user_input.lower().lstrip()
+        for abbr, full in (("y ", "why "), ("r ", "are "), ("u ", "you ")):
+            if _lower_stripped.startswith(abbr):
+                user_input = full + user_input[len(abbr):]
+                break
+        user_input = self._normalise_informal(user_input)
         user_input = self._correct_spelling(user_input)  # Fix 9
         step       = ctx.get("onboarding_step", "done")
 
@@ -242,6 +253,11 @@ class MLEngine(ChatEngine):
             responses = INTENT_RESPONSES.get(tag, [FALLBACK_RESPONSE])
 
         reply = random.choice(responses)
+        # Hint when the message looks like a compound question ("X and Y?")
+        QUESTION_WORDS = {"what", "when", "where", "who", "why", "how"}
+        lower_words    = set(lower.split())
+        if " and " in lower and bool(lower_words & QUESTION_WORDS):
+            reply += " (You asked multiple questions — I answered the main one. Feel free to ask the second part separately!)"
         self._history.append({"role": "assistant", "content": reply})
         updated = {
             **ctx,
@@ -254,6 +270,53 @@ class MLEngine(ChatEngine):
     # =========================================================================
     # ONBOARDING HELPERS
     # =========================================================================
+
+    @staticmethod
+    def _normalise_informal(text: str) -> str:
+        """Expand common no-apostrophe shorthands before name/occupation extraction."""
+        import re
+        _INFORMAL = [
+            # contraction shorthands (word-boundary so "him" isn't touched)
+            (r"\bim\b",       "i'm"),
+            (r"\bdont\b",     "don't"),
+            (r"\bcant\b",     "can't"),
+            (r"\bwont\b",     "won't"),
+            (r"\bisnt\b",     "isn't"),
+            (r"\bwasnt\b",    "wasn't"),
+            (r"\bwerent\b",   "weren't"),
+            (r"\bdidnt\b",    "didn't"),
+            (r"\bdoesnt\b",   "doesn't"),
+            (r"\bhavent\b",   "haven't"),
+            (r"\bwouldnt\b",  "wouldn't"),
+            (r"\bshouldnt\b", "shouldn't"),
+            (r"\bcouldnt\b",  "couldn't"),
+            (r"\bwhos\b",     "who's"),
+            (r"\bwhats\b",    "what's"),
+            (r"\bhows\b",     "how's"),
+            (r"\bthats\b",    "that's"),
+            (r"\bits\b",      "it's"),
+            (r"\bive\b",      "i've"),
+            (r"\byoure\b",    "you're"),
+            (r"\btheyre\b",   "they're"),
+            (r"\bwere\b",     "we're"),
+            # common chat abbreviations
+            (r"\bidk\b",      "i don't know"),
+            (r"\bpls\b",      "please"),
+            (r"\bplz\b",      "please"),
+            (r"\bthx\b",      "thanks"),
+            (r"\bbtw\b",      "by the way"),
+            (r"\bngl\b",      "not gonna lie"),
+            (r"\btbh\b",      "to be honest"),
+            (r"\bimo\b",      "in my opinion"),
+            (r"\bgonna\b",    "going to"),
+            (r"\bwanna\b",    "want to"),
+            (r"\bgotta\b",    "got to"),
+            (r"\blemme\b",    "let me"),
+            (r"\bdunno\b",    "don't know"),
+        ]
+        for pattern, replacement in _INFORMAL:
+            text = re.sub(pattern, replacement, text, flags=re.IGNORECASE)
+        return text
 
     def _onboarding_respond(self, user_input: str, ctx: dict) -> tuple[str, dict]:
         step = ctx.get("onboarding_step", "name")
@@ -281,10 +344,20 @@ class MLEngine(ChatEngine):
         SKIP_WORDS = {"skip", "pass", "private", "anonymous", "secret", "nothing", "nope", "no"}
         if any(w in text.lower().split() for w in SKIP_WORDS):
             return "friend"
-        for prefix in [
+        # If user typed a greeting instead of their name, don't use it as a name
+        GREETING_WORDS = {"hello", "hi", "hey", "greetings", "howdy", "hiya", "sup", "yo", "good morning",
+                          "good afternoon", "good evening", "good day"}
+        if text.lower().strip() in GREETING_WORDS:
+            return "friend"
+        for prefix in sorted([
+            # formal
             "my name is", "i'm called", "i am called", "you can call me",
-            "call me", "the name is", "name's", "it's", "i'm", "i am",
-        ]:
+            "call me", "the name is", "it's", "i'm", "i am",
+            "my name's", "they call me", "just call me", "people call me",
+            # informal / shorthand (what real users type)
+            "im called", "im known as", "im",   # "im yip" → "yip"
+            "name is", "name's",
+        ], key=len, reverse=True):              # longest prefix first to avoid partial matches
             if text.lower().startswith(prefix):
                 text = text[len(prefix):].strip().strip(".,!?")
                 break
@@ -393,7 +466,7 @@ class MLEngine(ChatEngine):
             if len(clean) < 4:
                 result.append(tok)
                 continue
-            matches = get_close_matches(clean, _DOMAIN_TERMS, n=1, cutoff=0.78)
+            matches = get_close_matches(clean, _DOMAIN_TERMS, n=1, cutoff=0.72)
             if matches and matches[0] != clean:
                 lead = len(tok) - len(tok.lstrip("?!.,;:'\""))
                 tail = len(tok) - len(tok.rstrip("?!.,;:'\""))

@@ -43,11 +43,12 @@ A full learning roadmap is at the end.
    - [Web Speech API](#web-speech-api)
 5. [Setup — Step by Step](#5-setup--step-by-step)
 6. [How to Run](#6-how-to-run)
-7. [All 17 Improvements Made](#7-all-17-improvements-made)
-8. [How to Add a New Topic](#8-how-to-add-a-new-topic)
-9. [Switching Engines](#9-switching-engines)
-10. [Learning Roadmap](#10-learning-roadmap)
-11. [Glossary](#11-glossary)
+7. [All 17 Original Improvements](#7-all-17-original-improvements)
+8. [Session 2 Improvements — Test-Driven Quality Fixes](#8-session-2-improvements--test-driven-quality-fixes)
+9. [How to Add a New Topic](#9-how-to-add-a-new-topic)
+10. [Switching Engines](#10-switching-engines)
+11. [Learning Roadmap](#11-learning-roadmap)
+12. [Glossary](#12-glossary)
 
 ---
 
@@ -111,7 +112,7 @@ engine/ml_engine.py  (the AI brain)
        ├──────────────────────────────────────────────────────┐
        ▼                                                       ▼
 model/embeddings.npy                            knowledge/samphor_kb.py
-(460 pre-computed embedding vectors)            (INTENT_RESPONSES, KHMER_RESPONSES, RICH_MEDIA)
+(616 pre-computed embedding vectors)            (INTENT_RESPONSES, KHMER_RESPONSES, RICH_MEDIA)
        │                                                       │
        │  returns "ask_definition" at 92% confidence          │  returns 1 random answer string
        └──────────────────────────┬────────────────────────────┘
@@ -126,7 +127,7 @@ model/embeddings.npy                            knowledge/samphor_kb.py
 
 ```
 data/intents.json
-       │  14 intents × ~33 patterns = ~460 training examples (English + Khmer)
+       │  24 intents, 616 training patterns total (English + Khmer)
        ▼
 engine/ml_engine.py  train()
        │  Step 1: Load all patterns and their intent tags from intents.json
@@ -134,8 +135,8 @@ engine/ml_engine.py  train()
        │  Step 3: Encode ALL patterns → one 384-dim vector per pattern
        │  Step 4: Save embedding matrix and label list to disk
        ▼
-model/embeddings.npy   (460 × 384 float32 matrix — the encoded training patterns)
-model/labels.pkl       (list of 460 intent tag strings, one per row in embeddings.npy)
+model/embeddings.npy   (616 × 384 float32 matrix — the encoded training patterns)
+model/labels.pkl       (list of 616 intent tag strings, one per row in embeddings.npy)
 ```
 
 ---
@@ -278,7 +279,7 @@ This is the smart engine. It has two jobs:
 with open("data/intents.json", "r", encoding="utf-8") as f:
     data = json.load(f)
 ```
-Reads ~460 training patterns across 14 intents, including Khmer-script patterns.
+Reads 616 training patterns across 24 intents, including Khmer-script patterns.
 
 **Step 2 — Encode all patterns:**
 ```python
@@ -293,7 +294,7 @@ have length 1, which makes cosine similarity equivalent to a dot product (faster
 np.save("model/embeddings.npy", embeddings)
 pickle.dump(labels, open("model/labels.pkl", "wb"))
 ```
-The embedding matrix (shape: `[460, 384]`) and the list of 460 intent tags are saved.
+The embedding matrix (shape: `[616, 384]`) and the list of 616 intent tags are saved.
 These are the only two files the chatbot needs at runtime.
 
 **The Inference Pipeline in detail (every chat message):**
@@ -318,23 +319,47 @@ def _predict(self, text: str) -> tuple[str, float, str | None, float]:
 
 Line by line:
 1. Encode the user query → 1 × 384 embedding.
-2. Cosine similarity against all 460 training embeddings → 460 scores.
+2. Cosine similarity against all 616 training embeddings → 616 scores.
 3. For each intent, keep the highest score among its patterns.
 4. Sort intents by score. Return top-2 for clarification logic.
 
-**Spell correction (Fix 9):**
+**Spell correction (Fix 9 + Session 2):**
 ```python
 @staticmethod
 def _correct_spelling(text: str) -> str:
-    domain_terms = ["samphor", "pinpeat", "khmer", ...]
+    domain_terms = ["samphor", "pinpeat", "khmer", "significance", "cultural", ...]
     corrected = []
     for word in text.split():
-        matches = get_close_matches(word.lower(), domain_terms, n=1, cutoff=0.75)
+        matches = get_close_matches(word.lower(), domain_terms, n=1, cutoff=0.72)
         corrected.append(matches[0] if matches else word)
     return " ".join(corrected)
 ```
 Uses `difflib.get_close_matches` to fix typos in Samphor-related domain words (e.g.,
-"Sanphor" → "Samphor", "Phinpeat" → "Pinpeat") without any extra packages.
+"Smaphor" → "samphor", "signnificance" → "significance") without any extra packages.
+The cutoff was lowered from 0.78 → 0.72 to catch transposition typos ("Smaphor" ↔ "Samphor").
+The domain vocabulary was expanded to include topic words so misspelled topic words like
+"signnificance" also get corrected before reaching the ML model.
+
+**Informal language normaliser (Session 2):**
+```python
+@staticmethod
+def _normalise_informal(text: str) -> str:
+    """Expand contractions and chat abbreviations before inference."""
+    _INFORMAL = [
+        (r"\bim\b", "i'm"),       # "im yip" → "i'm yip"
+        (r"\bdont\b", "don't"),
+        (r"\bwhats\b", "what's"),
+        (r"\bidk\b", "i don't know"),
+        (r"\bgonna\b", "going to"),
+        # ... ~30 patterns total
+    ]
+    for pattern, replacement in _INFORMAL:
+        text = re.sub(pattern, replacement, text, flags=re.IGNORECASE)
+    return text
+```
+Expands ~30 common informal typing patterns (missing apostrophes, chat abbreviations, slang)
+before spell correction and the sentence transformer run. This also fixes name extraction:
+`"im yip"` → `"i'm yip"` → prefix `"i'm"` is stripped → name extracted as `"Yip"` correctly.
 
 **Khmer detection (Fix 13):**
 ```python
@@ -408,38 +433,48 @@ FALLBACK_RESPONSE: str = (
 **Technical explanation:**
 A JSON file containing an array of intent objects. Each object has three fields: `"tag"` (str),
 `"patterns"` (list of str — the training examples), and `"responses"` (list of str — unused
-by the engine but kept for documentation). The file contains ~460 patterns across 14 intents,
-including English patterns (20 original + 10 additional) and Khmer-script patterns (4 per intent).
+by the engine but kept for documentation). The file contains **616 patterns across 24 intents**,
+including English patterns and Khmer-script patterns (4 per content intent).
 
 **Plain English:**
 This is the textbook the AI studies from. Each "intent" is a chapter, and each "pattern" is one
 way a human might phrase a question about that topic. More patterns = better recognition.
 Khmer patterns let native Cambodian speakers ask in their own language.
 
-**The 14 intents and what they cover:**
+**The 24 intents and what they cover:**
 
-| Intent Tag | Topic | Example Pattern |
-|-----------|-------|----------------|
-| `ask_definition` | What is the Samphor? | "What is the Samphor?", "ស័មភោ គឺ ជា អ្វី?" |
-| `ask_history` | Origins and history | "When was it invented?", "How old is the Samphor?" |
-| `ask_material` | What it's made of | "What wood is used?", "What is the drum skin made from?" |
-| `ask_shape` | Physical dimensions | "What shape is the Samphor?", "How big is it?" |
-| `ask_playing` | How to play it | "How do you play the Samphor?", "What technique is used?" |
-| `ask_tuning` | How it is tuned | "How is the Samphor tuned?", "What is the black paste?" |
-| `ask_ceremonies` | Ceremonial uses | "When is it played?", "What rituals use the Samphor?" |
-| `ask_pinpeat` | The Pinpeat orchestra | "What is the Pinpeat ensemble?", "What orchestra uses it?" |
-| `ask_compare` | Comparison to other drums | "How is it different from the tabla?", "Compare to taiko" |
-| `ask_learning` | How to learn it | "Where can I learn the Samphor?", "How long does it take?" |
-| `ask_preservation` | Cultural preservation | "Is the Samphor endangered?", "UNESCO heritage?" |
-| `greeting` | Hello messages | "Hi", "Hello", "ជំរាប សួរ" |
-| `farewell` | Goodbye messages | "Bye", "See you", "លា ហើយ" |
-| `out_of_scope` | Unrelated questions | "What's the weather?", "Tell me a joke" |
+| Intent Tag | Topic | Patterns |
+|-----------|-------|---------|
+| `ask_definition` | What is the Samphor? | 34 |
+| `ask_history` | Origins, history, when/who made it | 43 |
+| `ask_material` | What it is made of | 34 |
+| `ask_shape` | Physical dimensions and appearance | 34 |
+| `ask_playing` | How to play it, sounds it makes | 34 |
+| `ask_tuning` | How it is tuned, the kroeung paste | 34 |
+| `ask_ceremonies` | Ceremonial uses, cultural significance, why it was made | 49 |
+| `ask_pinpeat` | The Pinpeat orchestra and Samphor's role | 34 |
+| `ask_compare` | Comparison to other drums | 33 |
+| `ask_learning` | How and where to learn | 34 |
+| `ask_preservation` | UNESCO heritage, post-Khmer Rouge revival | 34 |
+| `greeting` | Hello messages, name introductions | 34 |
+| `farewell` | Goodbye messages | 26 |
+| `out_of_scope` | Unrelated topics, other instruments (Kompang, djembe, etc.) | 39 |
+| `ask_roneat` | The Roneat xylophone instrument | 12 |
+| `ask_khmer` | The Khmer people and civilization | 12 |
+| `ask_angkor` | Angkor Wat and the Angkor Empire | 12 |
+| `ask_sralai` | The Sralai oboe instrument | 12 |
+| `ask_chhing` | The Chhing finger cymbals | 12 |
+| `ask_skor_thom` | The Skor Thom large drums | 12 |
+| `ask_sbek_thom` | Sbek Thom shadow puppet theatre | 12 |
+| `ask_robam` | Robam Kbach Boran classical dance | 12 |
+| `ask_rufa` | Royal University of Fine Arts (RUFA) | 12 |
+| `ask_kroeung` | The kroeung drum tuning paste | 12 |
 
-**Why ~33 patterns per intent (up from ~20)?**
-Synonym expansion (Fix 11) was applied — each original pattern was augmented with rephrased
-variants to improve robustness. The sentence transformer generalizes much better than the old
-Bag-of-Words approach, so extra patterns reduce edge-case misclassifications rather than
-causing overfitting.
+**Why more patterns per intent?**
+Synonym expansion (Fix 11) augmented the original patterns with rephrased variants.
+Session 2 further added When/Who/Why question forms and cultural significance patterns
+to existing intents, and introduced 10 entirely new intents for terms the bot mentions
+in its own answers (so users can always follow up on any term they don't recognise).
 
 ---
 
@@ -471,6 +506,8 @@ shows clickable topic suggestion buttons underneath so you always know what to a
 | **Feedback buttons** (Fix 12) | Each bot message gets 👍/👎 buttons; click posts `{msg_id, vote}` to `/feedback` |
 | **localStorage** (Fix 8) | On every message, full history is `JSON.stringify`-ed to `localStorage["samphor-chat-v1"]` |
 | **Voice input** (Fix 16) | Mic button uses `SpeechRecognition` API; hides itself if browser doesn't support it |
+| **Chip deduplication** (Session 2) | `askedQuestions` Set tracks every sent message; chips already asked are filtered out before rendering |
+| **Chips exhausted notice** (Session 2) | When all chips for a topic have been asked, a notice appears and the full chip set is shown again |
 
 **HTML structure:**
 
@@ -566,8 +603,8 @@ recreated by running `train.py`.
 
 | File | Contents |
 |------|---------|
-| `embeddings.npy` | 460 × 384 float32 matrix — meaning vectors for all training patterns |
-| `labels.pkl` | Python list of 460 intent tag strings (one per embedding row) |
+| `embeddings.npy` | 616 × 384 float32 matrix — meaning vectors for all training patterns |
+| `labels.pkl` | Python list of 616 intent tag strings (one per embedding row) |
 
 ---
 
@@ -1137,7 +1174,7 @@ The analytics dashboard is at **http://127.0.0.1:5000/admin**.
 
 ---
 
-## 7. All 17 Improvements Made
+## 7. All 17 Original Improvements
 
 This project was upgraded from a basic proof-of-concept to a production-quality chatbot
 through 17 incremental improvements. Here is what each one does:
@@ -1244,7 +1281,149 @@ limit receive HTTP 429. Messages longer than 500 characters are rejected with HT
 
 ---
 
-## 8. How to Add a New Topic
+## 8. Session 2 Improvements — Test-Driven Quality Fixes
+
+Five real test conversations were analysed to find every case where the bot gave a wrong,
+confusing, or incomplete answer. The issues were grouped into categories and fixed systematically.
+All changes that touch `data/intents.json` require rerunning `train.py` to take effect.
+
+---
+
+### Knowledge Expansion
+
+**Fix 18 — Related-Terms Knowledge (10 New Intents)**
+The bot's own answers contain words like "Pinpeat", "Roneat", "Khmer", "Angkor", "Sralai",
+"Chhing", "Skor Thom", "Sbek Thom", "Robam Kbach Boran", "RUFA", and "kroeung" — but when
+a user asked what any of those words meant, the bot had no answer. Ten new intents were added
+(one per term) with 12 training patterns and 2 response variants each. Every new intent also
+has Wikipedia links in `RICH_MEDIA` and follow-up chips in `app.py`. The bot can now explain
+every term it uses in its own replies.
+
+---
+
+### Intent Routing Fixes (discovered from test conversations)
+
+**Fix 19 — "When" and "Who" Questions Routed to Materials (ask_history)**
+Questions like "When was the Samphor made?" and "Who made the Samphor?" were being classified
+as `ask_material` (returning construction/materials answers) because the sentence transformer
+found them semantically close to "How was the Samphor made?". Fixed by adding 10 explicit
+When/Who patterns directly to the `ask_history` intent in `data/intents.json`.
+
+**Fix 20 — "Why" and Cultural Significance Questions Not Answered (ask_ceremonies)**
+"Why was the Samphor played?", "Why was it made?", and "Cultural significance of the Samphor"
+either returned a fallback or triggered a goodbye response (when the word "significance" was
+misspelled). Fixed by adding 16 purpose/significance patterns to `ask_ceremonies` and adding
+"significance" to the spell-correction vocabulary so typos like "signnificance" are corrected
+before they reach the model.
+
+**Fix 21 — Greeting Name-Introduction Patterns**
+Messages like "hello i am Zanden" sometimes matched the farewell intent because the sentence
+transformer found no strong greeting match for a name-prefixed hello. Added name-introduction
+patterns ("hello i am", "hi my name is", "hey i am", etc.) to the `greeting` intent.
+
+**Fix 22 — Kompang and Other Instruments Answered as Samphor**
+Questions about the Kompang (a Malay/Bruneian frame drum) were being answered with Samphor
+content because the sentence transformer matched "how was the Kompang made" to "how was the
+Samphor made" by structure. Added explicit Kompang and other-instrument patterns (djembe,
+bongo, taiko, tabla) to `out_of_scope` with a dedicated response clarifying the bot only
+covers the Samphor.
+
+---
+
+### Input Handling Improvements (`engine/ml_engine.py`)
+
+**Fix 23 — Spell Correction Cutoff Lowered (0.78 → 0.72)**
+The difflib cutoff of 0.78 failed for letter-transposition typos. "Smaphor" (letters 'a' and
+'m' swapped from "Samphor") produces a SequenceMatcher ratio of ~0.71 — just below the old
+threshold. Lowering to 0.72 catches these transposition cases while remaining strict enough
+to avoid false corrections.
+
+**Fix 24 — Domain Vocabulary Expanded**
+The `_DOMAIN_TERMS` list only contained instrument/place names. Topic words were missing,
+which meant typos like "signnificance" (extra 'n') reached the ML model uncorrected and
+accidentally matched farewell patterns (the word begins with "sign"). Added 14 topic words:
+`significance`, `cultural`, `history`, `origin`, `material`, `technique`, `tradition`,
+`heritage`, `instrument`, `kroeung`, `robam`, `sbek`, `rufa`, `reamker`.
+
+**Fix 25 — Greeting Word Filter in Name Extraction**
+During onboarding, if a user typed "hello" when asked for their name, the bot would greet
+them as "Hello" ("Lovely to meet you, Hello!"). Added a `GREETING_WORDS` set check in
+`_extract_name()` — if the entire input is a greeting word, the name defaults to `"friend"`.
+
+**Fix 26 — Informal Language Normaliser (`_normalise_informal`)**
+Real users type contractions without apostrophes and use chat abbreviations. A new static
+method `_normalise_informal()` applies ~30 word-boundary regex substitutions before spell
+correction and inference:
+
+| Input typed | Normalised to |
+|-------------|--------------|
+| `im yip` | `i'm yip` → name extracted as "Yip" |
+| `whats samphor` | `what's samphor` → correct intent match |
+| `dont know` | `don't know` |
+| `idk` | `i don't know` |
+| `gonna` | `going to` |
+| `lemme` | `let me` |
+| `dunno` | `don't know` |
+
+The normaliser runs for both onboarding (name/occupation extraction) and regular questions.
+
+**Fix 27 — Abbreviation Expansion ("y " → "why ")**
+Single-letter word abbreviations at the start of a message were misclassified. `"y was the
+Samphor made"` was read as a materials question. A pre-processing step now maps:
+- `"y "` → `"why "` — "y was it played" → "why was it played"
+- `"r "` → `"are "` — "r there classes" → "are there classes"
+- `"u "` → `"you "` — "can u explain" → "can you explain"
+
+**Fix 28 — Compound Question Hint**
+When a user asks two questions in one message ("How was it played and what is the cultural
+significance?"), the bot only answered one. The bot now appends a note to its reply:
+*"You asked multiple questions — I answered the main one. Feel free to ask the second part
+separately!"* This triggers when the message contains " and " plus any question word
+(what, when, where, who, why, how).
+
+---
+
+### Bug Fix
+
+**Fix 29 — AttributeError: `_ml._model` → `_ml._st_model`**
+`app.py` checked `_ml._model is not None` to decide whether the ML engine was loaded.
+The actual attribute in `MLEngine` is `_st_model` (named to reflect "sentence transformer
+model"). This mismatch caused every `/chat` request to crash with `AttributeError` before
+it could even reach the fallback engine. Fixed by correcting the attribute name in `app.py`.
+
+---
+
+### UI Improvements (`templates/index.html`)
+
+**Fix 30 — Smart Chip Deduplication**
+The same 4 chip suggestions appeared after every bot reply regardless of what the user had
+already asked. An `askedQuestions` Set now tracks every message the user sends. Before chips
+are rendered, they are filtered to remove any question the user has already sent. This means
+the suggestions always show genuinely unexplored topics.
+
+The set is rebuilt from `localStorage` on page load (so it persists across refreshes) and
+cleared when the session is reset.
+
+**Fix 31 — "Chips Exhausted" Notice**
+When a user has asked every suggested question for a topic (all chips filtered out), rather
+than showing nothing, the UI now displays an italic notice:
+*"You've explored all the suggested questions for this topic! Here they are again in case
+you'd like to revisit:"* — followed by the full chip set reappearing for re-selection.
+
+---
+
+### Retraining Required
+
+After all `data/intents.json` changes (Fixes 18–22), the model must be retrained:
+```powershell
+.\.venv\Scripts\python.exe train.py
+```
+The new embeddings file will be **616 × 384** (up from the original count), covering all
+24 intents and their expanded pattern sets.
+
+---
+
+## 9. How to Add a New Topic
 
 Example: adding "Who makes the Samphor?" (intent: `ask_makers`)
 
@@ -1317,7 +1496,7 @@ The bot can now answer questions about Samphor makers in both English and Khmer.
 
 ---
 
-## 9. Switching Engines
+## 10. Switching Engines
 
 Edit two lines in `app.py`:
 
@@ -1345,7 +1524,7 @@ Note: `app.py` automatically falls back to `RuleBasedEngine` if `MLEngine` fails
 
 ---
 
-## 10. Learning Roadmap
+## 11. Learning Roadmap
 
 This is a structured plan to go from "I know some basics" to fully understanding and extending
 every part of this project. Each phase builds on the previous one.
@@ -1557,7 +1736,7 @@ After mastering this project, these are natural next steps:
 
 ---
 
-## 11. Glossary
+## 12. Glossary
 
 | Term | Technical meaning | Plain English |
 |------|--------------------|---------------|

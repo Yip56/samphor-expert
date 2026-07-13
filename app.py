@@ -46,6 +46,16 @@ _CHIPS: dict[str, list[str]] = {
     "ask_preservation": ["When did it originate?", "How do I learn to play?", "Where is it used?", "What is the Pinpeat ensemble?"],
     "farewell":         [],
     "out_of_scope":     ["What is the Samphor?", "How is it played?", "When did it originate?", "What is it made of?"],
+    "ask_roneat":       ["What is the Pinpeat ensemble?", "What is the Sralai?", "What is the Chhing?", "How is the Samphor played?"],
+    "ask_khmer":        ["What is Angkor Wat?", "What is the Samphor?", "What is the Pinpeat ensemble?", "When did it originate?"],
+    "ask_angkor":       ["What is the history of the Samphor?", "What is Khmer?", "What is the Bayon temple?", "When did it originate?"],
+    "ask_sralai":       ["What is the Pinpeat ensemble?", "What is the Roneat?", "What is the Chhing?", "How is the Samphor played?"],
+    "ask_chhing":       ["What is the Pinpeat ensemble?", "What is the Roneat?", "What is the Sralai?", "How is the Samphor tuned?"],
+    "ask_skor_thom":    ["What is the Pinpeat ensemble?", "How is the Samphor played?", "What is the Chhing?", "What is the Samphor?"],
+    "ask_sbek_thom":    ["What is Robam Kbach Boran?", "What is the Pinpeat ensemble?", "What is the Samphor?", "How is it preserved?"],
+    "ask_robam":        ["What is Sbek Thom?", "What is the Pinpeat ensemble?", "What ceremonies use the Samphor?", "How is it preserved?"],
+    "ask_rufa":         ["How is the Samphor tradition being preserved?", "How do I learn to play the Samphor?", "What happened after the Khmer Rouge?", "What is RUFA?"],
+    "ask_kroeung":      ["How is the Samphor tuned?", "What is the Samphor made of?", "What is the black paste on the Samphor?", "How is it played?"],
 }
 
 
@@ -91,7 +101,7 @@ def _save_review(sid: str, message: str, confidence: float, intent: str | None) 
 
 def _get_reply(user_message: str, context: dict) -> tuple[str, dict]:
     """Route a user message through MLEngine, fall back to RuleBasedEngine."""
-    if _ml._model is not None:
+    if _ml._st_model is not None:
         try:
             return _ml.respond(user_message, context)
         except Exception as exc:
