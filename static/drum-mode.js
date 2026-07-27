@@ -1,9 +1,10 @@
 /* ═══════════════════════════════════════════════════════════════════
-   drum-mode.js — Samphor entrance animation for drum play mode
+   drum-mode.js — Samphor entrance animation + drum play interaction
 
-   Each animation piece is its own function, callable in isolation.
-   Master enterDrumMode() orchestrates the sequence.
-   window.DRUM exposes every piece for testing.
+   Entrance animations : curtains, textile, statues, bot icon, drum UI.
+   Drum interaction    : layered PNG frame animation, zone click
+                         detection, hover highlight, keyboard play.
+   window.DRUM exposes every piece for isolated testing.
 ═══════════════════════════════════════════════════════════════════ */
 (function () {
   'use strict';
@@ -25,8 +26,8 @@
 
   /* ── Helpers ──────────────────────────────────────────────────── */
   function wait(ms) { return new Promise(r => setTimeout(r, ms)); }
-  function el(id) { return document.getElementById(id); }
-  function qs(sel) { return document.querySelector(sel); }
+  function el(id)   { return document.getElementById(id); }
+  function qs(sel)  { return document.querySelector(sel); }
 
   /* ─────────────────────────────────────────────────────────────────
      SINGLE-PIECE ANIMATION FUNCTIONS
@@ -35,68 +36,46 @@
   ───────────────────────────────────────────────────────────────── */
 
   function animateTopCurtain() {
-    const t = TIMING.topCurtain;
-    const wrap = el('curtain-top-wrap');        /* wrapper now owns the transition */
+    const t    = TIMING.topCurtain;
+    const wrap = el('curtain-top-wrap');
     wrap.style.transition = `transform ${t.duration}ms ${t.easing}`;
-    return wait(t.delay).then(() => {
-      wrap.classList.add('dm-in');
-      return wait(t.duration);
-    });
+    return wait(t.delay).then(() => { wrap.classList.add('dm-in'); return wait(t.duration); });
   }
 
   function animateLeftCurtain() {
-    const t = TIMING.sideCurtains;
+    const t    = TIMING.sideCurtains;
     const wrap = el('curtain-left-wrap');
     wrap.style.transition = `transform ${t.duration}ms ${t.easing}`;
-    return wait(t.delay).then(() => {
-      wrap.classList.add('dm-in');
-      return wait(t.duration);
-    });
+    return wait(t.delay).then(() => { wrap.classList.add('dm-in'); return wait(t.duration); });
   }
 
   function animateRightCurtain() {
-    const t = TIMING.sideCurtains;
+    const t    = TIMING.sideCurtains;
     const wrap = el('curtain-right-wrap');
     wrap.style.transition = `transform ${t.duration}ms ${t.easing}`;
-    return wait(t.delay).then(() => {
-      wrap.classList.add('dm-in');
-      return wait(t.duration);
-    });
+    return wait(t.delay).then(() => { wrap.classList.add('dm-in'); return wait(t.duration); });
   }
 
   function animateBottomTextile() {
-    const t = TIMING.bottomTextile;
-    const wrap = el('textile-bottom-wrap');     /* wrapper now owns the transition */
+    const t    = TIMING.bottomTextile;
+    const wrap = el('textile-bottom-wrap');
     wrap.style.transition = `transform ${t.duration}ms ${t.easing}`;
-    return wait(t.delay).then(() => {
-      wrap.classList.add('dm-in');
-      return wait(t.duration);
-    });
+    return wait(t.delay).then(() => { wrap.classList.add('dm-in'); return wait(t.duration); });
   }
 
-  /* ── Fix 1: Statue rise from fully below stage floor + shake ──── */
+  /* Fix 1: Statue rise from fully below stage floor + shake */
   function animateStatues() {
-    const t = TIMING.statues;
+    const t     = TIMING.statues;
     const left  = el('statue-left-wrap');
     const right = el('statue-right-wrap');
-
-    /* Only set `bottom` inline (dynamic per viewport); opacity and transform
-       live in CSS so the .dm-in class can override them without specificity
-       conflicts from inline styles (inline > class in the cascade).
-       CSS initial state: opacity:0, transform:translateY(100%) — hidden below stage.
-       CSS .dm-in state:  opacity:1, transform:translateY(0)    — at resting position. */
     const textileWrap = el('textile-bottom-wrap');
-    const textileH = textileWrap ? textileWrap.offsetHeight : 64;
+    const textileH    = textileWrap ? textileWrap.offsetHeight : 64;
     left.style.bottom  = textileH + 'px';
     right.style.bottom = textileH + 'px';
-
     const trans = `opacity ${t.duration}ms ease-in, transform ${t.duration}ms ${t.easing}`;
     left.style.transition  = trans;
     right.style.transition = trans;
-
     return wait(t.delay).then(() => {
-      /* .dm-in transitions: opacity → 1, transform → translateY(0).
-         CSS shake animation also fires on the inner .statue-shake div. */
       left.classList.add('dm-in');
       right.classList.add('dm-in');
       return wait(t.duration);
@@ -104,36 +83,27 @@
   }
 
   function animateBotIcon() {
-    const t = TIMING.botIcon;
+    const t    = TIMING.botIcon;
     const elem = el('drum-bot-icon');
     elem.style.transition = `opacity ${t.duration}ms ${t.easing}, transform ${t.duration}ms ${t.easing}`;
-    return wait(t.delay).then(() => {
-      elem.classList.add('dm-in');
-      return wait(t.duration);
-    });
+    return wait(t.delay).then(() => { elem.classList.add('dm-in'); return wait(t.duration); });
   }
 
   function animateDrumCircles() {
-    const t = TIMING.drumCircles;
+    const t    = TIMING.drumCircles;
     const elem = el('drum-circles');
     elem.style.transition = `opacity ${t.duration}ms ${t.easing}, transform ${t.duration}ms ${t.easing}`;
-    return wait(t.delay).then(() => {
-      elem.classList.add('dm-in');
-      return wait(t.duration);
-    });
+    return wait(t.delay).then(() => { elem.classList.add('dm-in'); return wait(t.duration); });
   }
 
   function animateNoteLanes() {
-    const t = TIMING.noteLanes;
+    const t    = TIMING.noteLanes;
     const elem = el('note-lanes');
     elem.style.transition = `opacity ${t.duration}ms ${t.easing}`;
-    return wait(t.delay).then(() => {
-      elem.classList.add('dm-in');
-      return wait(t.duration);
-    });
+    return wait(t.delay).then(() => { elem.classList.add('dm-in'); return wait(t.duration); });
   }
 
-  /* ── Fix 2: Chat UI retreat — chat box + input + action bar ────── */
+  /* Fix 2: Chat UI retreat — chat box + input + action bar */
   function minimizeChatBox() {
     const t        = TIMING.chatBox;
     const chatEl   = el('chat-box');
@@ -143,50 +113,187 @@
     const fadeTrans = `opacity ${t.duration}ms ease`;
     if (chatEl)   chatEl.style.transition   = `opacity 0.3s ease, ${moveTrans}`;
     if (inputEl)  inputEl.style.transition  = moveTrans;
-    if (actionEl) actionEl.style.transition = fadeTrans;   /* Fix 2: fade, not snap */
-    return wait(t.delay).then(() => {
-      document.body.classList.add('drum-mode');
-      return wait(t.duration);
-    });
+    if (actionEl) actionEl.style.transition = fadeTrans;
+    return wait(t.delay).then(() => { document.body.classList.add('drum-mode'); return wait(t.duration); });
   }
 
   /* ── Show overlays ─────────────────────────────────────────────── */
   function showTheatre() { el('theatre-overlay').style.display = 'block'; }
-  function showDrumUI()   { el('drum-ui').style.display        = 'flex';  }
+  function showDrumUI()  { el('drum-ui').style.display         = 'flex';  }
+
+  /* ─────────────────────────────────────────────────────────────────
+     DRUM INTERACTION
+     Frame animation: each drum zone has 4 PNG frames that play at
+     50 ms intervals then snap back to the idle (first) frame.
+     Zone detection: click distance from the container centre,
+     thresholds expressed as fractions of the half-width so they
+     scale automatically with the CSS container size.
+     Keyboard: left hand (A-F) → BigHead; right hand (H-L) → SmallHead.
+  ───────────────────────────────────────────────────────────────── */
+  const RIM_FRAMES    = ['11','12','13','14'];
+  const MIDDLE_FRAMES = ['7','8','9','10'];
+  const CENTER_FRAMES = ['3','4','5','6'];
+  const IMG_BASE      = '/static/Drum_image/SamphorDrumDesign';
+
+  /* Keys closer to the centre gap map to inner zones.
+     A/L = outermost (Rim), D-F / H-J = innermost (Center). */
+  const KEY_MAP = {
+    'a': { head: 'big',   zone: 'rim'    },
+    's': { head: 'big',   zone: 'middle' },
+    'd': { head: 'big',   zone: 'center' },
+    'f': { head: 'big',   zone: 'center' },
+    'h': { head: 'small', zone: 'center' },
+    'j': { head: 'small', zone: 'middle' },
+    'k': { head: 'small', zone: 'rim'    },
+    'l': { head: 'small', zone: 'rim'    },
+  };
+
+  let drumModeActive = false;
+
+  function initDrumImages() {
+    el('Rim').src         = IMG_BASE + RIM_FRAMES[0]    + '.png';
+    el('Middle').src      = IMG_BASE + MIDDLE_FRAMES[0] + '.png';
+    el('Center').src      = IMG_BASE + CENTER_FRAMES[0] + '.png';
+    el('SmallRim').src    = IMG_BASE + RIM_FRAMES[0]    + '.png';
+    el('SmallMiddle').src = IMG_BASE + MIDDLE_FRAMES[0] + '.png';
+    el('SmallCenter').src = IMG_BASE + CENTER_FRAMES[0] + '.png';
+  }
+
+  function playFrames(imgEl, frames) {
+    frames.forEach((frame, i) => {
+      setTimeout(() => { imgEl.src = IMG_BASE + frame + '.png'; }, 50 * i);
+    });
+    /* Snap back to idle frame after the last animation step */
+    setTimeout(() => { imgEl.src = IMG_BASE + frames[0] + '.png'; }, 50 * frames.length);
+  }
+
+  function hitZone(head, zone) {
+    const layerId = {
+      big:   { rim: 'Rim',      middle: 'Middle',      center: 'Center'      },
+      small: { rim: 'SmallRim', middle: 'SmallMiddle', center: 'SmallCenter' },
+    }[head][zone];
+    const frames = { rim: RIM_FRAMES, middle: MIDDLE_FRAMES, center: CENTER_FRAMES }[zone];
+    if (layerId && frames) playFrames(el(layerId), frames);
+  }
+
+  function flashLane(key) {
+    const lane = qs(`.note-lane[data-key="${key.toUpperCase()}"]`);
+    if (!lane) return;
+    lane.classList.add('lane-hit');
+    setTimeout(() => lane.classList.remove('lane-hit'), 180);
+  }
+
+  /* Zone thresholds derived from drum.html original pixel values,
+     normalised to the rendered container's half-width so they hold
+     at any CSS size. BigHead: 100/177/260 out of 350 half-px.
+                       SmallHead: 65/113/170 out of 225 half-px.  */
+  function distToZone(dist, containerW, isBig) {
+    const r = containerW / 2;
+    if (isBig) {
+      if (dist <= r * 0.286) return 'center';
+      if (dist <= r * 0.506) return 'middle';
+      if (dist <= r * 0.743) return 'rim';
+    } else {
+      if (dist <= r * 0.289) return 'center';
+      if (dist <= r * 0.502) return 'middle';
+      if (dist <= r * 0.756) return 'rim';
+    }
+    return null;
+  }
+
+  function setLayerBrightness(ids, value) {
+    ids.forEach(id => { const e = el(id); if (e) e.style.filter = `brightness(${value})`; });
+  }
+
+  function resetDrumLayers() {
+    setLayerBrightness(['Rim','Middle','Center','SmallRim','SmallMiddle','SmallCenter'], 1);
+  }
+
+  function onDrumClick(e) {
+    if (!drumModeActive) return;
+    const bigR   = el('BigHead').getBoundingClientRect();
+    const smallR = el('SmallHead').getBoundingClientRect();
+
+    function zoneFor(rect, isBig) {
+      return distToZone(
+        Math.hypot(e.clientX - (rect.left + rect.width / 2),
+                   e.clientY - (rect.top  + rect.height / 2)),
+        rect.width, isBig
+      );
+    }
+
+    if (e.clientX >= bigR.left && e.clientX <= bigR.right &&
+        e.clientY >= bigR.top  && e.clientY <= bigR.bottom) {
+      const zone = zoneFor(bigR, true);
+      if (zone) hitZone('big', zone);
+    } else if (e.clientX >= smallR.left && e.clientX <= smallR.right &&
+               e.clientY >= smallR.top  && e.clientY <= smallR.bottom) {
+      const zone = zoneFor(smallR, false);
+      if (zone) hitZone('small', zone);
+    }
+  }
+
+  function onDrumMouseMove(e) {
+    if (!drumModeActive) return;
+    resetDrumLayers();
+    const bigR   = el('BigHead').getBoundingClientRect();
+    const smallR = el('SmallHead').getBoundingClientRect();
+
+    function highlight(rect, isBig, prefix) {
+      const zone = distToZone(
+        Math.hypot(e.clientX - (rect.left + rect.width / 2),
+                   e.clientY - (rect.top  + rect.height / 2)),
+        rect.width, isBig
+      );
+      const layerId = { rim: prefix+'Rim', middle: prefix+'Middle', center: prefix+'Center' }[zone];
+      if (layerId) setLayerBrightness([layerId], 1.25);
+    }
+
+    if (e.clientX >= bigR.left && e.clientX <= bigR.right &&
+        e.clientY >= bigR.top  && e.clientY <= bigR.bottom) {
+      highlight(bigR, true, '');
+    } else if (e.clientX >= smallR.left && e.clientX <= smallR.right &&
+               e.clientY >= smallR.top  && e.clientY <= smallR.bottom) {
+      highlight(smallR, false, 'Small');
+    }
+  }
+
+  function onDrumKeyDown(e) {
+    if (!drumModeActive || e.repeat) return;
+    const mapping = KEY_MAP[e.key.toLowerCase()];
+    if (!mapping) return;
+    hitZone(mapping.head, mapping.zone);
+    flashLane(e.key.toLowerCase());
+  }
 
   /* ─────────────────────────────────────────────────────────────────
      RESET — snaps all pieces back to pre-animation state.
-     Useful for replaying the sequence or individual pieces.
   ───────────────────────────────────────────────────────────────── */
   function resetDrumMode() {
+    drumModeActive = false;
+
     /* Suppress transitions so pieces snap to off-screen instantly */
-    const wrapperIds = [
-      'curtain-top-wrap', 'curtain-left-wrap', 'curtain-right-wrap',
-      'textile-bottom-wrap',
-    ];
-    wrapperIds.forEach(id => {
-      const e = el(id);
-      if (!e) return;
+    ['curtain-top-wrap','curtain-left-wrap','curtain-right-wrap','textile-bottom-wrap']
+      .forEach(id => {
+        const e = el(id); if (!e) return;
+        e.style.transition = 'none';
+        e.classList.remove('dm-in');
+      });
+
+    ['statue-left-wrap','statue-right-wrap'].forEach(id => {
+      const e = el(id); if (!e) return;
+      e.style.transition = 'none';
+      e.style.bottom     = '';
+      e.classList.remove('dm-in');
+    });
+
+    ['drum-bot-icon','drum-circles','note-lanes'].forEach(id => {
+      const e = el(id); if (!e) return;
       e.style.transition = 'none';
       e.classList.remove('dm-in');
     });
 
-    /* Statue wraps: only `bottom` was set inline (Fix 1); opacity/transform
-       revert to CSS defaults automatically when .dm-in is removed. */
-    ['statue-left-wrap', 'statue-right-wrap'].forEach(id => {
-      const e = el(id);
-      if (!e) return;
-      e.style.transition = 'none';
-      e.style.bottom     = '';   /* remove dynamic bottom → CSS fallback 68px */
-      e.classList.remove('dm-in');
-    });
-
-    ['drum-bot-icon', 'drum-circles', 'note-lanes'].forEach(id => {
-      const e = el(id);
-      if (!e) return;
-      e.style.transition = 'none';
-      e.classList.remove('dm-in');
-    });
+    resetDrumLayers();
 
     el('theatre-overlay').style.display = 'none';
     el('drum-ui').style.display         = 'none';
@@ -203,43 +310,35 @@
 
   /* ─────────────────────────────────────────────────────────────────
      MASTER ENTRANCE SEQUENCE
-     Sequence:
-       t=0    chat UI retreats (concurrent, no await)
-              theatre curtains + textile all start (concurrent)
-              bot icon relocates (concurrent)
-       after textile: statues rise with shake (chained)
-       after bot icon: drum circles → note lanes (chained)
+     t=0    chat UI retreats (concurrent)
+            theatre curtains + textile all start (concurrent)
+            bot icon relocates (concurrent)
+     after textile: statues rise (chained)
+     after bot icon: drum circles → note lanes (chained)
   ───────────────────────────────────────────────────────────────── */
   async function enterDrumMode() {
     showTheatre();
     showDrumUI();
+    initDrumImages();
+    drumModeActive = true;
 
-    /* One rAF ensures display:block is painted before transitions fire */
+    /* One rAF ensures display:block/flex is painted before transitions fire */
     await wait(16);
 
-    /* Chat UI retreats concurrently — no await */
     minimizeChatBox();
 
-    /* Theatre — all start together; keep textile promise for statue chaining */
     const textileP = animateBottomTextile();
-    animateTopCurtain();   /* concurrent */
-    animateLeftCurtain();  /* concurrent, has own configured delay */
-    animateRightCurtain(); /* concurrent */
+    animateTopCurtain();
+    animateLeftCurtain();
+    animateRightCurtain();
 
-    /* Statues only after textile lands */
     const statuesP = textileP.then(() => animateStatues());
 
-    /* Bot icon starts concurrently with theatre */
     const botIconP = animateBotIcon();
-
-    /* Drum circles after bot icon */
     await botIconP;
     await animateDrumCircles();
-
-    /* Note lanes after drum circles */
     await animateNoteLanes();
 
-    /* statuesP resolves in the background */
     void statuesP;
   }
 
@@ -261,6 +360,9 @@
     showDrumUI,
     resetDrumMode,
     enterDrumMode,
+    hitZone,
+    flashLane,
+    initDrumImages,
   };
 
   window.DRUM          = DRUM;
@@ -269,5 +371,11 @@
   document.addEventListener('DOMContentLoaded', () => {
     const exitBtn = el('drum-exit-btn');
     if (exitBtn) exitBtn.addEventListener('click', () => resetDrumMode());
+
+    /* Drum interaction listeners — guarded by drumModeActive flag,
+       so they're silent while the chat UI is active. */
+    document.addEventListener('click',     onDrumClick);
+    document.addEventListener('mousemove', onDrumMouseMove);
+    document.addEventListener('keydown',   onDrumKeyDown);
   });
 })();

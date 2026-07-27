@@ -272,25 +272,43 @@
 }
 #drum-bot-icon.dm-in { opacity: 1; transform: translateY(0); }
 
-/* Drum circles */
+/* Drum image container */
 #drum-circles {
-  display: flex; gap: 32px;
+  display: flex; justify-content: center; align-items: center;
   margin-top: 20px; flex-shrink: 0;
   opacity: 0; transform: scale(0.9);
 }
 #drum-circles.dm-in { opacity: 1; transform: scale(1); }
 
-.drum-circle {
-  width: 120px; height: 120px; border-radius: 50%;
-  background:
-    radial-gradient(circle at 38% 35%, rgba(255,255,255,0.22) 0%, transparent 55%),
-    linear-gradient(145deg, rgba(3,46,161,0.85) 0%, rgba(22,2,17,0.90) 100%);
-  border: 3px solid rgba(255,255,255,0.18);
-  box-shadow: 0 8px 32px rgba(3,46,161,0.35), inset 0 2px 8px rgba(255,255,255,0.10);
-  cursor: pointer; pointer-events: auto;
-  transition: transform 0.08s ease;
+.drum-wrapper {
+  display: flex; flex-direction: row;
+  justify-content: center; align-items: center;
+  gap: 40px;
 }
-.drum-circle:active { transform: scale(0.93); }
+
+/* Big head container */
+.img-container {
+  position: relative;
+  width: 280px; height: 280px;
+  cursor: pointer; pointer-events: auto; flex-shrink: 0;
+}
+
+/* Small head container */
+.img-container.small-head {
+  width: 180px; height: 180px;
+}
+
+/* All drum layers fill the container and stack via z-index */
+.img-container img {
+  position: absolute;
+  width: 100%; height: 100%;
+  top: 0; left: 0;
+  transition: filter 0.06s ease;
+  user-select: none; -webkit-user-drag: none;
+}
+#Rim,      #SmallRim    { z-index: 1; }
+#Middle,   #SmallMiddle { z-index: 2; }
+#Center,   #SmallCenter { z-index: 3; }
 
 /* Note lanes */
 #note-lanes {
@@ -311,6 +329,18 @@
   border-radius: 4px 4px 0 0;
   display: flex; align-items: flex-end; justify-content: center;
   padding-bottom: 10px;
+  transition: background 0.06s ease, border-color 0.06s ease;
+}
+
+/* Key rectangle flash when hit (mouse click or keyboard) */
+.note-lane.lane-hit {
+  background: linear-gradient(to bottom, rgba(255,190,40,0.32) 0%, rgba(255,120,0,0.20) 100%);
+  border-color: rgba(255,190,40,0.55);
+  border-bottom-color: rgba(255,190,40,0.75);
+}
+.note-lane.lane-hit .note-lane-key {
+  color: #fff;
+  background: rgba(255,140,0,0.55);
 }
 .note-lane-key {
   font-family: 'Manrope', sans-serif; font-size: 12px; font-weight: 700;

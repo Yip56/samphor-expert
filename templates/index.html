@@ -476,8 +476,20 @@ body.chat-active .action-bar { display: flex; }
   </div>
 
   <div id="drum-circles">
-    <div class="drum-circle" data-drum="left"  aria-label="Left drum head"></div>
-    <div class="drum-circle" data-drum="right" aria-label="Right drum head"></div>
+    <div class="drum-wrapper">
+      <!-- Big Head (Left) — larger playing surface -->
+      <div class="img-container" id="BigHead" aria-label="Samphor big head — click to play">
+        <img src="/static/Drum_image/SamphorDrumDesign11.png" alt="" id="Rim">
+        <img src="/static/Drum_image/SamphorDrumDesign7.png"  alt="" id="Middle">
+        <img src="/static/Drum_image/SamphorDrumDesign3.png"  alt="" id="Center">
+      </div>
+      <!-- Small Head (Right) — higher-pitched surface -->
+      <div class="img-container small-head" id="SmallHead" aria-label="Samphor small head — click to play">
+        <img src="/static/Drum_image/SamphorDrumDesign11.png" alt="" id="SmallRim">
+        <img src="/static/Drum_image/SamphorDrumDesign7.png"  alt="" id="SmallMiddle">
+        <img src="/static/Drum_image/SamphorDrumDesign3.png"  alt="" id="SmallCenter">
+      </div>
+    </div>
   </div>
 
   <div id="note-lanes" role="group" aria-label="Note lanes">
