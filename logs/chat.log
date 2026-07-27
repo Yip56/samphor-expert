@@ -228,3 +228,138 @@ AttributeError: 'MLEngine' object has no attribute '_model'
 2026-07-13 13:05:27  127.0.0.1 - - [13/Jul/2026 13:05:27] "POST /chat HTTP/1.1" 200 -
 2026-07-13 13:05:28  [0f2dffe3] Session reset
 2026-07-13 13:05:28  127.0.0.1 - - [13/Jul/2026 13:05:28] "POST /reset HTTP/1.1" 200 -
+2026-07-17 22:10:10  [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5000
+ * Running on http://192.168.1.50:5000
+2026-07-17 22:10:10  [33mPress CTRL+C to quit[0m
+2026-07-17 22:10:15  127.0.0.1 - - [17/Jul/2026 22:10:15] "GET / HTTP/1.1" 200 -
+2026-07-17 22:10:15  127.0.0.1 - - [17/Jul/2026 22:10:15] "GET /static/drum-mode.css HTTP/1.1" 200 -
+2026-07-17 22:10:15  127.0.0.1 - - [17/Jul/2026 22:10:15] "GET /images/statue.png HTTP/1.1" 200 -
+2026-07-17 22:10:15  127.0.0.1 - - [17/Jul/2026 22:10:15] "GET /images/textiles.png HTTP/1.1" 200 -
+2026-07-17 22:10:15  127.0.0.1 - - [17/Jul/2026 22:10:15] "GET /static/drum-mode.js HTTP/1.1" 200 -
+2026-07-17 22:10:15  127.0.0.1 - - [17/Jul/2026 22:10:15] "GET /images/top-curtain.png HTTP/1.1" 200 -
+2026-07-17 22:10:15  127.0.0.1 - - [17/Jul/2026 22:10:15] "GET /images/side%20curtain.png HTTP/1.1" 200 -
+2026-07-17 22:10:15  127.0.0.1 - - [17/Jul/2026 22:10:15] "[33mGET /favicon.ico HTTP/1.1[0m" 404 -
+2026-07-17 22:15:25  127.0.0.1 - - [17/Jul/2026 22:15:25] "GET / HTTP/1.1" 200 -
+2026-07-17 22:15:25  127.0.0.1 - - [17/Jul/2026 22:15:25] "[36mGET /static/drum-mode.css HTTP/1.1[0m" 304 -
+2026-07-17 22:15:25  127.0.0.1 - - [17/Jul/2026 22:15:25] "[36mGET /images/top-curtain.png HTTP/1.1[0m" 304 -
+2026-07-17 22:15:25  127.0.0.1 - - [17/Jul/2026 22:15:25] "GET /images/side%20curtain.png HTTP/1.1" 200 -
+2026-07-17 22:15:25  127.0.0.1 - - [17/Jul/2026 22:15:25] "[36mGET /images/textiles.png HTTP/1.1[0m" 304 -
+2026-07-17 22:15:25  127.0.0.1 - - [17/Jul/2026 22:15:25] "GET /images/statue.png HTTP/1.1" 200 -
+2026-07-17 22:15:25  127.0.0.1 - - [17/Jul/2026 22:15:25] "[36mGET /static/drum-mode.js HTTP/1.1[0m" 304 -
+2026-07-17 22:15:25  127.0.0.1 - - [17/Jul/2026 22:15:25] "GET / HTTP/1.1" 200 -
+2026-07-17 22:15:25  127.0.0.1 - - [17/Jul/2026 22:15:25] "[36mGET /static/drum-mode.css HTTP/1.1[0m" 304 -
+2026-07-17 22:15:25  127.0.0.1 - - [17/Jul/2026 22:15:25] "[36mGET /images/top-curtain.png HTTP/1.1[0m" 304 -
+2026-07-17 22:15:25  127.0.0.1 - - [17/Jul/2026 22:15:25] "[36mGET /images/side%20curtain.png HTTP/1.1[0m" 304 -
+2026-07-17 22:15:25  127.0.0.1 - - [17/Jul/2026 22:15:25] "[36mGET /images/textiles.png HTTP/1.1[0m" 304 -
+2026-07-17 22:15:25  127.0.0.1 - - [17/Jul/2026 22:15:25] "[36mGET /images/statue.png HTTP/1.1[0m" 304 -
+2026-07-17 22:15:25  127.0.0.1 - - [17/Jul/2026 22:15:25] "[36mGET /static/drum-mode.js HTTP/1.1[0m" 304 -
+2026-07-17 22:15:26  127.0.0.1 - - [17/Jul/2026 22:15:26] "GET / HTTP/1.1" 200 -
+2026-07-17 22:15:26  127.0.0.1 - - [17/Jul/2026 22:15:26] "[36mGET /static/drum-mode.css HTTP/1.1[0m" 304 -
+2026-07-17 22:15:26  127.0.0.1 - - [17/Jul/2026 22:15:26] "[36mGET /images/top-curtain.png HTTP/1.1[0m" 304 -
+2026-07-17 22:15:26  127.0.0.1 - - [17/Jul/2026 22:15:26] "[36mGET /images/side%20curtain.png HTTP/1.1[0m" 304 -
+2026-07-17 22:15:26  127.0.0.1 - - [17/Jul/2026 22:15:26] "[36mGET /images/textiles.png HTTP/1.1[0m" 304 -
+2026-07-17 22:15:26  127.0.0.1 - - [17/Jul/2026 22:15:26] "[36mGET /images/statue.png HTTP/1.1[0m" 304 -
+2026-07-17 22:15:26  127.0.0.1 - - [17/Jul/2026 22:15:26] "[36mGET /static/drum-mode.js HTTP/1.1[0m" 304 -
+2026-07-17 22:15:28  [a4b9ce96] USER: 'Tell me about Angkor and the Samphor'  |  INTENT: fallback/clarify  |  CONF: 0%  |  REPLY: "Lovely to meet you, Tell Me! What do you do for a living, if you don't mind me a"
+2026-07-17 22:15:28  127.0.0.1 - - [17/Jul/2026 22:15:28] "POST /chat HTTP/1.1" 200 -
+2026-07-17 22:21:17  127.0.0.1 - - [17/Jul/2026 22:21:17] "GET / HTTP/1.1" 200 -
+2026-07-17 22:21:17  127.0.0.1 - - [17/Jul/2026 22:21:17] "[36mGET /static/drum-mode.css HTTP/1.1[0m" 304 -
+2026-07-17 22:21:17  127.0.0.1 - - [17/Jul/2026 22:21:17] "[33mGET /images/top-curtain.png HTTP/1.1[0m" 404 -
+2026-07-17 22:21:17  127.0.0.1 - - [17/Jul/2026 22:21:17] "[33mGET /images/side%20curtain.png HTTP/1.1[0m" 404 -
+2026-07-17 22:21:17  127.0.0.1 - - [17/Jul/2026 22:21:17] "[33mGET /images/textiles.png HTTP/1.1[0m" 404 -
+2026-07-17 22:21:17  127.0.0.1 - - [17/Jul/2026 22:21:17] "[33mGET /images/statue.png HTTP/1.1[0m" 404 -
+2026-07-17 22:21:17  127.0.0.1 - - [17/Jul/2026 22:21:17] "[36mGET /static/drum-mode.js HTTP/1.1[0m" 304 -
+2026-07-17 22:21:17  127.0.0.1 - - [17/Jul/2026 22:21:17] "GET / HTTP/1.1" 200 -
+2026-07-17 22:21:17  127.0.0.1 - - [17/Jul/2026 22:21:17] "[36mGET /static/drum-mode.css HTTP/1.1[0m" 304 -
+2026-07-17 22:21:17  127.0.0.1 - - [17/Jul/2026 22:21:17] "[33mGET /images/top-curtain.png HTTP/1.1[0m" 404 -
+2026-07-17 22:21:17  127.0.0.1 - - [17/Jul/2026 22:21:17] "[33mGET /images/side%20curtain.png HTTP/1.1[0m" 404 -
+2026-07-17 22:21:17  127.0.0.1 - - [17/Jul/2026 22:21:17] "[33mGET /images/textiles.png HTTP/1.1[0m" 404 -
+2026-07-17 22:21:17  127.0.0.1 - - [17/Jul/2026 22:21:17] "[33mGET /images/statue.png HTTP/1.1[0m" 404 -
+2026-07-17 22:21:17  127.0.0.1 - - [17/Jul/2026 22:21:17] "[36mGET /static/drum-mode.js HTTP/1.1[0m" 304 -
+2026-07-17 22:21:17  127.0.0.1 - - [17/Jul/2026 22:21:17] "GET / HTTP/1.1" 200 -
+2026-07-17 22:21:17  127.0.0.1 - - [17/Jul/2026 22:21:17] "[36mGET /static/drum-mode.css HTTP/1.1[0m" 304 -
+2026-07-17 22:21:17  127.0.0.1 - - [17/Jul/2026 22:21:17] "[33mGET /images/top-curtain.png HTTP/1.1[0m" 404 -
+2026-07-17 22:21:17  127.0.0.1 - - [17/Jul/2026 22:21:17] "[33mGET /images/side%20curtain.png HTTP/1.1[0m" 404 -
+2026-07-17 22:21:17  127.0.0.1 - - [17/Jul/2026 22:21:17] "[33mGET /images/textiles.png HTTP/1.1[0m" 404 -
+2026-07-17 22:21:17  127.0.0.1 - - [17/Jul/2026 22:21:17] "[33mGET /images/statue.png HTTP/1.1[0m" 404 -
+2026-07-17 22:21:17  127.0.0.1 - - [17/Jul/2026 22:21:17] "[36mGET /static/drum-mode.js HTTP/1.1[0m" 304 -
+2026-07-17 22:21:46  127.0.0.1 - - [17/Jul/2026 22:21:46] "GET / HTTP/1.1" 200 -
+2026-07-17 22:21:46  127.0.0.1 - - [17/Jul/2026 22:21:46] "[36mGET /static/drum-mode.css HTTP/1.1[0m" 304 -
+2026-07-17 22:21:46  127.0.0.1 - - [17/Jul/2026 22:21:46] "[33mGET /images/top-curtain.png HTTP/1.1[0m" 404 -
+2026-07-17 22:21:46  127.0.0.1 - - [17/Jul/2026 22:21:46] "[33mGET /images/textiles.png HTTP/1.1[0m" 404 -
+2026-07-17 22:21:46  127.0.0.1 - - [17/Jul/2026 22:21:46] "[33mGET /images/side%20curtain.png HTTP/1.1[0m" 404 -
+2026-07-17 22:21:46  127.0.0.1 - - [17/Jul/2026 22:21:46] "GET /images/statue.png HTTP/1.1" 200 -
+2026-07-17 22:21:46  127.0.0.1 - - [17/Jul/2026 22:21:46] "[36mGET /static/drum-mode.js HTTP/1.1[0m" 304 -
+2026-07-17 22:29:45  127.0.0.1 - - [17/Jul/2026 22:29:45] "GET / HTTP/1.1" 200 -
+2026-07-17 22:29:45  127.0.0.1 - - [17/Jul/2026 22:29:45] "[36mGET /static/drum-mode.css HTTP/1.1[0m" 304 -
+2026-07-17 22:29:45  127.0.0.1 - - [17/Jul/2026 22:29:45] "[33mGET /images/top-curtain.png HTTP/1.1[0m" 404 -
+2026-07-17 22:29:45  127.0.0.1 - - [17/Jul/2026 22:29:45] "[33mGET /images/textiles.png HTTP/1.1[0m" 404 -
+2026-07-17 22:29:45  127.0.0.1 - - [17/Jul/2026 22:29:45] "[33mGET /images/side%20curtain.png HTTP/1.1[0m" 404 -
+2026-07-17 22:29:45  127.0.0.1 - - [17/Jul/2026 22:29:45] "GET /images/statue.png HTTP/1.1" 200 -
+2026-07-17 22:29:45  127.0.0.1 - - [17/Jul/2026 22:29:45] "[36mGET /static/drum-mode.js HTTP/1.1[0m" 304 -
+2026-07-17 22:33:13  127.0.0.1 - - [17/Jul/2026 22:33:13] "GET / HTTP/1.1" 200 -
+2026-07-17 22:33:13  127.0.0.1 - - [17/Jul/2026 22:33:13] "[36mGET /static/drum-mode.css HTTP/1.1[0m" 304 -
+2026-07-17 22:33:13  127.0.0.1 - - [17/Jul/2026 22:33:13] "GET /images/top-curtain.png HTTP/1.1" 200 -
+2026-07-17 22:33:13  127.0.0.1 - - [17/Jul/2026 22:33:13] "[33mGET /images/side%20curtain.png HTTP/1.1[0m" 404 -
+2026-07-17 22:33:13  127.0.0.1 - - [17/Jul/2026 22:33:13] "[33mGET /images/textiles.png HTTP/1.1[0m" 404 -
+2026-07-17 22:33:13  127.0.0.1 - - [17/Jul/2026 22:33:13] "[36mGET /images/statue.png HTTP/1.1[0m" 304 -
+2026-07-17 22:33:13  127.0.0.1 - - [17/Jul/2026 22:33:13] "[36mGET /static/drum-mode.js HTTP/1.1[0m" 304 -
+2026-07-17 22:35:02  127.0.0.1 - - [17/Jul/2026 22:35:02] "GET / HTTP/1.1" 200 -
+2026-07-17 22:35:02  127.0.0.1 - - [17/Jul/2026 22:35:02] "[36mGET /static/drum-mode.css HTTP/1.1[0m" 304 -
+2026-07-17 22:35:02  127.0.0.1 - - [17/Jul/2026 22:35:02] "[36mGET /images/top-curtain.png HTTP/1.1[0m" 304 -
+2026-07-17 22:35:02  127.0.0.1 - - [17/Jul/2026 22:35:02] "GET /images/side%20curtain.png HTTP/1.1" 200 -
+2026-07-17 22:35:02  127.0.0.1 - - [17/Jul/2026 22:35:02] "GET /images/textiles.png HTTP/1.1" 200 -
+2026-07-17 22:35:02  127.0.0.1 - - [17/Jul/2026 22:35:02] "[36mGET /images/statue.png HTTP/1.1[0m" 304 -
+2026-07-17 22:35:02  127.0.0.1 - - [17/Jul/2026 22:35:02] "[36mGET /static/drum-mode.js HTTP/1.1[0m" 304 -
+2026-07-17 23:01:36  127.0.0.1 - - [17/Jul/2026 23:01:36] "GET / HTTP/1.1" 200 -
+2026-07-17 23:01:36  127.0.0.1 - - [17/Jul/2026 23:01:36] "GET /static/drum-mode.css HTTP/1.1" 200 -
+2026-07-17 23:01:36  127.0.0.1 - - [17/Jul/2026 23:01:36] "[36mGET /images/top-curtain.png HTTP/1.1[0m" 304 -
+2026-07-17 23:01:36  127.0.0.1 - - [17/Jul/2026 23:01:36] "[36mGET /images/side%20curtain.png HTTP/1.1[0m" 304 -
+2026-07-17 23:01:36  127.0.0.1 - - [17/Jul/2026 23:01:36] "[36mGET /images/textiles.png HTTP/1.1[0m" 304 -
+2026-07-17 23:01:36  127.0.0.1 - - [17/Jul/2026 23:01:36] "[36mGET /images/statue.png HTTP/1.1[0m" 304 -
+2026-07-17 23:01:36  127.0.0.1 - - [17/Jul/2026 23:01:36] "GET /static/drum-mode.js HTTP/1.1" 200 -
+2026-07-17 23:02:34  [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5000
+ * Running on http://192.168.1.50:5000
+2026-07-17 23:02:34  [33mPress CTRL+C to quit[0m
+2026-07-17 23:08:26  127.0.0.1 - - [17/Jul/2026 23:08:26] "GET / HTTP/1.1" 200 -
+2026-07-17 23:08:27  127.0.0.1 - - [17/Jul/2026 23:08:27] "[36mGET /images/top-curtain.png HTTP/1.1[0m" 304 -
+2026-07-17 23:08:27  127.0.0.1 - - [17/Jul/2026 23:08:27] "[36mGET /static/drum-mode.css HTTP/1.1[0m" 304 -
+2026-07-17 23:08:27  127.0.0.1 - - [17/Jul/2026 23:08:27] "[36mGET /static/drum-mode.js HTTP/1.1[0m" 304 -
+2026-07-17 23:08:27  127.0.0.1 - - [17/Jul/2026 23:08:27] "[36mGET /images/side%20curtain.png HTTP/1.1[0m" 304 -
+2026-07-17 23:08:27  127.0.0.1 - - [17/Jul/2026 23:08:27] "[36mGET /images/statue.png HTTP/1.1[0m" 304 -
+2026-07-17 23:08:27  127.0.0.1 - - [17/Jul/2026 23:08:27] "[36mGET /images/textiles.png HTTP/1.1[0m" 304 -
+2026-07-17 23:08:27  127.0.0.1 - - [17/Jul/2026 23:08:27] "[33mGET /favicon.ico HTTP/1.1[0m" 404 -
+2026-07-17 23:08:33  127.0.0.1 - - [17/Jul/2026 23:08:33] "GET / HTTP/1.1" 200 -
+2026-07-17 23:08:33  127.0.0.1 - - [17/Jul/2026 23:08:33] "[36mGET /static/drum-mode.css HTTP/1.1[0m" 304 -
+2026-07-17 23:08:33  127.0.0.1 - - [17/Jul/2026 23:08:33] "[36mGET /images/top-curtain.png HTTP/1.1[0m" 304 -
+2026-07-17 23:08:33  127.0.0.1 - - [17/Jul/2026 23:08:33] "[36mGET /images/side%20curtain.png HTTP/1.1[0m" 304 -
+2026-07-17 23:08:33  127.0.0.1 - - [17/Jul/2026 23:08:33] "[36mGET /images/textiles.png HTTP/1.1[0m" 304 -
+2026-07-17 23:08:33  127.0.0.1 - - [17/Jul/2026 23:08:33] "[36mGET /images/statue.png HTTP/1.1[0m" 304 -
+2026-07-17 23:08:33  127.0.0.1 - - [17/Jul/2026 23:08:33] "[36mGET /static/drum-mode.js HTTP/1.1[0m" 304 -
+2026-07-17 23:08:33  127.0.0.1 - - [17/Jul/2026 23:08:33] "[36mGET /static/drum-mode.css HTTP/1.1[0m" 304 -
+2026-07-27 18:57:21  [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5000
+ * Running on http://192.168.1.51:5000
+2026-07-27 18:57:21  [33mPress CTRL+C to quit[0m
+2026-07-27 18:57:25  127.0.0.1 - - [27/Jul/2026 18:57:25] "GET / HTTP/1.1" 200 -
+2026-07-27 18:57:25  127.0.0.1 - - [27/Jul/2026 18:57:25] "GET /images/side%20curtain.png HTTP/1.1" 200 -
+2026-07-27 18:57:25  127.0.0.1 - - [27/Jul/2026 18:57:25] "GET /images/top-curtain.png HTTP/1.1" 200 -
+2026-07-27 18:57:25  127.0.0.1 - - [27/Jul/2026 18:57:25] "GET /static/drum-mode.css HTTP/1.1" 200 -
+2026-07-27 18:57:25  127.0.0.1 - - [27/Jul/2026 18:57:25] "GET /images/textiles.png HTTP/1.1" 200 -
+2026-07-27 18:57:25  127.0.0.1 - - [27/Jul/2026 18:57:25] "GET /images/statue.png HTTP/1.1" 200 -
+2026-07-27 18:57:25  127.0.0.1 - - [27/Jul/2026 18:57:25] "GET /static/drum-mode.js HTTP/1.1" 200 -
+2026-07-27 18:57:25  127.0.0.1 - - [27/Jul/2026 18:57:25] "[33mGET /favicon.ico HTTP/1.1[0m" 404 -
+2026-07-27 18:57:27  [6cb78fda] Session reset
+2026-07-27 18:57:27  127.0.0.1 - - [27/Jul/2026 18:57:27] "POST /reset HTTP/1.1" 200 -
+2026-07-27 18:59:13  [6cb78fda] Session reset
+2026-07-27 18:59:13  127.0.0.1 - - [27/Jul/2026 18:59:13] "POST /reset HTTP/1.1" 200 -
+2026-07-27 22:20:45  [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5000
+ * Running on http://192.168.1.51:5000
+2026-07-27 22:20:45  [33mPress CTRL+C to quit[0m

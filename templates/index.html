@@ -7,6 +7,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700&family=DM+Sans:opsz,wght@9..40,400;9..40,500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/static/drum-mode.css">
 <style>
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -419,6 +420,78 @@ body.chat-active .action-bar { display: flex; }
 <!-- Floating bubble canvas -->
 <div id="bubble-canvas" aria-hidden="true"></div>
 
+<!-- ═══ Theatre Overlay (drum mode entrance) ════════════════════════
+     Images start off-screen; JS adds .dm-in to trigger each slide.
+     Side curtains reuse one image; right instance is CSS-mirrored.
+══════════════════════════════════════════════════════════════════ -->
+<div id="theatre-overlay" aria-hidden="true">
+
+  <!-- Warm ember ambient glows — Fix 5 background dim, Fix 6 recolor -->
+  <div class="stage-glow stage-glow-1"></div>
+  <div class="stage-glow stage-glow-2"></div>
+  <div class="stage-glow stage-glow-3"></div>
+
+  <!-- Top curtain wrapper needed for ::before/::after shading overlays -->
+  <div id="curtain-top-wrap">
+    <img id="curtain-top" src="/images/top-curtain.png" alt="">
+  </div>
+
+  <div id="curtain-left-wrap">
+    <img src="/images/side%20curtain.png" alt="">
+  </div>
+  <div id="curtain-right-wrap">
+    <!-- scaleX(-1) on img via CSS — no separate right-side asset -->
+    <img src="/images/side%20curtain.png" alt="">
+  </div>
+
+  <!-- Textile wrapper needed for ::before shading overlay -->
+  <div id="textile-bottom-wrap">
+    <img id="textile-bottom" src="/images/textiles.png" alt="">
+  </div>
+
+  <!-- statue-shake inner div handles horizontal tremor; outer wrap handles vertical rise -->
+  <div id="statue-left-wrap">
+    <div class="statue-shake">
+      <img src="/images/statue.png" alt="">
+    </div>
+  </div>
+  <div id="statue-right-wrap">
+    <div class="statue-shake">
+      <img src="/images/statue.png" alt="">
+    </div>
+  </div>
+
+</div>
+
+<!-- ═══ Drum UI (bot icon, drum circles, note lanes) ═══════════════ -->
+<div id="drum-ui" aria-label="Drum play mode">
+  <button id="drum-exit-btn" title="Back to chat">← Back to chat</button>
+
+  <div id="drum-bot-icon" aria-hidden="true">
+    <svg width="28" height="28" viewBox="0 0 24 24" fill="none"
+         stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83
+               M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"/>
+    </svg>
+  </div>
+
+  <div id="drum-circles">
+    <div class="drum-circle" data-drum="left"  aria-label="Left drum head"></div>
+    <div class="drum-circle" data-drum="right" aria-label="Right drum head"></div>
+  </div>
+
+  <div id="note-lanes" role="group" aria-label="Note lanes">
+    <div class="note-lane" data-key="A"><span class="note-lane-key">A</span></div>
+    <div class="note-lane" data-key="S"><span class="note-lane-key">S</span></div>
+    <div class="note-lane" data-key="D"><span class="note-lane-key">D</span></div>
+    <div class="note-lane" data-key="F"><span class="note-lane-key">F</span></div>
+    <div class="note-lane" data-key="H"><span class="note-lane-key">H</span></div>
+    <div class="note-lane" data-key="J"><span class="note-lane-key">J</span></div>
+    <div class="note-lane" data-key="K"><span class="note-lane-key">K</span></div>
+    <div class="note-lane" data-key="L"><span class="note-lane-key">L</span></div>
+  </div>
+</div>
+
 <!-- Intro overlay -->
 <div id="intro-overlay">
   <div id="intro-icon">
@@ -446,8 +519,9 @@ body.chat-active .action-bar { display: flex; }
 
 <!-- Floating action buttons -->
 <div class="action-bar" aria-label="Chat actions">
-  <button id="download-btn" class="action-btn" title="Download chat history">Save history</button>
-  <button id="reset-btn"    class="action-btn danger" title="Reset session">Reset</button>
+  <button id="drum-mode-btn" class="action-btn" title="Switch to drum play mode">Drum mode</button>
+  <button id="download-btn"  class="action-btn" title="Download chat history">Save history</button>
+  <button id="reset-btn"     class="action-btn danger" title="Reset session">Reset</button>
 </div>
 
 <div class="app">
@@ -954,6 +1028,12 @@ if (hasHistory) {
   // First-time user — run intro
   runIntroSequence();
 }
+
+// ── Drum mode trigger ────────────────────────────────────────────────────────
+document.getElementById('drum-mode-btn').addEventListener('click', () => {
+  if (typeof enterDrumMode === 'function') enterDrumMode();
+});
 </script>
+<script src="/static/drum-mode.js"></script>
 </body>
 </html>

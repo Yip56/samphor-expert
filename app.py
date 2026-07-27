@@ -18,7 +18,7 @@ import time
 import uuid
 from datetime import datetime
 
-from flask import Flask, jsonify, render_template, request, session
+from flask import Flask, jsonify, render_template, request, send_from_directory, session
 
 from engine.chat_engine import RuleBasedEngine
 from engine.ml_engine import MLEngine
@@ -154,6 +154,11 @@ def _ensure_session_id():
 @app.route("/")
 def index():
     return render_template("index.html")
+
+
+@app.route("/images/<path:filename>")
+def serve_image(filename):
+    return send_from_directory("images", filename)
 
 
 # =============================================================================

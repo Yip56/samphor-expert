@@ -1,0 +1,337 @@
+/* ═══════════════════════════════════════════════════════════════════
+   DRUM MODE — Theatre entrance & game UI
+   Fixes applied:
+     Fix 1 — Statue rises from below stage floor with decreasing shake
+     Fix 2 — Action bar fades out (not snap-hidden) during drum mode
+     Fix 3 — Gradient shading/shadows for curtain depth + statue contact shadow
+     Fix 4 — Rim-light glows on centre-facing edges, with per-element flicker
+     Fix 5 — Dark stage background behind the drum UI
+     Fix 6 — Warm ember ambient stage glows (amber/orange palette)
+═══════════════════════════════════════════════════════════════════ */
+
+/* ─── Shared pseudo-element base ─────────────────────────────────── */
+#curtain-top-wrap::before, #curtain-top-wrap::after,
+#curtain-left-wrap::before, #curtain-left-wrap::after,
+#curtain-right-wrap::before, #curtain-right-wrap::after,
+#textile-bottom-wrap::before {
+  content: '';
+  position: absolute;
+  pointer-events: none;
+}
+
+/* ─── Theatre Overlay ─────────────────────────────────────────────── */
+/* Fix 5: dark stage background covers the bright page behind it */
+#theatre-overlay {
+  position: fixed; inset: 0; z-index: 20;
+  pointer-events: none; overflow: hidden;
+  display: none;
+  background: #0c0812; /* deep purple-black stage */
+}
+#theatre-overlay.dm-active { display: block; }
+
+/* ─── Fix 6: Warm ember ambient stage glows ───────────────────────── */
+.stage-glow {
+  position: absolute;
+  border-radius: 50%;
+  pointer-events: none;
+  opacity: 0;
+  /* fade in after curtains arrive, then gently pulse (Fix 6) */
+  transition: opacity 2s ease 0.8s;
+}
+#theatre-overlay.dm-active .stage-glow { opacity: 1; }
+
+/* Each glow has its own palette, size, position, and flicker rhythm  */
+.stage-glow-1 {
+  width: 700px; height: 460px;
+  left: 50%; top: 38%;
+  transform: translate(-50%, -50%);
+  background: radial-gradient(ellipse at center,
+    rgba(255,80,10,0.13) 0%, rgba(220,60,0,0.06) 50%, transparent 75%);
+  filter: blur(48px);
+  animation: dmAmberPulse1 3.2s ease-in-out 2.8s infinite;
+}
+.stage-glow-2 {
+  width: 420px; height: 320px;
+  left: 18%; top: 62%;
+  background: radial-gradient(ellipse at center,
+    rgba(210,90,10,0.11) 0%, rgba(180,50,0,0.05) 55%, transparent 78%);
+  filter: blur(36px);
+  animation: dmAmberPulse2 2.7s ease-in-out 3.3s infinite;
+}
+.stage-glow-3 {
+  width: 420px; height: 320px;
+  right: 18%; top: 62%;
+  background: radial-gradient(ellipse at center,
+    rgba(190,70,0,0.11) 0%, rgba(160,40,0,0.05) 55%, transparent 78%);
+  filter: blur(36px);
+  animation: dmAmberPulse3 3.8s ease-in-out 2.3s infinite;
+}
+
+/* Pulse keyframes start at 1 to match the fade-in transition's end value */
+@keyframes dmAmberPulse1 { 0%,100% { opacity: 1; } 45% { opacity: 0.82; } 70% { opacity: 0.95; } }
+@keyframes dmAmberPulse2 { 0%,100% { opacity: 1; } 30% { opacity: 0.78; } 65% { opacity: 0.92; } }
+@keyframes dmAmberPulse3 { 0%,100% { opacity: 1; } 38% { opacity: 0.85; } 72% { opacity: 0.80; } }
+
+/* ─── Top curtain wrapper ─────────────────────────────────────────── */
+#curtain-top-wrap {
+  position: absolute; top: 0; left: 0; right: 0;
+  transform: translateY(-100%);
+  z-index: 2;
+}
+#curtain-top-wrap img { width: 100%; height: auto; display: block; }
+#curtain-top-wrap.dm-in { transform: translateY(0); }
+
+/* Fix 3: depth shadow along top edge (fabric falls from above) */
+#curtain-top-wrap::after {
+  inset: 0;
+  background: linear-gradient(to bottom,
+    rgba(0,0,0,0.30) 0%,
+    rgba(0,0,0,0.10) 40%,
+    transparent 75%);
+  z-index: 1;
+}
+/* Fix 4: warm rim-light on bottom/inner edge, flickering */
+#curtain-top-wrap::before {
+  left: 0; right: 0; bottom: 0; height: 55%;
+  background: linear-gradient(to top, transparent 0%, rgba(255,130,40,0.14) 100%);
+  z-index: 2;
+  --rf-dur: 3.7s; --rf-delay: 0.9s;
+  animation: dmRimFlicker var(--rf-dur) ease-in-out var(--rf-delay) infinite;
+}
+
+/* ─── Side curtains ───────────────────────────────────────────────── */
+#curtain-left-wrap {
+  position: absolute; top: 0; left: 0; height: 100%;
+  transform: translateX(-100%);
+  z-index: 2;
+}
+#curtain-left-wrap img { height: 100%; width: auto; display: block; }
+#curtain-left-wrap.dm-in { transform: translateX(0); }
+
+/* Fix 3: fold depth — darker on the far/outer left edge */
+#curtain-left-wrap::after {
+  inset: 0;
+  background: linear-gradient(to right,
+    rgba(0,0,0,0.32) 0%,
+    rgba(0,0,0,0.10) 35%,
+    transparent 65%);
+  z-index: 1;
+}
+/* Fix 4: warm rim-light on inner (right/centre-facing) edge */
+#curtain-left-wrap::before {
+  top: 0; right: 0; bottom: 0; width: 45%;
+  background: linear-gradient(to left, transparent 0%, rgba(255,130,40,0.16) 100%);
+  z-index: 2;
+  --rf-dur: 3.2s; --rf-delay: 0s;
+  animation: dmRimFlicker var(--rf-dur) ease-in-out var(--rf-delay) infinite;
+}
+
+#curtain-right-wrap {
+  position: absolute; top: 0; right: 0; height: 100%;
+  transform: translateX(100%);
+  z-index: 2;
+}
+#curtain-right-wrap img { height: 100%; width: auto; display: block; transform: scaleX(-1); }
+#curtain-right-wrap.dm-in { transform: translateX(0); }
+
+/* Fix 3: fold depth — darker on the far/outer right edge */
+#curtain-right-wrap::after {
+  inset: 0;
+  background: linear-gradient(to left,
+    rgba(0,0,0,0.32) 0%,
+    rgba(0,0,0,0.10) 35%,
+    transparent 65%);
+  z-index: 1;
+}
+/* Fix 4: warm rim-light on inner (left/centre-facing) edge */
+#curtain-right-wrap::before {
+  top: 0; left: 0; bottom: 0; width: 45%;
+  background: linear-gradient(to right, transparent 0%, rgba(255,130,40,0.16) 100%);
+  z-index: 2;
+  --rf-dur: 2.8s; --rf-delay: 0.5s;
+  animation: dmRimFlicker var(--rf-dur) ease-in-out var(--rf-delay) infinite;
+}
+
+/* ─── Bottom textile wrapper ──────────────────────────────────────── */
+#textile-bottom-wrap {
+  position: absolute; bottom: 0; left: 0; right: 0;
+  transform: translateY(100%);
+  z-index: 3; /* above side curtains so it overlaps slightly */
+}
+#textile-bottom-wrap img { width: 100%; height: auto; display: block; }
+#textile-bottom-wrap.dm-in { transform: translateY(0); }
+
+/* Fix 3: soft drop shadow from bottom textile into the stage.
+   Applied to the img, not the wrapper, so it doesn't shadow the
+   rim-light ::before overlay as well.                              */
+#textile-bottom-wrap img { filter: drop-shadow(0 -8px 16px rgba(0,0,0,0.40)); }
+
+/* Fix 4: warm rim-light on the top/inner edge of the textile */
+#textile-bottom-wrap::before {
+  top: 0; left: 0; right: 0; height: 55%;
+  background: linear-gradient(to bottom, rgba(255,130,40,0.18) 0%, transparent 100%);
+  z-index: 1;
+  --rf-dur: 4.1s; --rf-delay: 0.3s;
+  animation: dmRimFlicker var(--rf-dur) ease-in-out var(--rf-delay) infinite;
+}
+
+/* ─── Statues ─────────────────────────────────────────────────────── */
+/* Fix 1: initial state has statues fully below stage floor.
+   JS only sets `bottom` inline (dynamic textile height);
+   opacity and transform live in CSS so the .dm-in class can override
+   them without inline-style specificity conflicts.                    */
+#statue-left-wrap,
+#statue-right-wrap {
+  position: absolute;
+  bottom: 68px;        /* fallback; overridden by JS after textile height measured */
+  opacity: 0;
+  transform: translateY(100%); /* 100% of own height = fully hidden below stage */
+  z-index: 4;
+}
+#statue-left-wrap  { left: 40px; }
+#statue-right-wrap { right: 40px; }
+
+/* Resting state: base of plinth aligns with top of textile */
+#statue-left-wrap.dm-in,
+#statue-right-wrap.dm-in { opacity: 1; transform: translateY(0); }
+
+/* Fix 3: contact shadow grounds the statues on the stage floor */
+#statue-left-wrap img,
+#statue-right-wrap img {
+  width: 96px; height: auto; display: block;
+  filter: drop-shadow(0 10px 18px rgba(0,0,0,0.60));
+}
+#statue-right-wrap img { transform: scaleX(-1); }
+
+/* Fix 1: horizontal shake wrapper — triggered when parent gets .dm-in */
+.statue-shake { position: relative; }
+#statue-left-wrap.dm-in  .statue-shake,
+#statue-right-wrap.dm-in .statue-shake {
+  animation: statueShake 650ms ease-out forwards;
+}
+
+/* Fix 1: decreasing-amplitude horizontal tremor */
+@keyframes statueShake {
+  0%   { transform: translateX(0); }
+  8%   { transform: translateX(-3px); }
+  16%  { transform: translateX(3px); }
+  24%  { transform: translateX(-2.5px); }
+  32%  { transform: translateX(2px); }
+  42%  { transform: translateX(-1.5px); }
+  50%  { transform: translateX(1.2px); }
+  59%  { transform: translateX(-0.8px); }
+  67%  { transform: translateX(0.5px); }
+  76%  { transform: translateX(-0.3px); }
+  85%  { transform: translateX(0.2px); }
+  100% { transform: translateX(0); }
+}
+
+/* ─── Fix 4: Rim-light flicker keyframes ─────────────────────────── */
+/* Subtle oscillation — each ::before has its own duration/delay via --rf-* */
+@keyframes dmRimFlicker {
+  0%, 100% { opacity: 1.00; }
+  28%       { opacity: 0.65; }
+  55%       { opacity: 0.88; }
+  78%       { opacity: 0.72; }
+}
+
+/* ─── Drum UI ─────────────────────────────────────────────────────── */
+#drum-ui {
+  position: fixed; inset: 0; z-index: 21;
+  display: none; flex-direction: column; align-items: center;
+  padding-bottom: 72px;
+  overflow: hidden;
+}
+#drum-ui.dm-active { display: flex; }
+
+/* Exit / back-to-chat button */
+#drum-exit-btn {
+  position: absolute; top: 16px; right: 20px; z-index: 1;
+  background: rgba(255,255,255,0.14); border: 1px solid rgba(255,255,255,0.22);
+  backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
+  border-radius: 20px; padding: 7px 16px;
+  font-family: 'Manrope', sans-serif; font-size: 11px; font-weight: 600;
+  color: rgba(255,255,255,0.72); letter-spacing: 0.06em; text-transform: uppercase;
+  cursor: pointer;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.30);
+  transition: background 0.18s, color 0.18s;
+  pointer-events: auto;
+}
+#drum-exit-btn:hover { background: rgba(255,255,255,0.25); color: #fff; }
+
+/* Bot icon */
+#drum-bot-icon {
+  width: 56px; height: 56px;
+  background: linear-gradient(135deg, #032EA1 0%, #1a4fd6 100%);
+  border-radius: 18px;
+  display: flex; align-items: center; justify-content: center;
+  box-shadow: 0 8px 32px rgba(3,46,161,0.50), 0 0 0 1px rgba(255,255,255,0.12);
+  margin-top: 44px; flex-shrink: 0;
+  opacity: 0;
+  transform: translateY(32px);
+}
+#drum-bot-icon.dm-in { opacity: 1; transform: translateY(0); }
+
+/* Drum circles */
+#drum-circles {
+  display: flex; gap: 32px;
+  margin-top: 20px; flex-shrink: 0;
+  opacity: 0; transform: scale(0.9);
+}
+#drum-circles.dm-in { opacity: 1; transform: scale(1); }
+
+.drum-circle {
+  width: 120px; height: 120px; border-radius: 50%;
+  background:
+    radial-gradient(circle at 38% 35%, rgba(255,255,255,0.22) 0%, transparent 55%),
+    linear-gradient(145deg, rgba(3,46,161,0.85) 0%, rgba(22,2,17,0.90) 100%);
+  border: 3px solid rgba(255,255,255,0.18);
+  box-shadow: 0 8px 32px rgba(3,46,161,0.35), inset 0 2px 8px rgba(255,255,255,0.10);
+  cursor: pointer; pointer-events: auto;
+  transition: transform 0.08s ease;
+}
+.drum-circle:active { transform: scale(0.93); }
+
+/* Note lanes */
+#note-lanes {
+  display: flex; gap: 3px;
+  margin-top: 16px; flex: 1;
+  width: 100%; max-width: 920px; padding: 0 20px;
+  align-self: center;
+  opacity: 0;
+  pointer-events: auto;
+}
+#note-lanes.dm-in { opacity: 1; }
+
+.note-lane {
+  flex: 1; position: relative; min-height: 0; overflow: hidden;
+  border: 1px solid rgba(255,255,255,0.10);
+  border-bottom: 3px solid rgba(255,255,255,0.18);
+  background: linear-gradient(to bottom, rgba(255,255,255,0.03) 0%, rgba(255,255,255,0.07) 100%);
+  border-radius: 4px 4px 0 0;
+  display: flex; align-items: flex-end; justify-content: center;
+  padding-bottom: 10px;
+}
+.note-lane-key {
+  font-family: 'Manrope', sans-serif; font-size: 12px; font-weight: 700;
+  color: rgba(255,255,255,0.55); text-transform: uppercase; letter-spacing: 0.05em;
+  background: rgba(0,0,0,0.35); border-radius: 5px; padding: 2px 7px;
+  pointer-events: none;
+}
+.note-lane:nth-child(4) { margin-right: 14px; }
+
+/* ─── Chat box + input slide-out ─────────────────────────────────── */
+/* Transitions are set via JS before body.drum-mode is applied */
+body.drum-mode #chat-box       { transform: translateY(110%); }
+body.drum-mode .input-bar-wrapper { transform: translateY(110%); }
+
+/* Fix 2: action bar fades out (pointer-events removed so it's not tab-accessible) */
+body.drum-mode .action-bar {
+  opacity: 0;
+  pointer-events: none;
+  /* transition set via JS before class is applied */
+}
+
+/* ─── Drum-mode trigger button in the chat action bar ────────────── */
+#drum-mode-btn { background: linear-gradient(135deg, rgba(3,46,161,0.10) 0%, rgba(3,46,161,0.05) 100%); }
+#drum-mode-btn:hover { color: #032EA1; }
