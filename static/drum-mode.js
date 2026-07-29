@@ -154,16 +154,25 @@
   };
 
   const SOUNDS = {
-    center_mute: new Audio('/static/Sounds/Center-mute.wav'),
-    center_open: new Audio('/static/Sounds/Center-open.wav'),
-    middle:      new Audio('/static/Sounds/Middle-Layer.wav'),
-    rim:         new Audio('/static/Sounds/Rim.wav'),
+    big: {
+      center_mute: new Audio('/static/Sounds/Center-mute.wav'),
+      center_open: new Audio('/static/Sounds/Center-open.wav'),
+      middle:      new Audio('/static/Sounds/Middle-Layer.wav'),
+      rim:         new Audio('/static/Sounds/Rim.wav'),
+    },
+    small: {
+      center_mute: new Audio('/static/Sounds/Hi-pitch-CenterMute.wav'),
+      center_open: new Audio('/static/Sounds/Hi-pitch-CenterOpen.wav'),
+      middle:      new Audio('/static/Sounds/Hi-pitch-MiddleLayer.wav'),
+      rim:         new Audio('/static/Sounds/Hi-pitch-Rim.wav'),
+    },
   };
 
-  function playDrumSound(zone, isMute) {
-    const snd = zone === 'center'
-      ? (isMute ? SOUNDS.center_mute : SOUNDS.center_open)
-      : zone === 'middle' ? SOUNDS.middle : SOUNDS.rim;
+  function playDrumSound(zone, isMute, head) {
+    const bank = SOUNDS[head];
+    const snd  = zone === 'center'
+      ? (isMute ? bank.center_mute : bank.center_open)
+      : zone === 'middle' ? bank.middle : bank.rim;
     snd.currentTime = 0;
     snd.play().catch(() => {});
   }
@@ -238,7 +247,7 @@
     }[head][zone];
     const frames = { rim: RIM_FRAMES, middle: MIDDLE_FRAMES, center: CENTER_FRAMES }[zone];
     if (layerId && frames) playFrames(el(layerId), frames);
-    playDrumSound(zone, !!isMute);
+    playDrumSound(zone, !!isMute, head);
 
     let x, y;
     if (clientX !== undefined) {
