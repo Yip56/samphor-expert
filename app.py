@@ -15,6 +15,8 @@ import json
 import logging
 import os
 import time
+import urllib.parse
+import urllib.request
 import uuid
 from datetime import datetime
 
@@ -29,6 +31,38 @@ from knowledge.samphor_kb import RICH_MEDIA
 # =============================================================================
 _ml   = MLEngine()
 _rule = RuleBasedEngine()
+
+# Exact chip-text → intent map.  When the user message exactly matches a chip
+# we served, bypass the ML model entirely to prevent misclassification
+# (e.g. "How is it played?" was mapping to ask_ceremonies at 79% confidence).
+_CHIP_INTENT_MAP: dict[str, str] = {
+    "What is the Samphor?":              "ask_definition",
+    "What is the Samphor drum?":         "ask_definition",
+    "What does it look like?":           "ask_shape",
+    "What is it made of?":               "ask_material",
+    "How is it played?":                 "ask_playing",
+    "How is the Samphor played?":        "ask_playing",
+    "How is it tuned?":                  "ask_tuning",
+    "Where is it used?":                 "ask_ceremonies",
+    "What ceremonies use the Samphor?":  "ask_ceremonies",
+    "When did it originate?":            "ask_history",
+    "What is the history of the Samphor?": "ask_history",
+    "How is it preserved?":              "ask_preservation",
+    "What is the Pinpeat ensemble?":     "ask_pinpeat",
+    "What is the Pinpeat?":              "ask_pinpeat",
+    "How do I learn to play it?":        "ask_learning",
+    "How do I learn to play?":           "ask_learning",
+    "How does it compare to other drums?": "ask_compare",
+    "Tell me about Angkor and the Samphor": "ask_angkor",
+    "What is Angkor Wat?":               "ask_angkor",
+    "What is Khmer?":                    "ask_khmer",
+    "What is the Roneat?":               "ask_roneat",
+    "What is the Sralai?":               "ask_sralai",
+    "What is the Chhing?":               "ask_chhing",
+    "What is Robam Kbach Boran?":        "ask_robam",
+    "What is Sbek Thom?":                "ask_sbek_thom",
+    "What is RUFA?":                     "ask_rufa",
+}
 
 # Fix 5 — Quick reply chips: suggested follow-up questions per intent.
 _CHIPS: dict[str, list[str]] = {
@@ -99,8 +133,40 @@ def _save_review(sid: str, message: str, confidence: float, intent: str | None) 
         pass
 
 
+# Reverse map: chip text → intent (used for answered-intent deduplication).
+_CHIP_TO_INTENT: dict[str, str] = {
+    chip: intent
+    for intent, chips in _CHIPS.items()
+    for chip in chips
+}
+# Merge explicit chip-intent overrides into the reverse map.
+_CHIP_TO_INTENT.update(_CHIP_INTENT_MAP)
+
+
 def _get_reply(user_message: str, context: dict) -> tuple[str, dict]:
-    """Route a user message through MLEngine, fall back to RuleBasedEngine."""
+    """Route a user message through MLEngine, fall back to RuleBasedEngine.
+
+    Exact chip-text matches bypass the ML model to prevent misclassification
+    (e.g. "How is it played?" was mapping to ask_ceremonies at 79% conf).
+    """
+    from knowledge.samphor_kb import INTENT_RESPONSES
+    import random as _random
+
+    # Only apply chip shortcut after onboarding is done.
+    if context.get("onboarding_step", "done") == "done":
+        chip_intent = _CHIP_INTENT_MAP.get(user_message.strip())
+        if chip_intent:
+            responses = INTENT_RESPONSES.get(chip_intent, [])
+            if responses:
+                reply = _random.choice(responses)
+                updated = {
+                    **context,
+                    "last_intent":      chip_intent,
+                    "last_response":    reply,
+                    "last_confidence":  1.0,
+                }
+                return reply, updated
+
     if _ml._st_model is not None:
         try:
             return _ml.respond(user_message, context)
@@ -182,6 +248,7 @@ def chat():
         return jsonify({"response": "Your message is too long. Please keep it under 500 characters."}), 400
 
     context = session.get("chat_context", {})
+    # Only trigger onboarding if the frontend intro hasn't already set user_name.
     if "onboarding_step" not in context and "user_name" not in context:
         context = {"onboarding_step": "name"}
 
@@ -191,11 +258,16 @@ def chat():
 
     reply, updated_context = _get_reply(user_message, context)
 
-    session["chat_context"] = updated_context
-
     intent = updated_context.get("last_intent") or "fallback/clarify"
     conf   = updated_context.get("last_confidence", 0.0)
     sid    = session.get("sid", "?")
+
+    # Deduplicate chips: filter out intents the user has already seen this session.
+    answered = set(updated_context.get("answered_intents", []))
+    answered.add(intent)
+    updated_context["answered_intents"] = list(answered)
+
+    session["chat_context"] = updated_context
 
     # Fix 14: Update analytics counters.
     _stats["total"] += 1
@@ -214,9 +286,44 @@ def chat():
         sid, user_message, intent, conf * 100, reply[:80],
     )
 
-    chips = _CHIPS.get(intent, _CHIPS["out_of_scope"])
-    media = RICH_MEDIA.get(intent, {})   # Fix 7: rich media links per intent
-    return jsonify({"response": reply, "chips": chips, "media": media})
+    raw_chips = _CHIPS.get(intent, _CHIPS["out_of_scope"])
+    # Remove chips whose intent has already been answered this session.
+    fresh_chips = [c for c in raw_chips if _CHIP_TO_INTENT.get(c, "") not in answered]
+    chips = fresh_chips if fresh_chips else raw_chips   # fallback to all if exhausted
+
+    media = RICH_MEDIA.get(intent, {})
+
+    return jsonify({
+        "response":   reply,
+        "chips":      chips,
+        "media":      media,
+        "intent":     intent,
+        "confidence": round(conf * 100, 1),
+    })
+
+
+# =============================================================================
+# ROUTE: /user-context  — called by the HTML intro when it completes,
+#                         so the ML engine skips its own onboarding flow
+#                         and the first real question is never hijacked.
+# =============================================================================
+@app.route("/user-context", methods=["POST"])
+def user_context():
+    data       = request.get_json(force=True)
+    name       = data.get("name", "").strip()
+    occupation = data.get("occupation", "").strip()
+    ctx        = session.get("chat_context", {})
+    ctx["onboarding_step"] = "done"
+    if name:
+        ctx["user_name"]       = name
+    if occupation:
+        ctx["user_occupation"] = occupation
+    session["chat_context"] = ctx
+    _log.info(
+        "[%s] User context pre-set: name=%r, occupation=%r",
+        session.get("sid", "?"), name, occupation,
+    )
+    return jsonify({"status": "ok"})
 
 
 # =============================================================================
@@ -225,13 +332,16 @@ def chat():
 @app.route("/reset", methods=["POST"])
 def reset():
     _ml.reset()
-    # Restart onboarding so the bot re-introduces itself on a fresh session.
-    session["chat_context"] = {"onboarding_step": "name"}
+    # Keep name/occupation from the intro but reset everything else.
+    old_ctx  = session.get("chat_context", {})
+    new_ctx  = {"onboarding_step": "done"}
+    if old_ctx.get("user_name"):
+        new_ctx["user_name"]       = old_ctx["user_name"]
+    if old_ctx.get("user_occupation"):
+        new_ctx["user_occupation"] = old_ctx["user_occupation"]
+    session["chat_context"] = new_ctx
     _log.info("[%s] Session reset", session.get("sid", "?"))
-    return jsonify({
-        "status": "Session reset.",
-        "greeting": "Hello again! May I ask your name so we can start fresh?",
-    })
+    return jsonify({"status": "Session reset."})
 
 
 # =============================================================================
@@ -283,6 +393,50 @@ def admin_review():
         return jsonify({"total": len(entries), "entries": entries[-50:]})
     except FileNotFoundError:
         return jsonify({"total": 0, "entries": []})
+
+
+# =============================================================================
+# ROUTE: /wiki-image  — proxy to Wikipedia REST API to fetch page thumbnails
+# =============================================================================
+@app.route("/wiki-image")
+def wiki_image():
+    wiki_url = request.args.get("url", "")
+    if "wikipedia.org/wiki/" not in wiki_url:
+        return jsonify({"image_url": None})
+    title = wiki_url.split("/wiki/")[-1]
+    api_url = f"https://en.wikipedia.org/api/rest_v1/page/summary/{urllib.parse.quote(title)}"
+    try:
+        req = urllib.request.Request(
+            api_url,
+            headers={"User-Agent": "SamphorExpertBot/1.0 (educational project)"},
+        )
+        with urllib.request.urlopen(req, timeout=6) as resp:
+            data = json.loads(resp.read())
+        image_url = data.get("thumbnail", {}).get("source")
+        _log.info("[wiki-image] title=%r  image=%s", data.get("title", ""), image_url or "none")
+        return jsonify({"image_url": image_url, "title": data.get("title", "")})
+    except Exception:
+        return jsonify({"image_url": None})
+
+
+# =============================================================================
+# ROUTE: /save-history  — saves chat history to logs/ directory
+# =============================================================================
+@app.route("/save-history", methods=["POST"])
+def save_history():
+    data  = request.get_json(force=True)
+    lines = data.get("lines", [])
+    ts    = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
+    filename = f"chat_history_{ts}.txt"
+    path     = os.path.join("logs", filename)
+    try:
+        with open(path, "w", encoding="utf-8") as f:
+            f.write("\n".join(lines))
+        sid = session.get("sid", "?")
+        _log.info("[%s] Chat history saved to %s", sid, filename)
+        return jsonify({"status": "ok", "filename": filename})
+    except OSError as e:
+        return jsonify({"status": "error", "message": str(e)}), 500
 
 
 # =============================================================================

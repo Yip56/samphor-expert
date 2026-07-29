@@ -138,14 +138,52 @@
   /* Keys closer to the centre gap map to inner zones.
      A/L = outermost (Rim), D-F / H-J = innermost (Center). */
   const KEY_MAP = {
-    'a': { head: 'big',   zone: 'rim'    },
-    's': { head: 'big',   zone: 'middle' },
-    'd': { head: 'big',   zone: 'center' },
-    'f': { head: 'big',   zone: 'center' },
-    'h': { head: 'small', zone: 'center' },
-    'j': { head: 'small', zone: 'middle' },
-    'k': { head: 'small', zone: 'rim'    },
-    'l': { head: 'small', zone: 'rim'    },
+    'a': { head: 'big',   zone: 'rim',    mute: false },
+    's': { head: 'big',   zone: 'middle', mute: false },
+    'd': { head: 'big',   zone: 'center', mute: false },
+    'f': { head: 'big',   zone: 'center', mute: true  },
+    'h': { head: 'small', zone: 'center', mute: true  },
+    'j': { head: 'small', zone: 'center', mute: false },
+    'k': { head: 'small', zone: 'middle', mute: false },
+    'l': { head: 'small', zone: 'rim',    mute: false },
+  };
+
+  const HAND_IMG = {
+    big:   { open: '/static/Open_hand_(left).png',  hit: '/static/Open_hand_Hit(left).png',  mute: '/static/Mute(left).png'  },
+    small: { open: '/static/Open_hand_(right).png', hit: '/static/Open_hand_Hit(right).png', mute: '/static/Mute(right).png' },
+  };
+
+  const SOUNDS = {
+    center_mute: new Audio('/static/Sounds/Center-mute.wav'),
+    center_open: new Audio('/static/Sounds/Center-open.wav'),
+    middle:      new Audio('/static/Sounds/Middle-Layer.wav'),
+    rim:         new Audio('/static/Sounds/Rim.wav'),
+  };
+
+  function playDrumSound(zone, isMute) {
+    const snd = zone === 'center'
+      ? (isMute ? SOUNDS.center_mute : SOUNDS.center_open)
+      : zone === 'middle' ? SOUNDS.middle : SOUNDS.rim;
+    snd.currentTime = 0;
+    snd.play().catch(() => {});
+  }
+
+  /* ── Hand zone offsets for keyboard hits ─────────────────────────────
+     Adjust dx (right +) and dy (down +) so each hand lands visually
+     inside the correct ring when keys are pressed.
+     Click hits use the actual cursor position instead.
+  ──────────────────────────────────────────────────────────────────── */
+  const HAND_ZONE_OFFSETS = {
+    big: {
+      center: { dx: 0, dy:   0 },
+      middle: { dx: 0, dy:  55 },
+      rim:    { dx: 0, dy: 105 },
+    },
+    small: {
+      center: { dx: 0, dy:  0 },
+      middle: { dx: 0, dy: 36 },
+      rim:    { dx: 0, dy: 68 },
+    },
   };
 
   let drumModeActive = false;
@@ -167,13 +205,52 @@
     setTimeout(() => { imgEl.src = IMG_BASE + frames[0] + '.png'; }, 50 * frames.length);
   }
 
-  function hitZone(head, zone) {
+  function showHand(x, y, isMute, head) {
+    const imgs = HAND_IMG[head];
+    const hand = document.createElement('img');
+    hand.className       = 'drum-hand';
+    hand.src             = isMute ? imgs.mute : imgs.open;
+    hand.style.left      = x + 'px';
+    hand.style.top       = y + 'px';
+    hand.style.transform = 'translate(-50%, -50%) scale(1.2)';
+    document.body.appendChild(hand);
+
+    /* Two rAFs ensure scale(1.2) is painted before the transition fires */
+    requestAnimationFrame(() => {
+      requestAnimationFrame(() => {
+        hand.style.transition = 'transform 150ms ease-out';
+        hand.style.transform  = 'translate(-50%, -50%) scale(1.0)';
+      });
+    });
+
+    /* Frame 2: swap to impact image after 150 ms, then remove */
+    setTimeout(() => {
+      hand.style.transition = '';
+      hand.src = isMute ? imgs.mute : imgs.hit;
+      setTimeout(() => hand.remove(), 150);
+    }, 150);
+  }
+
+  function hitZone(head, zone, clientX, clientY, isMute) {
     const layerId = {
       big:   { rim: 'Rim',      middle: 'Middle',      center: 'Center'      },
       small: { rim: 'SmallRim', middle: 'SmallMiddle', center: 'SmallCenter' },
     }[head][zone];
     const frames = { rim: RIM_FRAMES, middle: MIDDLE_FRAMES, center: CENTER_FRAMES }[zone];
     if (layerId && frames) playFrames(el(layerId), frames);
+    playDrumSound(zone, !!isMute);
+
+    let x, y;
+    if (clientX !== undefined) {
+      x = clientX; y = clientY;
+    } else {
+      const headEl = el(head === 'big' ? 'BigHead' : 'SmallHead');
+      const rect   = headEl.getBoundingClientRect();
+      const off    = HAND_ZONE_OFFSETS[head][zone];
+      x = rect.left + rect.width  / 2 + off.dx;
+      y = rect.top  + rect.height / 2 + off.dy;
+    }
+    showHand(x, y, !!isMute, head);
   }
 
   function flashLane(key) {
@@ -192,11 +269,11 @@
     if (isBig) {
       if (dist <= r * 0.286) return 'center';
       if (dist <= r * 0.506) return 'middle';
-      if (dist <= r * 0.743) return 'rim';
+      if (dist <= r * 1.0) return 'rim';
     } else {
       if (dist <= r * 0.289) return 'center';
       if (dist <= r * 0.502) return 'middle';
-      if (dist <= r * 0.756) return 'rim';
+      if (dist <= r * 1.0) return 'rim';
     }
     return null;
   }
@@ -225,11 +302,11 @@
     if (e.clientX >= bigR.left && e.clientX <= bigR.right &&
         e.clientY >= bigR.top  && e.clientY <= bigR.bottom) {
       const zone = zoneFor(bigR, true);
-      if (zone) hitZone('big', zone);
+      if (zone) hitZone('big', zone, e.clientX, e.clientY, zone === 'center');
     } else if (e.clientX >= smallR.left && e.clientX <= smallR.right &&
                e.clientY >= smallR.top  && e.clientY <= smallR.bottom) {
       const zone = zoneFor(smallR, false);
-      if (zone) hitZone('small', zone);
+      if (zone) hitZone('small', zone, e.clientX, e.clientY, zone === 'center');
     }
   }
 
@@ -262,7 +339,7 @@
     if (!drumModeActive || e.repeat) return;
     const mapping = KEY_MAP[e.key.toLowerCase()];
     if (!mapping) return;
-    hitZone(mapping.head, mapping.zone);
+    hitZone(mapping.head, mapping.zone, undefined, undefined, mapping.mute);
     flashLane(e.key.toLowerCase());
   }
 
@@ -363,6 +440,11 @@
     hitZone,
     flashLane,
     initDrumImages,
+    showHand,
+    HAND_IMG,
+    HAND_ZONE_OFFSETS,
+    SOUNDS,
+    playDrumSound,
   };
 
   window.DRUM          = DRUM;

@@ -365,3 +365,15 @@ body.drum-mode .action-bar {
 /* ─── Drum-mode trigger button in the chat action bar ────────────── */
 #drum-mode-btn { background: linear-gradient(135deg, rgba(3,46,161,0.10) 0%, rgba(3,46,161,0.05) 100%); }
 #drum-mode-btn:hover { color: #032EA1; }
+
+/* ─── Drum hit hand overlay ──────────────────────────────────────── */
+.drum-hand {
+  position: fixed;
+  width: 80px; height: 80px;
+  object-fit: contain;
+  pointer-events: none;
+  z-index: 999;
+  transform: translate(-50%, -50%) scale(1.2);
+  transform-origin: center center;
+  user-select: none; -webkit-user-drag: none;
+}

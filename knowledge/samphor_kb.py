@@ -360,7 +360,11 @@ RICH_MEDIA: dict[str, dict] = {
     "ask_material": {"links": [
         {"label": "Jackfruit — Wikipedia", "url": "https://en.wikipedia.org/wiki/Jackfruit"},
     ]},
+    "ask_shape": {"links": [
+        {"label": "Samphor — Wikipedia", "url": "https://en.wikipedia.org/wiki/Samphor"},
+    ]},
     "ask_playing": {"links": [
+        {"label": "Samphor — Wikipedia", "url": "https://en.wikipedia.org/wiki/Samphor"},
         {"label": "Pinpeat ensemble — Wikipedia", "url": "https://en.wikipedia.org/wiki/Pinpeat"},
     ]},
     "ask_tuning": {"links": [

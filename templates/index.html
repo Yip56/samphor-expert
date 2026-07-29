@@ -113,16 +113,16 @@ html, body {
 
 /* Typewriter text */
 #intro-text {
-  font-size: 15px; font-weight: 400;
+  font-size: 30px; font-weight: 400;
   color: var(--ink-mid); text-align: center;
-  min-height: 22px; max-width: 380px;
+  min-height: 44px; max-width: 640px;
   opacity: 0; transition: opacity 0.4s ease;
-  line-height: 1.6; margin-bottom: 0;
+  line-height: 1.5; margin-bottom: 0;
 }
 #intro-text.visible { opacity: 1; }
 #intro-text .cursor {
-  display: inline-block; width: 2px; height: 1em;
-  background: var(--navy); margin-left: 1px;
+  display: inline-block; width: 3px; height: 1em;
+  background: var(--navy); margin-left: 2px;
   vertical-align: text-bottom;
   animation: blink 0.8s step-end infinite;
 }
@@ -130,21 +130,22 @@ html, body {
 
 /* Rapport questions in intro */
 #intro-questions {
-  margin-top: 28px;
+  margin-top: 32px;
   display: flex; flex-direction: column; gap: 10px;
-  align-items: center; width: 100%; max-width: 440px;
+  align-items: center; width: 100%; max-width: 580px;
   opacity: 0; transition: opacity 0.4s ease;
   padding: 0 24px;
 }
 #intro-questions.visible { opacity: 1; }
 
 .intro-input-wrap {
-  display: flex; gap: 8px; width: 100%;
+  display: flex; gap: 10px; width: 100%;
   background: #fff;
-  border: 1.5px solid rgba(3,46,161,0.22);
-  border-radius: 12px; padding: 6px 8px 6px 14px;
+  border: 2px solid rgba(3,46,161,0.22);
+  border-radius: 16px; padding: 10px 12px 10px 20px;
   box-shadow: 0 2px 12px rgba(3,46,161,0.08);
   transition: border-color 0.2s, box-shadow 0.2s;
+  cursor: text;
 }
 .intro-input-wrap:focus-within {
   border-color: rgba(3,46,161,0.45);
@@ -152,19 +153,20 @@ html, body {
 }
 #intro-answer {
   flex: 1; border: none; outline: none;
-  font-size: 14px; font-family: 'Manrope', sans-serif;
-  color: var(--ink); background: transparent; padding: 6px 0;
+  font-size: 22px; font-family: 'Manrope', sans-serif;
+  color: var(--ink); background: transparent;
+  padding: 8px 0; min-height: 48px;
 }
 #intro-answer::placeholder { color: #9aa3b2; }
 #intro-submit {
   background: var(--navy);
-  border: none; border-radius: 8px;
-  width: 34px; height: 34px;
+  border: none; border-radius: 10px;
+  width: 46px; height: 46px;
   display: flex; align-items: center; justify-content: center;
   cursor: pointer;
   box-shadow: 0 2px 8px rgba(3,46,161,0.28);
   transition: background 0.18s, transform 0.12s;
-  flex-shrink: 0;
+  flex-shrink: 0; align-self: center;
 }
 #intro-submit:hover { background: #1a4fd6; transform: scale(1.07); }
 #intro-submit:active { background: #021f80; transform: scale(0.95); }
@@ -364,6 +366,72 @@ body.chat-active .action-bar { display: flex; }
 .media-link { font-size: 12px; color: var(--navy); text-decoration: none; opacity: 0.75; transition: opacity 0.15s; }
 .media-link:hover { opacity: 1; text-decoration: underline; }
 
+/* ─── DRUM IMAGE IN CHAT ─────────────────────────────────────────── */
+.msg-drum-img {
+  width: 100%; max-width: 380px;
+  margin-bottom: 8px;
+  border-radius: 16px; overflow: hidden;
+  box-shadow: 0 4px 20px rgba(3,46,161,0.18);
+  background: linear-gradient(135deg,rgba(3,46,161,0.06) 0%,rgba(3,46,161,0.02) 100%);
+}
+.msg-drum-img img {
+  width: 100%; height: auto; display: block;
+}
+
+/* ─── WIKI IMAGE CARDS (2.5× original) ──────────────────────────── */
+.wiki-images {
+  display: flex; flex-wrap: wrap; gap: 12px;
+  padding: 6px 0 8px;
+  animation: floatUp 0.28s cubic-bezier(0.22,0.61,0.36,1) both;
+  animation-delay: 0.12s;
+}
+.wiki-img-card {
+  border-radius: 14px; overflow: hidden;
+  border: 1px solid rgba(3,46,161,0.14);
+  box-shadow: 0 3px 14px rgba(3,46,161,0.12);
+  background: #fff;
+  display: flex; flex-direction: column;
+  width: 325px; flex-shrink: 0;
+  transition: transform 0.15s, box-shadow 0.15s;
+  text-decoration: none;
+}
+.wiki-img-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 6px 24px rgba(3,46,161,0.22);
+}
+.wiki-img-card img {
+  width: 100%; height: 215px;
+  object-fit: cover; display: block;
+}
+.wiki-img-label {
+  font-size: 13px; font-weight: 600;
+  color: var(--ink-mid); padding: 8px 12px 10px;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  letter-spacing: 0.02em;
+}
+
+/* ─── SAVE TOAST ─────────────────────────────────────────────────── */
+#save-toast {
+  position: fixed;
+  bottom: 160px;
+  right: calc(50% - 430px + 16px);
+  background: #fff;
+  border: 1px solid rgba(3,46,161,0.18);
+  border-radius: 12px;
+  padding: 12px 16px;
+  box-shadow: 0 4px 24px rgba(3,46,161,0.16);
+  font-size: 12px; font-family: 'Manrope', sans-serif;
+  color: var(--ink); z-index: 20;
+  max-width: 270px; line-height: 1.55;
+  opacity: 0; transform: translateY(10px);
+  transition: opacity 0.28s ease, transform 0.28s ease;
+  pointer-events: none;
+}
+#save-toast.visible { opacity: 1; transform: translateY(0); }
+#save-toast strong { color: var(--navy); display: block; margin-bottom: 2px; }
+#save-toast span   { color: var(--ink-mid); font-size: 11px; }
+@media (max-width: 900px) { #save-toast { right: 16px; } }
+
 /* ─── INPUT BAR ──────────────────────────────────────────────────── */
 .content-area { flex: 1; position: relative; min-height: 0; overflow: hidden; }
 .input-bar-wrapper { flex-shrink: 0; padding: 10px 24px 24px; }
@@ -468,11 +536,7 @@ body.chat-active .action-bar { display: flex; }
   <button id="drum-exit-btn" title="Back to chat">← Back to chat</button>
 
   <div id="drum-bot-icon" aria-hidden="true">
-    <svg width="28" height="28" viewBox="0 0 24 24" fill="none"
-         stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-      <path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83
-               M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"/>
-    </svg>
+    <img src="/static/Samspert-Icon.png" width="36" height="36" style="display:block;object-fit:contain;" alt="Samspert">
   </div>
 
   <div id="drum-circles">
@@ -511,9 +575,7 @@ body.chat-active .action-bar { display: flex; }
     <div class="beam-ring"></div>
     <div class="beam-ring"></div>
     <div class="intro-logo">
-      <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-        <path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"/>
-      </svg>
+      <img src="/static/Samspert-Icon.png" width="48" height="48" style="display:block;object-fit:contain;" alt="Samspert">
     </div>
   </div>
   <p id="intro-text"><span class="cursor"></span></p>
@@ -542,11 +604,9 @@ body.chat-active .action-bar { display: flex; }
     <!-- Landing -->
     <div id="landing">
       <div class="logo-mark" aria-hidden="true">
-        <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-          <path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"/>
-        </svg>
+        <img src="/static/Samspert-Icon.png" width="36" height="36" style="display:block;object-fit:contain;" alt="Samspert">
       </div>
-      <h1 class="heading">Ask our AI anything</h1>
+      <h1 class="heading">Ask Samspert anything</h1>
       <p class="subheading">Your guide to the Samphor, Cambodia's sacred barrel drum</p>
       <p class="suggestions-label">Try asking</p>
       <div class="landing-chips">
@@ -559,7 +619,7 @@ body.chat-active .action-bar { display: flex; }
 
     <!-- Chat thread -->
     <div id="chat-box">
-      <div id="typing" class="typing-indicator" aria-label="Samphor AI is typing" aria-live="polite">
+      <div id="typing" class="typing-indicator" aria-label="Samspert is typing" aria-live="polite">
         <span></span><span></span><span></span>
       </div>
     </div>
@@ -662,6 +722,13 @@ const introSubmit    = document.getElementById('intro-submit');
 
 function delay(ms) { return new Promise(r => setTimeout(r, ms)); }
 
+function getTimeGreeting() {
+  const h = new Date().getHours();
+  if (h >= 5 && h < 12) return 'Good morning!';
+  if (h >= 12 && h < 17) return 'Good afternoon!';
+  return 'Good evening!';
+}
+
 function typeText(el, text, speed = 28) {
   return new Promise(resolve => {
     el.classList.add('visible');
@@ -695,8 +762,8 @@ async function runIntroSequence() {
   });
   await delay(1200);
 
-  // Step 3: typewriter description
-  await typeText(introText, 'Your intelligent guide to the Samphor — Cambodia\'s sacred barrel drum.', 30);
+  // Step 3: typewriter description with time-aware greeting
+  await typeText(introText, getTimeGreeting() + ' I\'m Samspert, your intelligent guide to the Samphor — Cambodia\'s sacred barrel drum.', 30);
   await delay(600);
 
   // Step 4: rapport questions
@@ -728,22 +795,31 @@ async function submitIntroAnswer() {
     introAnswer.value = '';
     await askNextQuestion();
   } else {
-    // All done — dismiss intro, then greet by name + occupation
+    // All done — dismiss intro, pre-set backend context, then greet
     await delay(200);
     introText.classList.remove('visible');
     introText.textContent = '';
     introQuestions.classList.remove('visible');
     await delay(300);
     try { localStorage.setItem(INTRO_DONE_KEY, JSON.stringify(userData)); } catch(e) {}
-    dismissIntro();
 
-    // Build a personalised greeting using only name + occupation
+    // Tell the backend who this user is so the ML engine skips its own
+    // onboarding and the first real question is never hijacked.
     const name = (userData.name || '').trim();
     const occ  = (userData.occupation || '').trim();
+    fetch('/user-context', {
+      method: 'POST', headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({ name, occupation: occ }),
+    }).catch(() => {});
+
+    dismissIntro();
+
+    // Build a personalised greeting
     let greeting = name ? `Hello, ${name}!` : 'Hello!';
-    greeting += ' I\'m the Samphor AI — your guide to Cambodia\'s sacred barrel drum.';
+    greeting += ' I\'m Samspert — your guide to Cambodia\'s sacred barrel drum.';
     if (occ) {
-      greeting += ` As a ${occ}, you might find the instrument's deep ties to Cambodian court music and ceremonial ritual especially fascinating.`;
+      const cleanOcc = occ.replace(/^(i['’]?m\s+a|i\s+am\s+a|as\s+a|a)\s+/i, '').trim();
+      greeting += ` As a ${cleanOcc}, you might find the instrument's deep ties to Cambodian court music and ceremonial ritual especially fascinating.`;
     }
     greeting += ' What would you like to know?';
 
@@ -753,7 +829,7 @@ async function submitIntroAnswer() {
         'What is the Samphor drum?',
         'How is the Samphor played?',
         'What ceremonies use the Samphor?',
-      ], null);
+      ], null, null, null);
     }, 700);
   }
 }
@@ -767,6 +843,7 @@ introSubmit.addEventListener('click', submitIntroAnswer);
 introAnswer.addEventListener('keydown', e => {
   if (e.key === 'Enter') { e.preventDefault(); submitIntroAnswer(); }
 });
+document.querySelector('.intro-input-wrap').addEventListener('click', () => introAnswer.focus());
 
 /* ═══════════════════════════════════════════════════════════════════
    MAIN CHAT LOGIC
@@ -815,7 +892,7 @@ function parseMessageText(text) {
   return escaped.replace(/\n/g,'<br>');
 }
 
-const BOT_ICON_HTML = `<span class="bot-icon"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"/></svg></span>`;
+const BOT_ICON_HTML = `<span class="bot-icon"><img src="/static/Samspert-Icon.png" width="10" height="10" style="display:block;object-fit:contain;" alt="Samspert"></span>`;
 const SVG_THUMB_UP  = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#56637e" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 9V5a3 3 0 0 0-3-3l-4 9v11h11.28a2 2 0 0 0 2-1.7l1.38-9a2 2 0 0 0-2-2.3H14z"/><path d="M7 22H4a2 2 0 0 1-2-2v-7a2 2 0 0 1 2-2h3"/></svg>`;
 const SVG_THUMB_DN  = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#56637e" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 15v4a3 3 0 0 0 3 3l4-9V2H5.72a2 2 0 0 0-2 1.7l-1.38 9a2 2 0 0 0 2 2.3H10z"/><path d="M17 2h2.67A2.31 2.31 0 0 1 22 4v7a2.31 2.31 0 0 1-2.33 2H17"/></svg>`;
 
@@ -829,13 +906,12 @@ function addUserMessage(text) {
   chatBox.scrollTop = chatBox.scrollHeight;
 }
 
-function addBotMessage(text, chips, media, confidence) {
+function addBotMessage(text, chips, media, confidence, intent) {
   const group = document.createElement('div');
   group.className = 'msg-group bot';
 
-  let html =
-    '<div class="msg-label">' + BOT_ICON_HTML + 'Samphor AI</div>' +
-    '<div class="msg-bubble">' + parseMessageText(text) + '</div>';
+  let html = '<div class="msg-label">' + BOT_ICON_HTML + 'Samspert</div>';
+  html += '<div class="msg-bubble">' + parseMessageText(text) + '</div>';
 
   if (confidence !== undefined && confidence !== null) {
     html += '<div class="confidence-score">' + Math.round(confidence) + '% confidence</div>';
@@ -893,8 +969,46 @@ function addBotMessage(text, chips, media, confidence) {
       linksDiv.appendChild(a);
     });
     chatBox.insertBefore(linksDiv, typing);
+    fetchAndShowWikiImages(linksDiv, media.links, intent);
   }
 
+  chatBox.scrollTop = chatBox.scrollHeight;
+}
+
+// ── Wikipedia image fetcher ──────────────────────────────────────────────────
+// Only fetch for intents where the article image is visually meaningful.
+const WIKI_IMAGE_INTENTS = new Set([
+  'ask_definition', 'ask_shape', 'ask_playing',
+  'ask_history', 'ask_compare', 'ask_angkor', 'ask_sbek_thom',
+  'ask_robam', 'ask_khmer', 'ask_pinpeat',
+]);
+
+async function fetchAndShowWikiImages(container, links, intent) {
+  if (!WIKI_IMAGE_INTENTS.has(intent)) return;
+  if (!links || !links.length) return;
+  const wikiLinks = links.filter(l => l.url.includes('wikipedia.org/wiki/'));
+  if (!wikiLinks.length) return;
+
+  const imagesDiv = document.createElement('div');
+  imagesDiv.className = 'wiki-images';
+  container.before(imagesDiv);
+
+  await Promise.all(wikiLinks.map(async ({ label, url }) => {
+    try {
+      const res  = await fetch('/wiki-image?url=' + encodeURIComponent(url));
+      const data = await res.json();
+      if (!data.image_url) return;
+      const card = document.createElement('a');
+      card.className = 'wiki-img-card';
+      card.href = url; card.target = '_blank'; card.rel = 'noopener noreferrer';
+      card.innerHTML =
+        '<img src="' + data.image_url + '" alt="' + escapeHTML(label) + '" loading="lazy">' +
+        '<div class="wiki-img-label">' + escapeHTML(label) + '</div>';
+      imagesDiv.appendChild(card);
+    } catch(e) {}
+  }));
+
+  if (!imagesDiv.children.length) imagesDiv.remove();
   chatBox.scrollTop = chatBox.scrollHeight;
 }
 
@@ -941,9 +1055,9 @@ async function sendMessage(overrideText) {
     const data = await res.json();
     hideTyping();
     if (res.status === 429) {
-      addBotMessage(data.response || 'Too many messages — please wait a moment.', [], null);
+      addBotMessage(data.response || 'Too many messages — please wait a moment.', [], null, null, null);
     } else {
-      addBotMessage(data.response, data.chips || [], data.media || null, data.confidence);
+      addBotMessage(data.response, data.chips || [], data.media || null, data.confidence, data.intent);
       saveToStorage();
     }
   } catch(err) {
@@ -962,22 +1076,38 @@ document.querySelectorAll('.landing-chip').forEach(chip => {
   chip.addEventListener('click', () => sendMessage(chip.textContent));
 });
 
-// ── Download ────────────────────────────────────────────────────────────────
-document.getElementById('download-btn').addEventListener('click', () => {
+// ── Save toast helper ────────────────────────────────────────────────────────
+const saveToast = document.getElementById('save-toast');
+let _toastTimer = null;
+function showSaveToast(filename, ts) {
+  saveToast.innerHTML =
+    '<strong>Chat saved</strong>' +
+    '<span>' + ts + '</span><br>' +
+    '<span style="color:var(--navy);font-weight:600;">logs/' + filename + '</span>';
+  saveToast.classList.add('visible');
+  if (_toastTimer) clearTimeout(_toastTimer);
+  _toastTimer = setTimeout(() => saveToast.classList.remove('visible'), 4500);
+}
+
+// ── Save history to server logs/ ────────────────────────────────────────────
+document.getElementById('download-btn').addEventListener('click', async () => {
   const groups = chatBox.querySelectorAll('.msg-group');
   if (!groups.length) return;
-  const lines = ['Samphor Expert System — Chat History', 'Downloaded: ' + new Date().toLocaleString(), '='.repeat(50), ''];
+  const ts    = new Date().toLocaleString();
+  const lines = ['Samphor Expert System — Chat History', 'Saved: ' + ts, '='.repeat(50), ''];
   groups.forEach(g => {
     const label  = g.querySelector('.msg-label');
     const bubble = g.querySelector('.msg-bubble');
     if (label && bubble) { lines.push(label.textContent.trim() + ': ' + bubble.textContent.trim(), ''); }
   });
-  const blob = new Blob([lines.join('\n')], {type:'text/plain;charset=utf-8'});
-  const url  = URL.createObjectURL(blob);
-  const ts   = new Date().toISOString().slice(0,16).replace('T','_').replace(/:/g,'-');
-  const a    = document.createElement('a');
-  a.href = url; a.download = 'samphor-chat-' + ts + '.txt';
-  document.body.appendChild(a); a.click(); document.body.removeChild(a); URL.revokeObjectURL(url);
+  try {
+    const res  = await fetch('/save-history', {
+      method: 'POST', headers: {'Content-Type':'application/json'},
+      body: JSON.stringify({ lines }),
+    });
+    const data = await res.json();
+    if (data.status === 'ok') showSaveToast(data.filename, ts);
+  } catch(e) {}
 });
 
 // ── Reset — clears chat AND replays intro ───────────────────────────────────
@@ -1047,5 +1177,6 @@ document.getElementById('drum-mode-btn').addEventListener('click', () => {
 });
 </script>
 <script src="/static/drum-mode.js"></script>
+<div id="save-toast" role="status" aria-live="polite"></div>
 </body>
 </html>
