@@ -295,7 +295,7 @@
 
 /* Small head container */
 .img-container.small-head {
-  width: 180px; height: 180px;
+  width: 243px; height: 243px;
 }
 
 /* All drum layers fill the container and stack via z-index */
@@ -377,3 +377,197 @@ body.drum-mode .action-bar {
   transform-origin: center center;
   user-select: none; -webkit-user-drag: none;
 }
+
+/* ─── Hit line ────────────────────────────────────────────────────── */
+/* Thin horizontal marker 34 px from the lane bottom — matches
+   HIT_LINE constant in drum-tutorial.js.                           */
+.note-lane::after {
+  content: '';
+  position: absolute;
+  left: 0; right: 0;
+  bottom: 34px;
+  height: 2px;
+  background: rgba(255, 255, 255, 0.18);
+  pointer-events: none;
+}
+
+/* ─── Tutorial note elements ─────────────────────────────────────── */
+/* .tn-wrap positions the note centre; approach ring overflows it
+   upward/sideways and is clipped naturally by lane overflow:hidden. */
+.tn-wrap {
+  position: absolute;
+  left: calc(50% - 20px);   /* NOTE_R = 20 px */
+  width: 40px;
+  height: 40px;
+  overflow: visible;
+  pointer-events: none;
+}
+
+/* Filled colored circle */
+.tn-dot {
+  position: absolute;
+  width: 40px; height: 40px;
+  border-radius: 50%;
+  top: 0; left: 0;
+}
+
+/* Approach ring — size set by JS every frame */
+.tn-ring {
+  position: absolute;
+  top: 50%; left: 50%;
+  transform: translate(-50%, -50%);
+  border-radius: 50%;
+  border: 2px solid;
+  pointer-events: none;
+}
+
+/* Hit: dot blooms outward and fades */
+.tn-hit .tn-dot {
+  animation: tnHitBurst 0.28s ease-out forwards;
+}
+@keyframes tnHitBurst {
+  0%   { transform: scale(1.0); opacity: 1.0; }
+  50%  { transform: scale(1.7); opacity: 0.8; }
+  100% { transform: scale(2.2); opacity: 0.0; }
+}
+
+/* Miss: dot fades (color already swapped to red in JS) */
+.tn-miss .tn-dot {
+  animation: tnMissFade 0.28s ease-out forwards;
+}
+@keyframes tnMissFade {
+  0%   { opacity: 0.8; }
+  100% { opacity: 0.0; }
+}
+
+/* ─── Tutorial controls (left of big drum) ───────────────────────── */
+#tutorial-controls {
+  display: flex; flex-direction: column; gap: 8px;
+  align-items: flex-start;
+  pointer-events: auto;
+}
+
+.tc-row { display: flex; gap: 6px; }
+
+#tutorial-start-btn,
+#tutorial-stop-btn {
+  background: rgba(255, 255, 255, 0.14);
+  border: 1px solid rgba(255, 255, 255, 0.22);
+  backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
+  border-radius: 22px; padding: 10px 22px;
+  font-family: 'Manrope', sans-serif; font-size: 13px; font-weight: 600;
+  color: rgba(255, 255, 255, 0.80); letter-spacing: 0.06em; text-transform: uppercase;
+  cursor: pointer;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.30);
+  transition: background 0.18s, color 0.18s;
+  min-width: 148px;
+}
+#tutorial-start-btn:hover,
+#tutorial-stop-btn:hover { background: rgba(255, 255, 255, 0.25); color: #fff; }
+
+/* Level picker pills */
+.tl-btn {
+  background: rgba(255, 255, 255, 0.07);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 16px; padding: 6px 15px;
+  font-family: 'Manrope', sans-serif; font-size: 12px; font-weight: 700;
+  color: rgba(255, 255, 255, 0.45); letter-spacing: 0.08em; text-transform: uppercase;
+  cursor: pointer; transition: background 0.15s, color 0.15s, border-color 0.15s;
+}
+.tl-btn:hover { background: rgba(255, 255, 255, 0.16); color: rgba(255, 255, 255, 0.85); }
+.tl-btn.tl-active {
+  background: rgba(255, 255, 255, 0.22);
+  border-color: rgba(255, 255, 255, 0.38);
+  color: #fff;
+}
+
+/* "Press Space to start" hint */
+#tutorial-space-hint {
+  font-family: 'Manrope', sans-serif;
+  font-size: 10px; font-weight: 600;
+  color: rgba(255, 255, 255, 0.40);
+  letter-spacing: 0.12em; text-transform: uppercase;
+  animation: spaceHintPulse 2.2s ease-in-out infinite;
+}
+@keyframes spaceHintPulse {
+  0%, 100% { opacity: 0.40; }
+  50%       { opacity: 0.85; }
+}
+
+/* ─── Hit / miss feedback bar (below note lanes) ─────────────────── */
+#tutorial-feedback-bar {
+  flex-shrink: 0;
+  height: 36px;
+  display: flex; align-items: center; justify-content: center;
+  pointer-events: none;
+}
+
+#tutorial-feedback-text {
+  font-family: 'Manrope', sans-serif;
+  font-size: 17px; font-weight: 800; letter-spacing: 0.06em;
+  opacity: 0;
+}
+#tutorial-feedback-text.tf-hit  { color: #5bb890; }
+#tutorial-feedback-text.tf-miss { color: #e05555; }
+#tutorial-feedback-text.tf-show {
+  animation: tfPop 0.75s ease-out forwards;
+}
+@keyframes tfPop {
+  0%   { opacity: 0;   transform: translateY(2px); }
+  12%  { opacity: 1;   transform: translateY(-3px); }
+  65%  { opacity: 1;   transform: translateY(-3px); }
+  100% { opacity: 0;   transform: translateY(-8px); }
+}
+
+/* ─── Tutorial results overlay ───────────────────────────────────── */
+#tutorial-results {
+  position: absolute; inset: 0; z-index: 30;
+  display: none;
+  align-items: center; justify-content: center;
+  background: rgba(0, 0, 0, 0.65);
+  backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
+}
+
+.tr-card {
+  background: rgba(255, 255, 255, 0.07);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 20px;
+  padding: 44px 60px;
+  text-align: center;
+  display: flex; flex-direction: column; align-items: center; gap: 10px;
+  box-shadow: 0 16px 48px rgba(0, 0, 0, 0.50);
+}
+
+.tr-title {
+  font-family: 'Manrope', sans-serif;
+  font-size: 12px; font-weight: 700;
+  color: rgba(255, 255, 255, 0.45);
+  letter-spacing: 0.14em; text-transform: uppercase;
+}
+
+#tr-pct {
+  font-family: 'Manrope', sans-serif;
+  font-size: 68px; font-weight: 800;
+  color: #fff; line-height: 1;
+  margin: 4px 0;
+}
+
+#tr-detail {
+  font-family: 'Manrope', sans-serif;
+  font-size: 14px; color: rgba(255, 255, 255, 0.50);
+}
+
+#tr-retry,
+#tr-stop {
+  background: rgba(255, 255, 255, 0.12);
+  border: 1px solid rgba(255, 255, 255, 0.22);
+  border-radius: 20px; padding: 10px 28px;
+  font-family: 'Manrope', sans-serif; font-size: 11px; font-weight: 700;
+  color: rgba(255, 255, 255, 0.80); letter-spacing: 0.08em; text-transform: uppercase;
+  cursor: pointer; transition: background 0.18s, color 0.18s;
+}
+#tr-retry:hover,
+#tr-stop:hover { background: rgba(255, 255, 255, 0.22); color: #fff; }
+
+.tr-card { gap: 10px; }
+.tr-buttons { display: flex; gap: 10px; margin-top: 10px; }

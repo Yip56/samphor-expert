@@ -535,19 +535,45 @@ body.chat-active .action-bar { display: flex; }
 <div id="drum-ui" aria-label="Drum play mode">
   <button id="drum-exit-btn" title="Back to chat">← Back to chat</button>
 
+  <!-- Tutorial results — shown after all notes resolve -->
+  <div id="tutorial-results" role="dialog" aria-modal="true" aria-label="Tutorial results">
+    <div class="tr-card">
+      <div class="tr-title">Tutorial complete</div>
+      <div id="tr-pct">—</div>
+      <div id="tr-detail">— / — notes hit</div>
+      <div class="tr-buttons">
+        <button id="tr-retry">Try again</button>
+        <button id="tr-stop">Stop</button>
+      </div>
+    </div>
+  </div>
+
   <div id="drum-bot-icon" aria-hidden="true">
     <img src="/static/Samspert-Icon.png" width="36" height="36" style="display:block;object-fit:contain;" alt="Samspert">
   </div>
 
   <div id="drum-circles">
     <div class="drum-wrapper">
-      <!-- Big Head (Left) — larger playing surface -->
+      <!-- Tutorial controls (Left of big drum) -->
+      <div id="tutorial-controls">
+        <div class="tc-row">
+          <button id="tutorial-start-btn" title="Start tutorial">Play Tutorial</button>
+          <button id="tutorial-stop-btn"  title="Stop tutorial" style="display:none">Stop</button>
+        </div>
+        <div class="tc-row" id="tutorial-level-select">
+          <button class="tl-btn tl-active" data-level="1">Lv 1</button>
+          <button class="tl-btn"           data-level="2">Lv 2</button>
+          <button class="tl-btn"           data-level="3">Lv 3</button>
+        </div>
+        <div id="tutorial-space-hint">Press Space to start</div>
+      </div>
+      <!-- Big Head (centre) — larger playing surface -->
       <div class="img-container" id="BigHead" aria-label="Samphor big head — click to play">
         <img src="/static/Drum_image/SamphorDrumDesign11.png" alt="" id="Rim">
         <img src="/static/Drum_image/SamphorDrumDesign7.png"  alt="" id="Middle">
         <img src="/static/Drum_image/SamphorDrumDesign3.png"  alt="" id="Center">
       </div>
-      <!-- Small Head (Right) — higher-pitched surface -->
+      <!-- Small Head (Right) -->
       <div class="img-container small-head" id="SmallHead" aria-label="Samphor small head — click to play">
         <img src="/static/Drum_image/SamphorDrumDesign11.png" alt="" id="SmallRim">
         <img src="/static/Drum_image/SamphorDrumDesign7.png"  alt="" id="SmallMiddle">
@@ -565,6 +591,11 @@ body.chat-active .action-bar { display: flex; }
     <div class="note-lane" data-key="J"><span class="note-lane-key">J</span></div>
     <div class="note-lane" data-key="K"><span class="note-lane-key">K</span></div>
     <div class="note-lane" data-key="L"><span class="note-lane-key">L</span></div>
+  </div>
+
+  <!-- Hit/miss feedback text — appears below the lanes -->
+  <div id="tutorial-feedback-bar" aria-live="polite" aria-atomic="true">
+    <span id="tutorial-feedback-text"></span>
   </div>
 </div>
 
@@ -1177,6 +1208,7 @@ document.getElementById('drum-mode-btn').addEventListener('click', () => {
 });
 </script>
 <script src="/static/drum-mode.js"></script>
+<script src="/static/drum-tutorial.js"></script>
 <div id="save-toast" role="status" aria-live="polite"></div>
 </body>
 </html>
