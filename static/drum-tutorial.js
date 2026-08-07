@@ -376,7 +376,7 @@
   function onSpaceStart(e) {
     if (e.code !== 'Space') return;
     const drumUI = document.getElementById('drum-ui');
-    if (!drumUI || drumUI.style.display === 'none') return;
+    if (!drumUI || drumUI.style.display !== 'flex') return;
     e.preventDefault();
     if (active) {
       log('Space pressed — stopping tutorial');
