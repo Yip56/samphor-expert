@@ -313,6 +313,20 @@ class MLEngine(ChatEngine):
             (r"\bgotta\b",    "got to"),
             (r"\blemme\b",    "let me"),
             (r"\bdunno\b",    "don't know"),
+            # common keyboard typos / phonetic misspellings
+            (r"\bwat\b",      "what"),
+            (r"\bwut\b",      "what"),
+            (r"\bwot\b",      "what"),
+            (r"\biz\b",       "is"),
+            (r"\bteh\b",      "the"),
+            (r"\bda\b",       "the"),
+            (r"\bwaz\b",      "was"),
+            (r"\bdat\b",      "that"),
+            (r"\bdis\b",      "this"),
+            (r"\btel\b",      "tell"),
+            (r"\bsomthing\b", "something"),
+            (r"\bsomething\b","something"),
+            (r"\bsignificance\b","significance"),
         ]
         for pattern, replacement in _INFORMAL:
             text = re.sub(pattern, replacement, text, flags=re.IGNORECASE)
