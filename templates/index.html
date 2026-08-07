@@ -478,9 +478,6 @@ body.chat-active .action-bar { display: flex; }
 #send-btn:disabled { background: rgba(3,46,161,0.22); box-shadow: none; transform: none; }
 #send-btn svg { stroke: #fff; }
 
-#mic-btn.listening { animation: pulse 1.0s infinite; }
-#mic-btn.listening svg { stroke: var(--red); }
-@keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.45} }
 </style>
 </head>
 <body>
@@ -663,14 +660,6 @@ body.chat-active .action-bar { display: flex; }
       <input id="user-input" type="text"
         placeholder="Ask me anything about the Samphor drum"
         autocomplete="off" aria-label="Message input"/>
-      <button id="mic-btn" class="icon-btn" title="Voice input" aria-label="Toggle voice input">
-        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#56637e" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-          <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/>
-          <path d="M19 10v2a7 7 0 0 1-14 0v-2"/>
-          <line x1="12" y1="19" x2="12" y2="23"/>
-          <line x1="8"  y1="23" x2="16" y2="23"/>
-        </svg>
-      </button>
       <button id="send-btn" class="icon-btn" title="Send message" aria-label="Send message">
         <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
           <path d="M5 12h14"/><path d="M12 5l7 7-7 7"/>
@@ -884,7 +873,6 @@ const typing   = document.getElementById('typing');
 const input    = document.getElementById('user-input');
 const sendBtn  = document.getElementById('send-btn');
 const resetBtn = document.getElementById('reset-btn');
-const micBtn   = document.getElementById('mic-btn');
 
 const STORAGE_KEY    = 'samphor-chat-v1';
 const askedQuestions = new Set();
@@ -1170,21 +1158,6 @@ resetBtn.addEventListener('click', async () => {
   }
 });
 
-// ── Voice input ─────────────────────────────────────────────────────────────
-const SpeechRec = window.SpeechRecognition || window.webkitSpeechRecognition;
-if (!SpeechRec) {
-  micBtn.style.display = 'none';
-} else {
-  const rec = new SpeechRec();
-  rec.lang = 'en-US'; rec.interimResults = false;
-  rec.onresult = e => { input.value = e.results[0][0].transcript; micBtn.classList.remove('listening'); input.focus(); };
-  rec.onend  = () => micBtn.classList.remove('listening');
-  rec.onerror = () => micBtn.classList.remove('listening');
-  micBtn.addEventListener('click', () => {
-    if (micBtn.classList.contains('listening')) { rec.stop(); }
-    else { rec.start(); micBtn.classList.add('listening'); }
-  });
-}
 
 // ── Init ────────────────────────────────────────────────────────────────────
 const hasHistory   = loadFromStorage();
