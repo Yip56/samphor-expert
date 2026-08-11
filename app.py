@@ -248,9 +248,10 @@ def chat():
         return jsonify({"response": "Your message is too long. Please keep it under 500 characters."}), 400
 
     context = session.get("chat_context", {})
-    # Only trigger onboarding if the frontend intro hasn't already set user_name.
-    if "onboarding_step" not in context and "user_name" not in context:
-        context = {"onboarding_step": "name"}
+    # The HTML intro handles all onboarding; backend defaults to "done" so a
+    # expired/new session never hijacks the first real question as a "name" input.
+    if "onboarding_step" not in context:
+        context = {"onboarding_step": "done"}
 
     # Clear one-shot flags written by the previous turn.
     context.pop("needs_review", None)

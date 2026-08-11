@@ -40,7 +40,9 @@
       "Bash(dir \"C:\\\\Users\\\\YLX\\\\samphor-expert\\\\Hand drawings\")",
       "Bash(Select-Object -First 100 FullName)",
       "Bash(xargs ls -lh)",
-      "Bash(grep *)"
+      "Bash(grep *)",
+      "PowerShell(Get-ChildItem C:\\\\Users\\\\YLX\\\\samphor-expert -Force | Where-Object { $_.Name -notmatch '\\\\.venv|__pycache__' } | Select-Object Name, PSIsContainer)",
+      "PowerShell(git *)"
     ]
   }
 }
