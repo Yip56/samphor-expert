@@ -37,7 +37,12 @@
       "Bash(Get-ChildItem *)",
       "Bash(python -c \"import json; data=json.load\\(open\\('data/intents.json',encoding='utf-8'\\)\\); tags=[i['tag'] for i in data['intents']]; print\\(f'Valid JSON — {len\\(data[\\\\\"intents\\\\\"]\\)} intents: {tags}'\\)\")",
       "Bash(python -c ' *)",
-      "Bash(dir \"C:\\\\Users\\\\YLX\\\\samphor-expert\\\\Hand drawings\")"
+      "Bash(dir \"C:\\\\Users\\\\YLX\\\\samphor-expert\\\\Hand drawings\")",
+      "Bash(Select-Object -First 100 FullName)",
+      "Bash(xargs ls -lh)",
+      "Bash(grep *)",
+      "PowerShell(Get-ChildItem C:\\\\Users\\\\YLX\\\\samphor-expert -Force | Where-Object { $_.Name -notmatch '\\\\.venv|__pycache__' } | Select-Object Name, PSIsContainer)",
+      "PowerShell(git *)"
     ]
   }
 }

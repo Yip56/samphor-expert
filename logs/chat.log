@@ -7476,117 +7476,417 @@ AttributeError: 'MLEngine' object has no attribute '_model'
 2026-08-07 13:50:10  127.0.0.1 - - [07/Aug/2026 13:50:10] "GET /wiki-image?url=https://en.wikipedia.org/wiki/Music_of_Cambodia HTTP/1.1" 200 -
 2026-08-07 13:50:10  [wiki-image] title='Samphor'  image=https://upload.wikimedia.org/wikipedia/commons/thumb/7/7d/Samphor.jpg/330px-Samphor.jpg
 2026-08-07 13:50:10  127.0.0.1 - - [07/Aug/2026 13:50:10] "GET /wiki-image?url=https://en.wikipedia.org/wiki/Samphor HTTP/1.1" 200 -
-2026-08-07 13:57:51  127.0.0.1 - - [07/Aug/2026 13:57:51] "GET / HTTP/1.1" 200 -
-2026-08-07 13:57:51  127.0.0.1 - - [07/Aug/2026 13:57:51] "[36mGET /static/drum-mode.css HTTP/1.1[0m" 304 -
-2026-08-07 13:57:52  127.0.0.1 - - [07/Aug/2026 13:57:52] "[36mGET /static/drum-mode.js HTTP/1.1[0m" 304 -
-2026-08-07 13:57:52  127.0.0.1 - - [07/Aug/2026 13:57:52] "[36mGET /images/textiles.png HTTP/1.1[0m" 304 -
-2026-08-07 13:57:52  127.0.0.1 - - [07/Aug/2026 13:57:52] "[36mGET /images/statue.png HTTP/1.1[0m" 304 -
-2026-08-07 13:57:52  127.0.0.1 - - [07/Aug/2026 13:57:52] "[36mGET /images/side%20curtain.png HTTP/1.1[0m" 304 -
-2026-08-07 13:57:52  127.0.0.1 - - [07/Aug/2026 13:57:52] "[36mGET /images/top-curtain.png HTTP/1.1[0m" 304 -
-2026-08-07 13:57:52  127.0.0.1 - - [07/Aug/2026 13:57:52] "[36mGET /static/drum-tutorial.js HTTP/1.1[0m" 304 -
-2026-08-07 13:57:52  127.0.0.1 - - [07/Aug/2026 13:57:52] "[36mGET /static/Samspert-Icon.png HTTP/1.1[0m" 304 -
-2026-08-07 13:57:52  127.0.0.1 - - [07/Aug/2026 13:57:52] "[36mGET /static/Drum_image/SamphorDrumDesign11.png HTTP/1.1[0m" 304 -
-2026-08-07 13:57:52  127.0.0.1 - - [07/Aug/2026 13:57:52] "[36mGET /static/Drum_image/SamphorDrumDesign7.png HTTP/1.1[0m" 304 -
-2026-08-07 13:57:52  127.0.0.1 - - [07/Aug/2026 13:57:52] "[36mGET /static/Drum_image/SamphorDrumDesign3.png HTTP/1.1[0m" 304 -
-2026-08-07 13:57:52  127.0.0.1 - - [07/Aug/2026 13:57:52] "[35m[1mGET /static/Sounds/Center-mute.wav HTTP/1.1[0m" 206 -
-2026-08-07 13:57:52  127.0.0.1 - - [07/Aug/2026 13:57:52] "[35m[1mGET /static/Sounds/Center-open.wav HTTP/1.1[0m" 206 -
-2026-08-07 13:57:52  127.0.0.1 - - [07/Aug/2026 13:57:52] "[35m[1mGET /static/Sounds/Middle-Layer.wav HTTP/1.1[0m" 206 -
-2026-08-07 13:57:52  127.0.0.1 - - [07/Aug/2026 13:57:52] "[35m[1mGET /static/Sounds/Rim.wav HTTP/1.1[0m" 206 -
-2026-08-07 13:57:52  127.0.0.1 - - [07/Aug/2026 13:57:52] "[35m[1mGET /static/Sounds/Hi-pitch-CenterMute.wav HTTP/1.1[0m" 206 -
-2026-08-07 13:57:52  127.0.0.1 - - [07/Aug/2026 13:57:52] "[35m[1mGET /static/Sounds/Hi-pitch-CenterOpen.wav HTTP/1.1[0m" 206 -
-2026-08-07 13:57:52  127.0.0.1 - - [07/Aug/2026 13:57:52] "[35m[1mGET /static/Sounds/Hi-pitch-MiddleLayer.wav HTTP/1.1[0m" 206 -
-2026-08-07 13:57:52  127.0.0.1 - - [07/Aug/2026 13:57:52] "[35m[1mGET /static/Sounds/Hi-pitch-Rim.wav HTTP/1.1[0m" 206 -
-2026-08-07 13:57:52  127.0.0.1 - - [07/Aug/2026 13:57:52] "[35m[1mGET /static/Sounds/Center-mute.wav HTTP/1.1[0m" 206 -
-2026-08-07 13:57:52  127.0.0.1 - - [07/Aug/2026 13:57:52] "[35m[1mGET /static/Sounds/Rim.wav HTTP/1.1[0m" 206 -
-2026-08-07 13:57:52  127.0.0.1 - - [07/Aug/2026 13:57:52] "[35m[1mGET /static/Sounds/Middle-Layer.wav HTTP/1.1[0m" 206 -
-2026-08-07 13:57:52  127.0.0.1 - - [07/Aug/2026 13:57:52] "[35m[1mGET /static/Sounds/Hi-pitch-CenterMute.wav HTTP/1.1[0m" 206 -
-2026-08-07 13:57:52  127.0.0.1 - - [07/Aug/2026 13:57:52] "[35m[1mGET /static/Sounds/Rim.wav HTTP/1.1[0m" 206 -
-2026-08-07 13:57:53  127.0.0.1 - - [07/Aug/2026 13:57:53] "[35m[1mGET /static/Sounds/Center-mute.wav HTTP/1.1[0m" 206 -
-2026-08-07 13:57:53  127.0.0.1 - - [07/Aug/2026 13:57:53] "[35m[1mGET /static/Sounds/Middle-Layer.wav HTTP/1.1[0m" 206 -
-2026-08-07 13:57:53  127.0.0.1 - - [07/Aug/2026 13:57:53] "[35m[1mGET /static/Sounds/Hi-pitch-CenterMute.wav HTTP/1.1[0m" 206 -
-2026-08-07 13:57:53  127.0.0.1 - - [07/Aug/2026 13:57:53] "[35m[1mGET /static/Sounds/Rim.wav HTTP/1.1[0m" 206 -
-2026-08-07 13:57:53  127.0.0.1 - - [07/Aug/2026 13:57:53] "[35m[1mGET /static/Sounds/Middle-Layer.wav HTTP/1.1[0m" 206 -
-2026-08-07 14:17:27  127.0.0.1 - - [07/Aug/2026 14:17:27] "GET / HTTP/1.1" 200 -
-2026-08-07 14:17:28  127.0.0.1 - - [07/Aug/2026 14:17:28] "[36mGET /static/drum-mode.css HTTP/1.1[0m" 304 -
-2026-08-07 14:17:28  127.0.0.1 - - [07/Aug/2026 14:17:28] "[36mGET /images/side%20curtain.png HTTP/1.1[0m" 304 -
-2026-08-07 14:17:28  127.0.0.1 - - [07/Aug/2026 14:17:28] "[36mGET /images/top-curtain.png HTTP/1.1[0m" 304 -
-2026-08-07 14:17:28  127.0.0.1 - - [07/Aug/2026 14:17:28] "[36mGET /images/textiles.png HTTP/1.1[0m" 304 -
-2026-08-07 14:17:28  127.0.0.1 - - [07/Aug/2026 14:17:28] "[36mGET /images/statue.png HTTP/1.1[0m" 304 -
-2026-08-07 14:17:28  127.0.0.1 - - [07/Aug/2026 14:17:28] "[36mGET /static/drum-mode.js HTTP/1.1[0m" 304 -
-2026-08-07 14:17:28  127.0.0.1 - - [07/Aug/2026 14:17:28] "[36mGET /static/drum-tutorial.js HTTP/1.1[0m" 304 -
-2026-08-07 14:17:28  127.0.0.1 - - [07/Aug/2026 14:17:28] "[36mGET /static/Samspert-Icon.png HTTP/1.1[0m" 304 -
-2026-08-07 14:17:28  127.0.0.1 - - [07/Aug/2026 14:17:28] "[36mGET /static/Drum_image/SamphorDrumDesign11.png HTTP/1.1[0m" 304 -
-2026-08-07 14:17:28  127.0.0.1 - - [07/Aug/2026 14:17:28] "[36mGET /static/Drum_image/SamphorDrumDesign7.png HTTP/1.1[0m" 304 -
-2026-08-07 14:17:28  127.0.0.1 - - [07/Aug/2026 14:17:28] "[36mGET /static/Drum_image/SamphorDrumDesign3.png HTTP/1.1[0m" 304 -
-2026-08-07 14:17:28  127.0.0.1 - - [07/Aug/2026 14:17:28] "[35m[1mGET /static/Sounds/Center-mute.wav HTTP/1.1[0m" 206 -
-2026-08-07 14:17:28  127.0.0.1 - - [07/Aug/2026 14:17:28] "[35m[1mGET /static/Sounds/Middle-Layer.wav HTTP/1.1[0m" 206 -
-2026-08-07 14:17:28  127.0.0.1 - - [07/Aug/2026 14:17:28] "[35m[1mGET /static/Sounds/Center-open.wav HTTP/1.1[0m" 206 -
-2026-08-07 14:17:28  127.0.0.1 - - [07/Aug/2026 14:17:28] "[35m[1mGET /static/Sounds/Rim.wav HTTP/1.1[0m" 206 -
-2026-08-07 14:17:28  127.0.0.1 - - [07/Aug/2026 14:17:28] "[35m[1mGET /static/Sounds/Hi-pitch-CenterMute.wav HTTP/1.1[0m" 206 -
-2026-08-07 14:17:28  127.0.0.1 - - [07/Aug/2026 14:17:28] "[35m[1mGET /static/Sounds/Hi-pitch-CenterOpen.wav HTTP/1.1[0m" 206 -
-2026-08-07 14:17:28  127.0.0.1 - - [07/Aug/2026 14:17:28] "[35m[1mGET /static/Sounds/Hi-pitch-MiddleLayer.wav HTTP/1.1[0m" 206 -
-2026-08-07 14:17:28  127.0.0.1 - - [07/Aug/2026 14:17:28] "[35m[1mGET /static/Sounds/Hi-pitch-Rim.wav HTTP/1.1[0m" 206 -
-2026-08-07 14:17:28  127.0.0.1 - - [07/Aug/2026 14:17:28] "[35m[1mGET /static/Sounds/Center-mute.wav HTTP/1.1[0m" 206 -
-2026-08-07 14:17:28  127.0.0.1 - - [07/Aug/2026 14:17:28] "[35m[1mGET /static/Sounds/Middle-Layer.wav HTTP/1.1[0m" 206 -
-2026-08-07 14:17:28  127.0.0.1 - - [07/Aug/2026 14:17:28] "[35m[1mGET /static/Sounds/Rim.wav HTTP/1.1[0m" 206 -
-2026-08-07 14:17:28  127.0.0.1 - - [07/Aug/2026 14:17:28] "[35m[1mGET /static/Sounds/Hi-pitch-CenterMute.wav HTTP/1.1[0m" 206 -
-2026-08-07 14:17:28  127.0.0.1 - - [07/Aug/2026 14:17:28] "[35m[1mGET /static/Sounds/Hi-pitch-Rim.wav HTTP/1.1[0m" 206 -
-2026-08-07 14:17:28  127.0.0.1 - - [07/Aug/2026 14:17:28] "[35m[1mGET /static/Sounds/Middle-Layer.wav HTTP/1.1[0m" 206 -
-2026-08-07 14:17:28  127.0.0.1 - - [07/Aug/2026 14:17:28] "[35m[1mGET /static/Sounds/Center-mute.wav HTTP/1.1[0m" 206 -
-2026-08-07 14:17:28  127.0.0.1 - - [07/Aug/2026 14:17:28] "[35m[1mGET /static/Sounds/Rim.wav HTTP/1.1[0m" 206 -
-2026-08-07 14:17:28  127.0.0.1 - - [07/Aug/2026 14:17:28] "[35m[1mGET /static/Sounds/Hi-pitch-CenterMute.wav HTTP/1.1[0m" 206 -
-2026-08-07 14:17:28  127.0.0.1 - - [07/Aug/2026 14:17:28] "[35m[1mGET /static/Sounds/Hi-pitch-Rim.wav HTTP/1.1[0m" 206 -
-2026-08-07 14:17:28  127.0.0.1 - - [07/Aug/2026 14:17:28] "[35m[1mGET /static/Sounds/Rim.wav HTTP/1.1[0m" 206 -
-2026-08-07 14:17:31  [1509c24b] Session reset
-2026-08-07 14:17:31  127.0.0.1 - - [07/Aug/2026 14:17:31] "POST /reset HTTP/1.1" 200 -
-2026-08-07 14:17:54  [1509c24b] User context pre-set: name='Yip', occupation='Student'
-2026-08-07 14:17:54  127.0.0.1 - - [07/Aug/2026 14:17:54] "POST /user-context HTTP/1.1" 200 -
-2026-08-07 14:18:09  [1509c24b] USER: 'wat is teh samphor'  |  INTENT: ask_definition  |  CONF: 78%  |  REPLY: 'A Samphor is a traditional Khmer drum with a wooden barrel body and two skin-cov'
-2026-08-07 14:18:09  127.0.0.1 - - [07/Aug/2026 14:18:09] "POST /chat HTTP/1.1" 200 -
-2026-08-07 14:18:10  [wiki-image] title='Samphor'  image=https://upload.wikimedia.org/wikipedia/commons/thumb/7/7d/Samphor.jpg/330px-Samphor.jpg
-2026-08-07 14:18:10  127.0.0.1 - - [07/Aug/2026 14:18:10] "GET /wiki-image?url=https://en.wikipedia.org/wiki/Samphor HTTP/1.1" 200 -
-2026-08-07 14:18:10  [wiki-image] title='Music of Cambodia'  image=https://upload.wikimedia.org/wikipedia/commons/thumb/a/ab/Bayonmarket01.JPG/330px-Bayonmarket01.JPG?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail
-2026-08-07 14:18:10  127.0.0.1 - - [07/Aug/2026 14:18:10] "GET /wiki-image?url=https://en.wikipedia.org/wiki/Music_of_Cambodia HTTP/1.1" 200 -
-2026-08-07 14:18:19  [1509c24b] USER: 'When did it originate?'  |  INTENT: ask_history  |  CONF: 100%  |  REPLY: 'Historical evidence places the Samphor in Cambodian culture at least as far back'
-2026-08-07 14:18:19  127.0.0.1 - - [07/Aug/2026 14:18:19] "POST /chat HTTP/1.1" 200 -
-2026-08-07 14:18:19  [wiki-image] title='Angkor Wat'  image=https://upload.wikimedia.org/wikipedia/commons/thumb/4/41/Angkor_Wat.jpg/330px-Angkor_Wat.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail
-2026-08-07 14:18:19  127.0.0.1 - - [07/Aug/2026 14:18:19] "GET /wiki-image?url=https://en.wikipedia.org/wiki/Angkor_Wat HTTP/1.1" 200 -
-2026-08-07 14:18:19  [wiki-image] title='Khmer Empire'  image=https://upload.wikimedia.org/wikipedia/commons/thumb/0/0b/Map-of-southeast-asia_900_CE.svg/330px-Map-of-southeast-asia_900_CE.svg.png?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail
-2026-08-07 14:18:19  127.0.0.1 - - [07/Aug/2026 14:18:19] "GET /wiki-image?url=https://en.wikipedia.org/wiki/Khmer_Empire HTTP/1.1" 200 -
-2026-08-07 14:18:21  [1509c24b] USER: 'What does it look like?'  |  INTENT: ask_shape  |  CONF: 100%  |  REPLY: 'In profile the Samphor resembles an hourglass with a wide waist. It sits horizon'
-2026-08-07 14:18:21  127.0.0.1 - - [07/Aug/2026 14:18:21] "POST /chat HTTP/1.1" 200 -
-2026-08-07 14:18:21  [wiki-image] title='Samphor'  image=https://upload.wikimedia.org/wikipedia/commons/thumb/7/7d/Samphor.jpg/330px-Samphor.jpg
-2026-08-07 14:18:21  127.0.0.1 - - [07/Aug/2026 14:18:21] "GET /wiki-image?url=https://en.wikipedia.org/wiki/Samphor HTTP/1.1" 200 -
-2026-08-07 14:18:23  [1509c24b] USER: 'How does it compare to other drums?'  |  INTENT: ask_compare  |  CONF: 100%  |  REPLY: 'Compared to the Indian tabla, the Samphor is a single-piece barrel drum rather t'
-2026-08-07 14:18:23  127.0.0.1 - - [07/Aug/2026 14:18:23] "POST /chat HTTP/1.1" 200 -
-2026-08-07 14:18:23  [wiki-image] title='Taiko'  image=https://upload.wikimedia.org/wikipedia/commons/thumb/1/16/Miya_Daiko_drum_-_Taiko_drums.jpg/330px-Miya_Daiko_drum_-_Taiko_drums.jpg
-2026-08-07 14:18:23  [wiki-image] title='Tabla'  image=https://upload.wikimedia.org/wikipedia/commons/thumb/e/e4/Prop._Tabla.jpg/330px-Prop._Tabla.jpg
-2026-08-07 14:18:23  127.0.0.1 - - [07/Aug/2026 14:18:23] "GET /wiki-image?url=https://en.wikipedia.org/wiki/Taiko HTTP/1.1" 200 -
-2026-08-07 14:18:23  127.0.0.1 - - [07/Aug/2026 14:18:23] "GET /wiki-image?url=https://en.wikipedia.org/wiki/Tabla HTTP/1.1" 200 -
-2026-08-07 14:18:30  [1509c24b] USER: 'How is it played?'  |  INTENT: ask_playing  |  CONF: 100%  |  REPLY: 'The Samphor is played with bare hands. The right hand strikes the larger head wi'
-2026-08-07 14:18:30  127.0.0.1 - - [07/Aug/2026 14:18:30] "POST /chat HTTP/1.1" 200 -
-2026-08-07 14:18:31  [wiki-image] title='Samphor'  image=https://upload.wikimedia.org/wikipedia/commons/thumb/7/7d/Samphor.jpg/330px-Samphor.jpg
-2026-08-07 14:18:31  127.0.0.1 - - [07/Aug/2026 14:18:31] "GET /wiki-image?url=https://en.wikipedia.org/wiki/Samphor HTTP/1.1" 200 -
-2026-08-07 14:18:31  [wiki-image] title='Pinpeat'  image=https://upload.wikimedia.org/wikipedia/commons/thumb/8/80/Pierre_Dieulefils_postcard_1662.jpg/330px-Pierre_Dieulefils_postcard_1662.jpg
-2026-08-07 14:18:31  127.0.0.1 - - [07/Aug/2026 14:18:31] "GET /wiki-image?url=https://en.wikipedia.org/wiki/Pinpeat HTTP/1.1" 200 -
-2026-08-07 14:18:32  [1509c24b] USER: 'How is it tuned?'  |  INTENT: ask_tuning  |  CONF: 100%  |  REPLY: 'The Samphor has no fixed Western pitch; its tuning is relative to the ensemble. '
-2026-08-07 14:18:32  127.0.0.1 - - [07/Aug/2026 14:18:32] "POST /chat HTTP/1.1" 200 -
-2026-08-07 14:18:38  [1509c24b] USER: 'How do I learn to play it?'  |  INTENT: ask_learning  |  CONF: 100%  |  REPLY: 'Learning the Samphor traditionally begins around age 8-10 at pagoda schools or a'
-2026-08-07 14:18:38  127.0.0.1 - - [07/Aug/2026 14:18:38] "POST /chat HTTP/1.1" 200 -
-2026-08-07 14:18:40  [1509c24b] USER: 'How is it preserved?'  |  INTENT: ask_preservation  |  CONF: 100%  |  REPLY: 'After the Khmer Rouge genocide (1975–1979) decimated the artistic community, sur'
-2026-08-07 14:18:40  127.0.0.1 - - [07/Aug/2026 14:18:40] "POST /chat HTTP/1.1" 200 -
-2026-08-07 14:18:41  [1509c24b] USER: 'Where is it used?'  |  INTENT: ask_ceremonies  |  CONF: 100%  |  REPLY: 'In ceremonial contexts the Samphor does more than keep time — specific rhythmic '
-2026-08-07 14:18:41  127.0.0.1 - - [07/Aug/2026 14:18:41] "POST /chat HTTP/1.1" 200 -
-2026-08-07 14:18:43  [1509c24b] USER: 'What is the Pinpeat ensemble?'  |  INTENT: ask_pinpeat  |  CONF: 100%  |  REPLY: 'Within the Pinpeat ensemble, the Samphor player holds a leadership role similar '
-2026-08-07 14:18:43  127.0.0.1 - - [07/Aug/2026 14:18:43] "POST /chat HTTP/1.1" 200 -
-2026-08-07 14:18:44  [wiki-image] title='Pinpeat'  image=https://upload.wikimedia.org/wikipedia/commons/thumb/8/80/Pierre_Dieulefils_postcard_1662.jpg/330px-Pierre_Dieulefils_postcard_1662.jpg
-2026-08-07 14:18:44  127.0.0.1 - - [07/Aug/2026 14:18:44] "GET /wiki-image?url=https://en.wikipedia.org/wiki/Pinpeat HTTP/1.1" 200 -
-2026-08-07 14:18:45  127.0.0.1 - - [07/Aug/2026 14:18:45] "GET /wiki-image?url=https://en.wikipedia.org/wiki/Cambodian_classical_dance HTTP/1.1" 200 -
-2026-08-07 14:18:49  [1509c24b] USER: 'How do I learn to play?'  |  INTENT: ask_learning  |  CONF: 100%  |  REPLY: 'The Royal University of Fine Arts (RUFA) in Phnom Penh offers formal Samphor tra'
-2026-08-07 14:18:49  127.0.0.1 - - [07/Aug/2026 14:18:49] "POST /chat HTTP/1.1" 200 -
-2026-08-07 14:18:52  [1509c24b] Chat history saved to chat_history_2026-08-07_14-18-52.txt
-2026-08-07 14:18:52  127.0.0.1 - - [07/Aug/2026 14:18:52] "POST /save-history HTTP/1.1" 200 -
-2026-08-07 14:18:58  [1509c24b] Chat history saved to chat_history_2026-08-07_14-18-58.txt
-2026-08-07 14:18:58  127.0.0.1 - - [07/Aug/2026 14:18:58] "POST /save-history HTTP/1.1" 200 -
-2026-08-07 14:19:13  [1509c24b] Chat history saved to chat_history_2026-08-07_14-19-13.txt
-2026-08-07 14:19:13  127.0.0.1 - - [07/Aug/2026 14:19:13] "POST /save-history HTTP/1.1" 200 -
+2026-08-07 23:31:33  [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5000
+ * Running on http://192.168.1.50:5000
+2026-08-07 23:31:33  [33mPress CTRL+C to quit[0m
+2026-08-07 23:31:44  127.0.0.1 - - [07/Aug/2026 23:31:44] "GET / HTTP/1.1" 200 -
+2026-08-07 23:31:44  127.0.0.1 - - [07/Aug/2026 23:31:44] "[36mGET /images/top-curtain.png HTTP/1.1[0m" 304 -
+2026-08-07 23:31:44  127.0.0.1 - - [07/Aug/2026 23:31:44] "[36mGET /images/side%20curtain.png HTTP/1.1[0m" 304 -
+2026-08-07 23:31:44  127.0.0.1 - - [07/Aug/2026 23:31:44] "[36mGET /static/drum-mode.css HTTP/1.1[0m" 304 -
+2026-08-07 23:31:44  127.0.0.1 - - [07/Aug/2026 23:31:44] "GET /static/drum-tutorial.js HTTP/1.1" 200 -
+2026-08-07 23:31:44  127.0.0.1 - - [07/Aug/2026 23:31:44] "[36mGET /static/Samspert-Icon.png HTTP/1.1[0m" 304 -
+2026-08-07 23:31:44  127.0.0.1 - - [07/Aug/2026 23:31:44] "[36mGET /static/Drum_image/SamphorDrumDesign11.png HTTP/1.1[0m" 304 -
+2026-08-07 23:31:44  127.0.0.1 - - [07/Aug/2026 23:31:44] "[36mGET /static/Drum_image/SamphorDrumDesign7.png HTTP/1.1[0m" 304 -
+2026-08-07 23:31:44  127.0.0.1 - - [07/Aug/2026 23:31:44] "[36mGET /images/statue.png HTTP/1.1[0m" 304 -
+2026-08-07 23:31:44  127.0.0.1 - - [07/Aug/2026 23:31:44] "[36mGET /images/textiles.png HTTP/1.1[0m" 304 -
+2026-08-07 23:31:44  127.0.0.1 - - [07/Aug/2026 23:31:44] "[36mGET /static/drum-mode.js HTTP/1.1[0m" 304 -
+2026-08-07 23:31:44  127.0.0.1 - - [07/Aug/2026 23:31:44] "[36mGET /static/Drum_image/SamphorDrumDesign3.png HTTP/1.1[0m" 304 -
+2026-08-07 23:31:44  127.0.0.1 - - [07/Aug/2026 23:31:44] "[35m[1mGET /static/Sounds/Center-mute.wav HTTP/1.1[0m" 206 -
+2026-08-07 23:31:44  127.0.0.1 - - [07/Aug/2026 23:31:44] "[35m[1mGET /static/Sounds/Middle-Layer.wav HTTP/1.1[0m" 206 -
+2026-08-07 23:31:44  127.0.0.1 - - [07/Aug/2026 23:31:44] "[35m[1mGET /static/Sounds/Rim.wav HTTP/1.1[0m" 206 -
+2026-08-07 23:31:44  127.0.0.1 - - [07/Aug/2026 23:31:44] "[35m[1mGET /static/Sounds/Hi-pitch-CenterOpen.wav HTTP/1.1[0m" 206 -
+2026-08-07 23:31:44  127.0.0.1 - - [07/Aug/2026 23:31:44] "[35m[1mGET /static/Sounds/Hi-pitch-CenterMute.wav HTTP/1.1[0m" 206 -
+2026-08-07 23:31:44  127.0.0.1 - - [07/Aug/2026 23:31:44] "[35m[1mGET /static/Sounds/Center-open.wav HTTP/1.1[0m" 206 -
+2026-08-07 23:31:44  127.0.0.1 - - [07/Aug/2026 23:31:44] "[35m[1mGET /static/Sounds/Hi-pitch-Rim.wav HTTP/1.1[0m" 206 -
+2026-08-07 23:31:44  127.0.0.1 - - [07/Aug/2026 23:31:44] "[35m[1mGET /static/Sounds/Hi-pitch-MiddleLayer.wav HTTP/1.1[0m" 206 -
+2026-08-07 23:31:45  127.0.0.1 - - [07/Aug/2026 23:31:45] "[33mGET /favicon.ico HTTP/1.1[0m" 404 -
+2026-08-07 23:31:54  [56114260] USER: 'zxc'  |  INTENT: fallback/clarify  |  CONF: 0%  |  REPLY: "Lovely to meet you, Zxc! What do you do for a living, if you don't mind me askin"
+2026-08-07 23:31:54  127.0.0.1 - - [07/Aug/2026 23:31:54] "POST /chat HTTP/1.1" 200 -
+2026-08-07 23:32:01  [56114260] USER: 'What is the Samphor?'  |  INTENT: fallback/clarify  |  CONF: 0%  |  REPLY: 'How interesting, Zxc! I am delighted to have you here. Feel free to ask me anyth'
+2026-08-07 23:32:01  127.0.0.1 - - [07/Aug/2026 23:32:01] "POST /chat HTTP/1.1" 200 -
+2026-08-07 23:32:02  [56114260] USER: 'How is it played?'  |  INTENT: ask_playing  |  CONF: 100%  |  REPLY: 'Playing the Samphor requires coordinating both hands independently. The dominant'
+2026-08-07 23:32:02  127.0.0.1 - - [07/Aug/2026 23:32:02] "POST /chat HTTP/1.1" 200 -
+2026-08-07 23:32:03  [wiki-image] title='Samphor'  image=https://upload.wikimedia.org/wikipedia/commons/thumb/7/7d/Samphor.jpg/330px-Samphor.jpg
+2026-08-07 23:32:03  127.0.0.1 - - [07/Aug/2026 23:32:03] "GET /wiki-image?url=https://en.wikipedia.org/wiki/Samphor HTTP/1.1" 200 -
+2026-08-07 23:32:03  [wiki-image] title='Pinpeat'  image=https://upload.wikimedia.org/wikipedia/commons/thumb/8/80/Pierre_Dieulefils_postcard_1662.jpg/330px-Pierre_Dieulefils_postcard_1662.jpg
+2026-08-07 23:32:03  127.0.0.1 - - [07/Aug/2026 23:32:03] "GET /wiki-image?url=https://en.wikipedia.org/wiki/Pinpeat HTTP/1.1" 200 -
+2026-08-07 23:48:59  [56114260] USER: 'What is the Samphor?'  |  INTENT: ask_definition  |  CONF: 100%  |  REPLY: 'A Samphor is a traditional Khmer drum with a wooden barrel body and two skin-cov'
+2026-08-07 23:48:59  127.0.0.1 - - [07/Aug/2026 23:48:59] "POST /chat HTTP/1.1" 200 -
+2026-08-07 23:48:59  [wiki-image] title='Music of Cambodia'  image=https://upload.wikimedia.org/wikipedia/commons/thumb/a/ab/Bayonmarket01.JPG/330px-Bayonmarket01.JPG?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail
+2026-08-07 23:48:59  127.0.0.1 - - [07/Aug/2026 23:48:59] "GET /wiki-image?url=https://en.wikipedia.org/wiki/Music_of_Cambodia HTTP/1.1" 200 -
+2026-08-07 23:48:59  [wiki-image] title='Samphor'  image=https://upload.wikimedia.org/wikipedia/commons/thumb/7/7d/Samphor.jpg/330px-Samphor.jpg
+2026-08-07 23:48:59  127.0.0.1 - - [07/Aug/2026 23:48:59] "GET /wiki-image?url=https://en.wikipedia.org/wiki/Samphor HTTP/1.1" 200 -
+2026-08-08 00:01:36  [56114260] USER: 'What is it made of?'  |  INTENT: ask_material  |  CONF: 100%  |  REPLY: 'The shell of the Samphor is carved from a single piece of jackfruit (Artocarpus '
+2026-08-08 00:01:36  127.0.0.1 - - [08/Aug/2026 00:01:36] "POST /chat HTTP/1.1" 200 -
+2026-08-08 00:01:37  [56114260] USER: 'When did it originate?'  |  INTENT: ask_history  |  CONF: 100%  |  REPLY: 'The Samphor traces its origins to the Angkor Empire (802–1431 CE). Bas-reliefs a'
+2026-08-08 00:01:37  127.0.0.1 - - [08/Aug/2026 00:01:37] "POST /chat HTTP/1.1" 200 -
+2026-08-08 00:01:38  [wiki-image] title='Angkor Wat'  image=https://upload.wikimedia.org/wikipedia/commons/thumb/4/41/Angkor_Wat.jpg/330px-Angkor_Wat.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail
+2026-08-08 00:01:38  127.0.0.1 - - [08/Aug/2026 00:01:38] "GET /wiki-image?url=https://en.wikipedia.org/wiki/Angkor_Wat HTTP/1.1" 200 -
+2026-08-08 00:01:38  [wiki-image] title='Khmer Empire'  image=https://upload.wikimedia.org/wikipedia/commons/thumb/0/0b/Map-of-southeast-asia_900_CE.svg/330px-Map-of-southeast-asia_900_CE.svg.png?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail
+2026-08-08 00:01:38  127.0.0.1 - - [08/Aug/2026 00:01:38] "GET /wiki-image?url=https://en.wikipedia.org/wiki/Khmer_Empire HTTP/1.1" 200 -
+2026-08-08 00:26:43  127.0.0.1 - - [08/Aug/2026 00:26:43] "GET / HTTP/1.1" 200 -
+2026-08-08 00:26:43  127.0.0.1 - - [08/Aug/2026 00:26:43] "GET /static/drum-mode.css HTTP/1.1" 200 -
+2026-08-08 00:26:43  127.0.0.1 - - [08/Aug/2026 00:26:43] "GET /images/top-curtain.png HTTP/1.1" 200 -
+2026-08-08 00:26:43  127.0.0.1 - - [08/Aug/2026 00:26:43] "GET /images/side%20curtain.png HTTP/1.1" 200 -
+2026-08-08 00:26:43  127.0.0.1 - - [08/Aug/2026 00:26:43] "GET /images/textiles.png HTTP/1.1" 200 -
+2026-08-08 00:26:43  127.0.0.1 - - [08/Aug/2026 00:26:43] "GET /images/statue.png HTTP/1.1" 200 -
+2026-08-08 00:26:43  127.0.0.1 - - [08/Aug/2026 00:26:43] "GET /static/drum-mode.js HTTP/1.1" 200 -
+2026-08-08 00:26:43  127.0.0.1 - - [08/Aug/2026 00:26:43] "GET /static/drum-tutorial.js HTTP/1.1" 200 -
+2026-08-08 00:26:43  127.0.0.1 - - [08/Aug/2026 00:26:43] "GET /static/Samspert-Icon.png HTTP/1.1" 200 -
+2026-08-08 00:26:43  127.0.0.1 - - [08/Aug/2026 00:26:43] "GET /static/Drum_image/SamphorDrumDesign11.png HTTP/1.1" 200 -
+2026-08-08 00:26:43  127.0.0.1 - - [08/Aug/2026 00:26:43] "GET /static/Drum_image/SamphorDrumDesign7.png HTTP/1.1" 200 -
+2026-08-08 00:26:43  127.0.0.1 - - [08/Aug/2026 00:26:43] "GET /static/Drum_image/SamphorDrumDesign3.png HTTP/1.1" 200 -
+2026-08-08 00:26:43  127.0.0.1 - - [08/Aug/2026 00:26:43] "[35m[1mGET /static/Sounds/Center-mute.wav HTTP/1.1[0m" 206 -
+2026-08-08 00:26:43  127.0.0.1 - - [08/Aug/2026 00:26:43] "[35m[1mGET /static/Sounds/Center-open.wav HTTP/1.1[0m" 206 -
+2026-08-08 00:26:43  127.0.0.1 - - [08/Aug/2026 00:26:43] "[35m[1mGET /static/Sounds/Middle-Layer.wav HTTP/1.1[0m" 206 -
+2026-08-08 00:26:43  127.0.0.1 - - [08/Aug/2026 00:26:43] "[35m[1mGET /static/Sounds/Rim.wav HTTP/1.1[0m" 206 -
+2026-08-08 00:26:43  127.0.0.1 - - [08/Aug/2026 00:26:43] "[35m[1mGET /static/Sounds/Hi-pitch-CenterMute.wav HTTP/1.1[0m" 206 -
+2026-08-08 00:26:43  127.0.0.1 - - [08/Aug/2026 00:26:43] "[35m[1mGET /static/Sounds/Hi-pitch-CenterOpen.wav HTTP/1.1[0m" 206 -
+2026-08-08 00:26:43  127.0.0.1 - - [08/Aug/2026 00:26:43] "[35m[1mGET /static/Sounds/Hi-pitch-MiddleLayer.wav HTTP/1.1[0m" 206 -
+2026-08-08 00:26:43  127.0.0.1 - - [08/Aug/2026 00:26:43] "[35m[1mGET /static/Sounds/Hi-pitch-Rim.wav HTTP/1.1[0m" 206 -
+2026-08-08 00:26:43  127.0.0.1 - - [08/Aug/2026 00:26:43] "[33mGET /favicon.ico HTTP/1.1[0m" 404 -
+2026-08-08 00:27:05  [d326b2b8] User context pre-set: name='yip', occupation='student'
+2026-08-08 00:27:05  127.0.0.1 - - [08/Aug/2026 00:27:05] "POST /user-context HTTP/1.1" 200 -
+2026-08-08 00:27:16  [d326b2b8] USER: 'How is the Samphor played?'  |  INTENT: ask_playing  |  CONF: 100%  |  REPLY: 'The Samphor is played with bare hands. The right hand strikes the larger head wi'
+2026-08-08 00:27:16  127.0.0.1 - - [08/Aug/2026 00:27:16] "POST /chat HTTP/1.1" 200 -
+2026-08-08 00:27:16  [wiki-image] title='Samphor'  image=https://upload.wikimedia.org/wikipedia/commons/thumb/7/7d/Samphor.jpg/330px-Samphor.jpg
+2026-08-08 00:27:16  127.0.0.1 - - [08/Aug/2026 00:27:16] "GET /wiki-image?url=https://en.wikipedia.org/wiki/Samphor HTTP/1.1" 200 -
+2026-08-08 00:27:17  [d326b2b8] USER: 'Where is it used?'  |  INTENT: ask_ceremonies  |  CONF: 100%  |  REPLY: 'The Samphor is indispensable in Cambodian religious and royal ceremonies: it acc'
+2026-08-08 00:27:17  127.0.0.1 - - [08/Aug/2026 00:27:17] "POST /chat HTTP/1.1" 200 -
+2026-08-08 00:27:18  [d326b2b8] USER: 'What is the Pinpeat ensemble?'  |  INTENT: ask_pinpeat  |  CONF: 100%  |  REPLY: "The Pinpeat is Cambodia's classical court orchestra, typically consisting of: Sa"
+2026-08-08 00:27:18  127.0.0.1 - - [08/Aug/2026 00:27:18] "POST /chat HTTP/1.1" 200 -
+2026-08-08 00:27:19  [wiki-image] title='Pinpeat'  image=https://upload.wikimedia.org/wikipedia/commons/thumb/8/80/Pierre_Dieulefils_postcard_1662.jpg/330px-Pierre_Dieulefils_postcard_1662.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail
+2026-08-08 00:27:19  127.0.0.1 - - [08/Aug/2026 00:27:19] "GET /wiki-image?url=https://en.wikipedia.org/wiki/Pinpeat HTTP/1.1" 200 -
+2026-08-08 00:27:19  [wiki-image] title='Pinpeat'  image=https://upload.wikimedia.org/wikipedia/commons/thumb/8/80/Pierre_Dieulefils_postcard_1662.jpg/330px-Pierre_Dieulefils_postcard_1662.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail
+2026-08-08 00:27:19  127.0.0.1 - - [08/Aug/2026 00:27:19] "GET /wiki-image?url=https://en.wikipedia.org/wiki/Pinpeat HTTP/1.1" 200 -
+2026-08-08 00:27:20  127.0.0.1 - - [08/Aug/2026 00:27:20] "GET /wiki-image?url=https://en.wikipedia.org/wiki/Cambodian_classical_dance HTTP/1.1" 200 -
+2026-08-08 00:27:24  [d326b2b8] Chat history saved to chat_history_2026-08-08_00-27-24.txt
+2026-08-08 00:27:24  127.0.0.1 - - [08/Aug/2026 00:27:24] "POST /save-history HTTP/1.1" 200 -
+2026-08-08 00:27:33  [d326b2b8] Chat history saved to chat_history_2026-08-08_00-27-33.txt
+2026-08-08 00:27:33  127.0.0.1 - - [08/Aug/2026 00:27:33] "POST /save-history HTTP/1.1" 200 -
+2026-08-08 00:27:36  [d326b2b8] Chat history saved to chat_history_2026-08-08_00-27-36.txt
+2026-08-08 00:27:36  127.0.0.1 - - [08/Aug/2026 00:27:36] "POST /save-history HTTP/1.1" 200 -
+2026-08-08 00:27:37  [d326b2b8] Chat history saved to chat_history_2026-08-08_00-27-37.txt
+2026-08-08 00:27:37  127.0.0.1 - - [08/Aug/2026 00:27:37] "POST /save-history HTTP/1.1" 200 -
+2026-08-08 00:27:37  [d326b2b8] Chat history saved to chat_history_2026-08-08_00-27-37.txt
+2026-08-08 00:27:37  127.0.0.1 - - [08/Aug/2026 00:27:37] "POST /save-history HTTP/1.1" 200 -
+2026-08-08 00:27:37  [d326b2b8] Chat history saved to chat_history_2026-08-08_00-27-37.txt
+2026-08-08 00:27:37  127.0.0.1 - - [08/Aug/2026 00:27:37] "POST /save-history HTTP/1.1" 200 -
+2026-08-08 00:27:37  [d326b2b8] Chat history saved to chat_history_2026-08-08_00-27-37.txt
+2026-08-08 00:27:37  127.0.0.1 - - [08/Aug/2026 00:27:37] "POST /save-history HTTP/1.1" 200 -
+2026-08-08 00:27:38  [d326b2b8] Chat history saved to chat_history_2026-08-08_00-27-38.txt
+2026-08-08 00:27:38  127.0.0.1 - - [08/Aug/2026 00:27:38] "POST /save-history HTTP/1.1" 200 -
+2026-08-08 00:27:48  [d326b2b8] Chat history saved to chat_history_2026-08-08_00-27-48.txt
+2026-08-08 00:27:48  127.0.0.1 - - [08/Aug/2026 00:27:48] "POST /save-history HTTP/1.1" 200 -
+2026-08-08 00:27:49  [d326b2b8] Chat history saved to chat_history_2026-08-08_00-27-49.txt
+2026-08-08 00:27:49  127.0.0.1 - - [08/Aug/2026 00:27:49] "POST /save-history HTTP/1.1" 200 -
+2026-08-08 00:27:49  [d326b2b8] Chat history saved to chat_history_2026-08-08_00-27-49.txt
+2026-08-08 00:27:49  127.0.0.1 - - [08/Aug/2026 00:27:49] "POST /save-history HTTP/1.1" 200 -
+2026-08-08 00:27:50  [d326b2b8] Chat history saved to chat_history_2026-08-08_00-27-50.txt
+2026-08-08 00:27:50  127.0.0.1 - - [08/Aug/2026 00:27:50] "POST /save-history HTTP/1.1" 200 -
+2026-08-08 00:27:50  [d326b2b8] Chat history saved to chat_history_2026-08-08_00-27-50.txt
+2026-08-08 00:27:50  127.0.0.1 - - [08/Aug/2026 00:27:50] "POST /save-history HTTP/1.1" 200 -
+2026-08-08 00:27:51  [d326b2b8] Chat history saved to chat_history_2026-08-08_00-27-51.txt
+2026-08-08 00:27:51  127.0.0.1 - - [08/Aug/2026 00:27:51] "POST /save-history HTTP/1.1" 200 -
+2026-08-08 00:27:51  [d326b2b8] Chat history saved to chat_history_2026-08-08_00-27-51.txt
+2026-08-08 00:27:51  127.0.0.1 - - [08/Aug/2026 00:27:51] "POST /save-history HTTP/1.1" 200 -
+2026-08-08 00:27:51  [d326b2b8] Chat history saved to chat_history_2026-08-08_00-27-51.txt
+2026-08-08 00:27:51  127.0.0.1 - - [08/Aug/2026 00:27:51] "POST /save-history HTTP/1.1" 200 -
+2026-08-08 00:27:53  [d326b2b8] Chat history saved to chat_history_2026-08-08_00-27-53.txt
+2026-08-08 00:27:53  127.0.0.1 - - [08/Aug/2026 00:27:53] "POST /save-history HTTP/1.1" 200 -
+2026-08-08 00:27:56  [d326b2b8] Chat history saved to chat_history_2026-08-08_00-27-56.txt
+2026-08-08 00:27:56  127.0.0.1 - - [08/Aug/2026 00:27:56] "POST /save-history HTTP/1.1" 200 -
+2026-08-08 00:28:00  [d326b2b8] Chat history saved to chat_history_2026-08-08_00-28-00.txt
+2026-08-08 00:28:00  127.0.0.1 - - [08/Aug/2026 00:28:00] "POST /save-history HTTP/1.1" 200 -
+2026-08-08 00:28:01  [d326b2b8] Chat history saved to chat_history_2026-08-08_00-28-01.txt
+2026-08-08 00:28:01  127.0.0.1 - - [08/Aug/2026 00:28:01] "POST /save-history HTTP/1.1" 200 -
+2026-08-08 00:28:01  [d326b2b8] Chat history saved to chat_history_2026-08-08_00-28-01.txt
+2026-08-08 00:28:01  127.0.0.1 - - [08/Aug/2026 00:28:01] "POST /save-history HTTP/1.1" 200 -
+2026-08-08 00:28:01  [d326b2b8] Chat history saved to chat_history_2026-08-08_00-28-01.txt
+2026-08-08 00:28:01  127.0.0.1 - - [08/Aug/2026 00:28:01] "POST /save-history HTTP/1.1" 200 -
+2026-08-08 00:28:01  [d326b2b8] Chat history saved to chat_history_2026-08-08_00-28-01.txt
+2026-08-08 00:28:01  127.0.0.1 - - [08/Aug/2026 00:28:01] "POST /save-history HTTP/1.1" 200 -
+2026-08-08 00:28:01  [d326b2b8] Chat history saved to chat_history_2026-08-08_00-28-01.txt
+2026-08-08 00:28:01  127.0.0.1 - - [08/Aug/2026 00:28:01] "POST /save-history HTTP/1.1" 200 -
+2026-08-08 00:28:01  [d326b2b8] Chat history saved to chat_history_2026-08-08_00-28-01.txt
+2026-08-08 00:28:01  127.0.0.1 - - [08/Aug/2026 00:28:01] "POST /save-history HTTP/1.1" 200 -
+2026-08-08 00:28:02  [d326b2b8] Chat history saved to chat_history_2026-08-08_00-28-02.txt
+2026-08-08 00:28:02  127.0.0.1 - - [08/Aug/2026 00:28:02] "POST /save-history HTTP/1.1" 200 -
+2026-08-08 00:31:16  127.0.0.1 - - [08/Aug/2026 00:31:16] "GET / HTTP/1.1" 200 -
+2026-08-08 00:31:16  127.0.0.1 - - [08/Aug/2026 00:31:16] "[36mGET /static/drum-mode.css HTTP/1.1[0m" 304 -
+2026-08-08 00:31:16  127.0.0.1 - - [08/Aug/2026 00:31:16] "[36mGET /images/top-curtain.png HTTP/1.1[0m" 304 -
+2026-08-08 00:31:16  127.0.0.1 - - [08/Aug/2026 00:31:16] "[36mGET /images/side%20curtain.png HTTP/1.1[0m" 304 -
+2026-08-08 00:31:16  127.0.0.1 - - [08/Aug/2026 00:31:16] "[36mGET /images/textiles.png HTTP/1.1[0m" 304 -
+2026-08-08 00:31:16  127.0.0.1 - - [08/Aug/2026 00:31:16] "[36mGET /images/statue.png HTTP/1.1[0m" 304 -
+2026-08-08 00:31:16  127.0.0.1 - - [08/Aug/2026 00:31:16] "[36mGET /static/drum-tutorial.js HTTP/1.1[0m" 304 -
+2026-08-08 00:31:16  127.0.0.1 - - [08/Aug/2026 00:31:16] "[36mGET /static/Drum_image/SamphorDrumDesign11.png HTTP/1.1[0m" 304 -
+2026-08-08 00:31:16  127.0.0.1 - - [08/Aug/2026 00:31:16] "[36mGET /static/Samspert-Icon.png HTTP/1.1[0m" 304 -
+2026-08-08 00:31:16  127.0.0.1 - - [08/Aug/2026 00:31:16] "[36mGET /static/drum-mode.js HTTP/1.1[0m" 304 -
+2026-08-08 00:31:16  127.0.0.1 - - [08/Aug/2026 00:31:16] "[36mGET /static/Drum_image/SamphorDrumDesign7.png HTTP/1.1[0m" 304 -
+2026-08-08 00:31:16  127.0.0.1 - - [08/Aug/2026 00:31:16] "[36mGET /static/Drum_image/SamphorDrumDesign3.png HTTP/1.1[0m" 304 -
+2026-08-08 00:31:16  127.0.0.1 - - [08/Aug/2026 00:31:16] "[35m[1mGET /static/Sounds/Center-mute.wav HTTP/1.1[0m" 206 -
+2026-08-08 00:31:16  127.0.0.1 - - [08/Aug/2026 00:31:16] "[35m[1mGET /static/Sounds/Center-open.wav HTTP/1.1[0m" 206 -
+2026-08-08 00:31:16  127.0.0.1 - - [08/Aug/2026 00:31:16] "[35m[1mGET /static/Sounds/Hi-pitch-CenterOpen.wav HTTP/1.1[0m" 206 -
+2026-08-08 00:31:16  127.0.0.1 - - [08/Aug/2026 00:31:16] "[35m[1mGET /static/Sounds/Middle-Layer.wav HTTP/1.1[0m" 206 -
+2026-08-08 00:31:16  127.0.0.1 - - [08/Aug/2026 00:31:16] "[35m[1mGET /static/Sounds/Rim.wav HTTP/1.1[0m" 206 -
+2026-08-08 00:31:16  127.0.0.1 - - [08/Aug/2026 00:31:16] "[35m[1mGET /static/Sounds/Hi-pitch-CenterMute.wav HTTP/1.1[0m" 206 -
+2026-08-08 00:31:16  127.0.0.1 - - [08/Aug/2026 00:31:16] "[35m[1mGET /static/Sounds/Hi-pitch-MiddleLayer.wav HTTP/1.1[0m" 206 -
+2026-08-08 00:31:16  127.0.0.1 - - [08/Aug/2026 00:31:16] "[35m[1mGET /static/Sounds/Hi-pitch-Rim.wav HTTP/1.1[0m" 206 -
+2026-08-08 00:31:19  127.0.0.1 - - [08/Aug/2026 00:31:19] "GET / HTTP/1.1" 200 -
+2026-08-08 00:31:19  127.0.0.1 - - [08/Aug/2026 00:31:19] "[36mGET /static/drum-mode.css HTTP/1.1[0m" 304 -
+2026-08-08 00:31:19  127.0.0.1 - - [08/Aug/2026 00:31:19] "[36mGET /images/top-curtain.png HTTP/1.1[0m" 304 -
+2026-08-08 00:31:19  127.0.0.1 - - [08/Aug/2026 00:31:19] "[36mGET /images/side%20curtain.png HTTP/1.1[0m" 304 -
+2026-08-08 00:31:19  127.0.0.1 - - [08/Aug/2026 00:31:19] "[36mGET /images/textiles.png HTTP/1.1[0m" 304 -
+2026-08-08 00:31:19  127.0.0.1 - - [08/Aug/2026 00:31:19] "[36mGET /images/statue.png HTTP/1.1[0m" 304 -
+2026-08-08 00:31:19  127.0.0.1 - - [08/Aug/2026 00:31:19] "[36mGET /static/drum-mode.js HTTP/1.1[0m" 304 -
+2026-08-08 00:31:19  127.0.0.1 - - [08/Aug/2026 00:31:19] "[36mGET /static/drum-tutorial.js HTTP/1.1[0m" 304 -
+2026-08-08 00:31:19  127.0.0.1 - - [08/Aug/2026 00:31:19] "[36mGET /static/Samspert-Icon.png HTTP/1.1[0m" 304 -
+2026-08-08 00:31:19  127.0.0.1 - - [08/Aug/2026 00:31:19] "[36mGET /static/Drum_image/SamphorDrumDesign11.png HTTP/1.1[0m" 304 -
+2026-08-08 00:31:19  127.0.0.1 - - [08/Aug/2026 00:31:19] "[36mGET /static/Drum_image/SamphorDrumDesign7.png HTTP/1.1[0m" 304 -
+2026-08-08 00:31:19  127.0.0.1 - - [08/Aug/2026 00:31:19] "[36mGET /static/Drum_image/SamphorDrumDesign3.png HTTP/1.1[0m" 304 -
+2026-08-08 00:31:19  127.0.0.1 - - [08/Aug/2026 00:31:19] "[35m[1mGET /static/Sounds/Center-mute.wav HTTP/1.1[0m" 206 -
+2026-08-08 00:31:19  127.0.0.1 - - [08/Aug/2026 00:31:19] "[35m[1mGET /static/Sounds/Center-open.wav HTTP/1.1[0m" 206 -
+2026-08-08 00:31:19  127.0.0.1 - - [08/Aug/2026 00:31:19] "[35m[1mGET /static/Sounds/Middle-Layer.wav HTTP/1.1[0m" 206 -
+2026-08-08 00:31:19  127.0.0.1 - - [08/Aug/2026 00:31:19] "[35m[1mGET /static/Sounds/Rim.wav HTTP/1.1[0m" 206 -
+2026-08-08 00:31:19  127.0.0.1 - - [08/Aug/2026 00:31:19] "[35m[1mGET /static/Sounds/Hi-pitch-CenterMute.wav HTTP/1.1[0m" 206 -
+2026-08-08 00:31:19  127.0.0.1 - - [08/Aug/2026 00:31:19] "[35m[1mGET /static/Sounds/Hi-pitch-CenterOpen.wav HTTP/1.1[0m" 206 -
+2026-08-08 00:31:19  127.0.0.1 - - [08/Aug/2026 00:31:19] "[35m[1mGET /static/Sounds/Hi-pitch-MiddleLayer.wav HTTP/1.1[0m" 206 -
+2026-08-08 00:31:19  127.0.0.1 - - [08/Aug/2026 00:31:19] "[35m[1mGET /static/Sounds/Hi-pitch-Rim.wav HTTP/1.1[0m" 206 -
+2026-08-08 00:31:19  127.0.0.1 - - [08/Aug/2026 00:31:19] "[35m[1mGET /static/Sounds/Center-mute.wav HTTP/1.1[0m" 206 -
+2026-08-08 00:31:19  127.0.0.1 - - [08/Aug/2026 00:31:19] "[35m[1mGET /static/Sounds/Middle-Layer.wav HTTP/1.1[0m" 206 -
+2026-08-08 00:31:19  127.0.0.1 - - [08/Aug/2026 00:31:19] "[35m[1mGET /static/Sounds/Center-mute.wav HTTP/1.1[0m" 206 -
+2026-08-08 00:31:19  127.0.0.1 - - [08/Aug/2026 00:31:19] "[35m[1mGET /static/Sounds/Middle-Layer.wav HTTP/1.1[0m" 206 -
+2026-08-08 00:31:19  127.0.0.1 - - [08/Aug/2026 00:31:19] "[35m[1mGET /static/Sounds/Center-mute.wav HTTP/1.1[0m" 206 -
+2026-08-08 00:31:19  127.0.0.1 - - [08/Aug/2026 00:31:19] "[35m[1mGET /static/Sounds/Middle-Layer.wav HTTP/1.1[0m" 206 -
+2026-08-08 00:31:20  [d326b2b8] Chat history saved to chat_history_2026-08-08_00-31-20.txt
+2026-08-08 00:31:20  127.0.0.1 - - [08/Aug/2026 00:31:20] "POST /save-history HTTP/1.1" 200 -
+2026-08-08 00:31:51  [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5000
+ * Running on http://192.168.1.50:5000
+2026-08-08 00:31:51  [33mPress CTRL+C to quit[0m
+2026-08-08 00:32:13  127.0.0.1 - - [08/Aug/2026 00:32:13] "GET / HTTP/1.1" 200 -
+2026-08-08 00:32:13  127.0.0.1 - - [08/Aug/2026 00:32:13] "[36mGET /images/top-curtain.png HTTP/1.1[0m" 304 -
+2026-08-08 00:32:13  127.0.0.1 - - [08/Aug/2026 00:32:13] "[36mGET /static/drum-mode.css HTTP/1.1[0m" 304 -
+2026-08-08 00:32:13  127.0.0.1 - - [08/Aug/2026 00:32:13] "[36mGET /static/drum-tutorial.js HTTP/1.1[0m" 304 -
+2026-08-08 00:32:13  127.0.0.1 - - [08/Aug/2026 00:32:13] "[36mGET /static/Samspert-Icon.png HTTP/1.1[0m" 304 -
+2026-08-08 00:32:13  127.0.0.1 - - [08/Aug/2026 00:32:13] "[36mGET /static/Drum_image/SamphorDrumDesign11.png HTTP/1.1[0m" 304 -
+2026-08-08 00:32:13  127.0.0.1 - - [08/Aug/2026 00:32:13] "[36mGET /static/Drum_image/SamphorDrumDesign7.png HTTP/1.1[0m" 304 -
+2026-08-08 00:32:13  127.0.0.1 - - [08/Aug/2026 00:32:13] "[36mGET /images/textiles.png HTTP/1.1[0m" 304 -
+2026-08-08 00:32:13  127.0.0.1 - - [08/Aug/2026 00:32:13] "[36mGET /static/Drum_image/SamphorDrumDesign3.png HTTP/1.1[0m" 304 -
+2026-08-08 00:32:13  127.0.0.1 - - [08/Aug/2026 00:32:13] "[36mGET /images/statue.png HTTP/1.1[0m" 304 -
+2026-08-08 00:32:13  127.0.0.1 - - [08/Aug/2026 00:32:13] "[36mGET /static/drum-mode.js HTTP/1.1[0m" 304 -
+2026-08-08 00:32:13  127.0.0.1 - - [08/Aug/2026 00:32:13] "[36mGET /images/side%20curtain.png HTTP/1.1[0m" 304 -
+2026-08-08 00:32:13  127.0.0.1 - - [08/Aug/2026 00:32:13] "[35m[1mGET /static/Sounds/Center-open.wav HTTP/1.1[0m" 206 -
+2026-08-08 00:32:13  127.0.0.1 - - [08/Aug/2026 00:32:13] "[35m[1mGET /static/Sounds/Center-mute.wav HTTP/1.1[0m" 206 -
+2026-08-08 00:32:13  127.0.0.1 - - [08/Aug/2026 00:32:13] "[35m[1mGET /static/Sounds/Rim.wav HTTP/1.1[0m" 206 -
+2026-08-08 00:32:13  127.0.0.1 - - [08/Aug/2026 00:32:13] "[35m[1mGET /static/Sounds/Middle-Layer.wav HTTP/1.1[0m" 206 -
+2026-08-08 00:32:13  127.0.0.1 - - [08/Aug/2026 00:32:13] "[35m[1mGET /static/Sounds/Hi-pitch-CenterMute.wav HTTP/1.1[0m" 206 -
+2026-08-08 00:32:13  127.0.0.1 - - [08/Aug/2026 00:32:13] "[35m[1mGET /static/Sounds/Hi-pitch-CenterOpen.wav HTTP/1.1[0m" 206 -
+2026-08-08 00:32:13  127.0.0.1 - - [08/Aug/2026 00:32:13] "[35m[1mGET /static/Sounds/Hi-pitch-MiddleLayer.wav HTTP/1.1[0m" 206 -
+2026-08-08 00:32:13  127.0.0.1 - - [08/Aug/2026 00:32:13] "[35m[1mGET /static/Sounds/Hi-pitch-Rim.wav HTTP/1.1[0m" 206 -
+2026-08-08 00:32:13  127.0.0.1 - - [08/Aug/2026 00:32:13] "[35m[1mGET /static/Sounds/Center-mute.wav HTTP/1.1[0m" 206 -
+2026-08-08 00:32:13  127.0.0.1 - - [08/Aug/2026 00:32:13] "[35m[1mGET /static/Sounds/Rim.wav HTTP/1.1[0m" 206 -
+2026-08-08 00:32:13  127.0.0.1 - - [08/Aug/2026 00:32:13] "[35m[1mGET /static/Sounds/Middle-Layer.wav HTTP/1.1[0m" 206 -
+2026-08-08 00:32:13  127.0.0.1 - - [08/Aug/2026 00:32:13] "[35m[1mGET /static/Sounds/Hi-pitch-CenterMute.wav HTTP/1.1[0m" 206 -
+2026-08-08 00:32:13  127.0.0.1 - - [08/Aug/2026 00:32:13] "[35m[1mGET /static/Sounds/Center-mute.wav HTTP/1.1[0m" 206 -
+2026-08-08 00:32:13  127.0.0.1 - - [08/Aug/2026 00:32:13] "[35m[1mGET /static/Sounds/Hi-pitch-MiddleLayer.wav HTTP/1.1[0m" 206 -
+2026-08-08 00:32:13  127.0.0.1 - - [08/Aug/2026 00:32:13] "[35m[1mGET /static/Sounds/Hi-pitch-Rim.wav HTTP/1.1[0m" 206 -
+2026-08-08 00:32:13  127.0.0.1 - - [08/Aug/2026 00:32:13] "[35m[1mGET /static/Sounds/Middle-Layer.wav HTTP/1.1[0m" 206 -
+2026-08-08 00:32:13  127.0.0.1 - - [08/Aug/2026 00:32:13] "[35m[1mGET /static/Sounds/Rim.wav HTTP/1.1[0m" 206 -
+2026-08-08 00:32:13  127.0.0.1 - - [08/Aug/2026 00:32:13] "[35m[1mGET /static/Sounds/Hi-pitch-CenterMute.wav HTTP/1.1[0m" 206 -
+2026-08-08 00:32:13  127.0.0.1 - - [08/Aug/2026 00:32:13] "[35m[1mGET /static/Sounds/Center-mute.wav HTTP/1.1[0m" 206 -
+2026-08-08 00:32:13  127.0.0.1 - - [08/Aug/2026 00:32:13] "[35m[1mGET /static/Sounds/Hi-pitch-MiddleLayer.wav HTTP/1.1[0m" 206 -
+2026-08-08 00:32:13  127.0.0.1 - - [08/Aug/2026 00:32:13] "[35m[1mGET /static/Sounds/Hi-pitch-Rim.wav HTTP/1.1[0m" 206 -
+2026-08-08 00:32:13  127.0.0.1 - - [08/Aug/2026 00:32:13] "[35m[1mGET /static/Sounds/Rim.wav HTTP/1.1[0m" 206 -
+2026-08-08 00:32:13  127.0.0.1 - - [08/Aug/2026 00:32:13] "[35m[1mGET /static/Sounds/Middle-Layer.wav HTTP/1.1[0m" 206 -
+2026-08-08 00:32:13  127.0.0.1 - - [08/Aug/2026 00:32:13] "[35m[1mGET /static/Sounds/Hi-pitch-CenterMute.wav HTTP/1.1[0m" 206 -
+2026-08-08 00:32:13  127.0.0.1 - - [08/Aug/2026 00:32:13] "[35m[1mGET /static/Sounds/Hi-pitch-MiddleLayer.wav HTTP/1.1[0m" 206 -
+2026-08-08 00:32:13  127.0.0.1 - - [08/Aug/2026 00:32:13] "[35m[1mGET /static/Sounds/Hi-pitch-Rim.wav HTTP/1.1[0m" 206 -
+2026-08-11 12:07:04  [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5000
+ * Running on http://192.168.1.50:5000
+2026-08-11 12:07:04  [33mPress CTRL+C to quit[0m
+2026-08-11 12:07:09  127.0.0.1 - - [11/Aug/2026 12:07:09] "GET / HTTP/1.1" 200 -
+2026-08-11 12:07:09  127.0.0.1 - - [11/Aug/2026 12:07:09] "[36mGET /static/drum-mode.css HTTP/1.1[0m" 304 -
+2026-08-11 12:07:09  127.0.0.1 - - [11/Aug/2026 12:07:09] "[36mGET /images/top-curtain.png HTTP/1.1[0m" 304 -
+2026-08-11 12:07:09  127.0.0.1 - - [11/Aug/2026 12:07:09] "[36mGET /static/Samspert-Icon.png HTTP/1.1[0m" 304 -
+2026-08-11 12:07:09  127.0.0.1 - - [11/Aug/2026 12:07:09] "[36mGET /static/drum-tutorial.js HTTP/1.1[0m" 304 -
+2026-08-11 12:07:09  127.0.0.1 - - [11/Aug/2026 12:07:09] "[36mGET /static/Drum_image/SamphorDrumDesign11.png HTTP/1.1[0m" 304 -
+2026-08-11 12:07:09  127.0.0.1 - - [11/Aug/2026 12:07:09] "[36mGET /static/Drum_image/SamphorDrumDesign7.png HTTP/1.1[0m" 304 -
+2026-08-11 12:07:09  127.0.0.1 - - [11/Aug/2026 12:07:09] "[36mGET /static/Drum_image/SamphorDrumDesign3.png HTTP/1.1[0m" 304 -
+2026-08-11 12:07:09  127.0.0.1 - - [11/Aug/2026 12:07:09] "[36mGET /images/side%20curtain.png HTTP/1.1[0m" 304 -
+2026-08-11 12:07:09  127.0.0.1 - - [11/Aug/2026 12:07:09] "[36mGET /images/textiles.png HTTP/1.1[0m" 304 -
+2026-08-11 12:07:09  127.0.0.1 - - [11/Aug/2026 12:07:09] "[36mGET /images/statue.png HTTP/1.1[0m" 304 -
+2026-08-11 12:07:09  127.0.0.1 - - [11/Aug/2026 12:07:09] "[36mGET /static/drum-mode.js HTTP/1.1[0m" 304 -
+2026-08-11 12:07:09  127.0.0.1 - - [11/Aug/2026 12:07:09] "[35m[1mGET /static/Sounds/Center-mute.wav HTTP/1.1[0m" 206 -
+2026-08-11 12:07:09  127.0.0.1 - - [11/Aug/2026 12:07:09] "[35m[1mGET /static/Sounds/Center-open.wav HTTP/1.1[0m" 206 -
+2026-08-11 12:07:09  127.0.0.1 - - [11/Aug/2026 12:07:09] "[35m[1mGET /static/Sounds/Middle-Layer.wav HTTP/1.1[0m" 206 -
+2026-08-11 12:07:09  127.0.0.1 - - [11/Aug/2026 12:07:09] "[35m[1mGET /static/Sounds/Rim.wav HTTP/1.1[0m" 206 -
+2026-08-11 12:07:09  127.0.0.1 - - [11/Aug/2026 12:07:09] "[35m[1mGET /static/Sounds/Hi-pitch-CenterOpen.wav HTTP/1.1[0m" 206 -
+2026-08-11 12:07:09  127.0.0.1 - - [11/Aug/2026 12:07:09] "[35m[1mGET /static/Sounds/Hi-pitch-CenterMute.wav HTTP/1.1[0m" 206 -
+2026-08-11 12:07:09  127.0.0.1 - - [11/Aug/2026 12:07:09] "[35m[1mGET /static/Sounds/Hi-pitch-MiddleLayer.wav HTTP/1.1[0m" 206 -
+2026-08-11 12:07:09  127.0.0.1 - - [11/Aug/2026 12:07:09] "[35m[1mGET /static/Sounds/Hi-pitch-Rim.wav HTTP/1.1[0m" 206 -
+2026-08-11 12:07:09  127.0.0.1 - - [11/Aug/2026 12:07:09] "[33mGET /favicon.ico HTTP/1.1[0m" 404 -
+2026-08-11 12:07:22  [417dc2dd] USER: 'wat is teh sampor'  |  INTENT: fallback/clarify  |  CONF: 0%  |  REPLY: "Lovely to meet you, Wat Is! What do you do for a living, if you don't mind me as"
+2026-08-11 12:07:22  127.0.0.1 - - [11/Aug/2026 12:07:22] "POST /chat HTTP/1.1" 200 -
+2026-08-11 12:07:31  [417dc2dd] USER: 'what is teh samphor'  |  INTENT: fallback/clarify  |  CONF: 0%  |  REPLY: 'How interesting, Wat Is! I am delighted to have you here. Feel free to ask me an'
+2026-08-11 12:07:31  127.0.0.1 - - [11/Aug/2026 12:07:31] "POST /chat HTTP/1.1" 200 -
+2026-08-11 12:07:54  [417dc2dd] Session reset
+2026-08-11 12:07:54  127.0.0.1 - - [11/Aug/2026 12:07:54] "POST /reset HTTP/1.1" 200 -
+2026-08-11 12:08:20  [417dc2dd] User context pre-set: name='Im Yip', occupation='im a student'
+2026-08-11 12:08:20  127.0.0.1 - - [11/Aug/2026 12:08:20] "POST /user-context HTTP/1.1" 200 -
+2026-08-11 12:08:48  [417dc2dd] Session reset
+2026-08-11 12:08:48  127.0.0.1 - - [11/Aug/2026 12:08:48] "POST /reset HTTP/1.1" 200 -
+2026-08-11 12:09:12  [417dc2dd] User context pre-set: name='my name is yip', occupation='im a student'
+2026-08-11 12:09:12  127.0.0.1 - - [11/Aug/2026 12:09:12] "POST /user-context HTTP/1.1" 200 -
+2026-08-11 12:16:43  127.0.0.1 - - [11/Aug/2026 12:16:43] "[36mGET /static/Mute(left).png HTTP/1.1[0m" 304 -
+2026-08-11 12:16:43  127.0.0.1 - - [11/Aug/2026 12:16:43] "[36mGET /static/Drum_image/SamphorDrumDesign4.png HTTP/1.1[0m" 304 -
+2026-08-11 12:16:43  127.0.0.1 - - [11/Aug/2026 12:16:43] "[35m[1mGET /static/Sounds/Center-mute.wav HTTP/1.1[0m" 206 -
+2026-08-11 12:16:43  127.0.0.1 - - [11/Aug/2026 12:16:43] "[36mGET /static/Drum_image/SamphorDrumDesign5.png HTTP/1.1[0m" 304 -
+2026-08-11 12:16:43  127.0.0.1 - - [11/Aug/2026 12:16:43] "[36mGET /static/Drum_image/SamphorDrumDesign6.png HTTP/1.1[0m" 304 -
+2026-08-11 12:16:44  127.0.0.1 - - [11/Aug/2026 12:16:44] "[36mGET /static/Open_hand_(left).png HTTP/1.1[0m" 304 -
+2026-08-11 12:16:44  127.0.0.1 - - [11/Aug/2026 12:16:44] "[35m[1mGET /static/Sounds/Middle-Layer.wav HTTP/1.1[0m" 206 -
+2026-08-11 12:16:44  127.0.0.1 - - [11/Aug/2026 12:16:44] "[36mGET /static/Drum_image/SamphorDrumDesign8.png HTTP/1.1[0m" 304 -
+2026-08-11 12:16:44  127.0.0.1 - - [11/Aug/2026 12:16:44] "[36mGET /static/Drum_image/SamphorDrumDesign9.png HTTP/1.1[0m" 304 -
+2026-08-11 12:16:44  127.0.0.1 - - [11/Aug/2026 12:16:44] "[36mGET /static/Drum_image/SamphorDrumDesign10.png HTTP/1.1[0m" 304 -
+2026-08-11 12:16:44  127.0.0.1 - - [11/Aug/2026 12:16:44] "[36mGET /static/Open_hand_Hit(left).png HTTP/1.1[0m" 304 -
+2026-08-11 12:16:44  127.0.0.1 - - [11/Aug/2026 12:16:44] "[35m[1mGET /static/Sounds/Rim.wav HTTP/1.1[0m" 206 -
+2026-08-11 12:16:44  127.0.0.1 - - [11/Aug/2026 12:16:44] "[36mGET /static/Drum_image/SamphorDrumDesign12.png HTTP/1.1[0m" 304 -
+2026-08-11 12:16:44  127.0.0.1 - - [11/Aug/2026 12:16:44] "[36mGET /static/Drum_image/SamphorDrumDesign13.png HTTP/1.1[0m" 304 -
+2026-08-11 12:16:44  127.0.0.1 - - [11/Aug/2026 12:16:44] "[36mGET /static/Drum_image/SamphorDrumDesign14.png HTTP/1.1[0m" 304 -
+2026-08-11 12:16:45  127.0.0.1 - - [11/Aug/2026 12:16:45] "[36mGET /static/Open_hand_(right).png HTTP/1.1[0m" 304 -
+2026-08-11 12:16:45  127.0.0.1 - - [11/Aug/2026 12:16:45] "[35m[1mGET /static/Sounds/Hi-pitch-MiddleLayer.wav HTTP/1.1[0m" 206 -
+2026-08-11 12:16:45  127.0.0.1 - - [11/Aug/2026 12:16:45] "[36mGET /static/Drum_image/SamphorDrumDesign8.png HTTP/1.1[0m" 304 -
+2026-08-11 12:16:45  127.0.0.1 - - [11/Aug/2026 12:16:45] "[36mGET /static/Drum_image/SamphorDrumDesign9.png HTTP/1.1[0m" 304 -
+2026-08-11 12:16:45  127.0.0.1 - - [11/Aug/2026 12:16:45] "[36mGET /static/Drum_image/SamphorDrumDesign10.png HTTP/1.1[0m" 304 -
+2026-08-11 12:16:45  127.0.0.1 - - [11/Aug/2026 12:16:45] "[36mGET /static/Open_hand_Hit(right).png HTTP/1.1[0m" 304 -
+2026-08-11 12:16:46  127.0.0.1 - - [11/Aug/2026 12:16:46] "[35m[1mGET /static/Sounds/Hi-pitch-Rim.wav HTTP/1.1[0m" 206 -
+2026-08-11 12:16:46  127.0.0.1 - - [11/Aug/2026 12:16:46] "[36mGET /static/Drum_image/SamphorDrumDesign12.png HTTP/1.1[0m" 304 -
+2026-08-11 12:16:46  127.0.0.1 - - [11/Aug/2026 12:16:46] "[36mGET /static/Drum_image/SamphorDrumDesign13.png HTTP/1.1[0m" 304 -
+2026-08-11 12:16:46  127.0.0.1 - - [11/Aug/2026 12:16:46] "[36mGET /static/Mute(right).png HTTP/1.1[0m" 304 -
+2026-08-11 12:16:46  127.0.0.1 - - [11/Aug/2026 12:16:46] "[35m[1mGET /static/Sounds/Hi-pitch-CenterMute.wav HTTP/1.1[0m" 206 -
+2026-08-11 12:16:46  127.0.0.1 - - [11/Aug/2026 12:16:46] "[36mGET /static/Drum_image/SamphorDrumDesign4.png HTTP/1.1[0m" 304 -
+2026-08-11 12:16:46  127.0.0.1 - - [11/Aug/2026 12:16:46] "[36mGET /static/Drum_image/SamphorDrumDesign5.png HTTP/1.1[0m" 304 -
+2026-08-11 12:16:46  127.0.0.1 - - [11/Aug/2026 12:16:46] "[36mGET /static/Drum_image/SamphorDrumDesign6.png HTTP/1.1[0m" 304 -
+2026-08-11 12:16:46  127.0.0.1 - - [11/Aug/2026 12:16:46] "[36mGET /static/Open_hand_(right).png HTTP/1.1[0m" 304 -
+2026-08-11 12:16:46  127.0.0.1 - - [11/Aug/2026 12:16:46] "[36mGET /static/Drum_image/SamphorDrumDesign8.png HTTP/1.1[0m" 304 -
+2026-08-11 12:16:46  127.0.0.1 - - [11/Aug/2026 12:16:46] "[36mGET /static/Drum_image/SamphorDrumDesign9.png HTTP/1.1[0m" 304 -
+2026-08-11 12:16:47  127.0.0.1 - - [11/Aug/2026 12:16:47] "[36mGET /static/Drum_image/SamphorDrumDesign10.png HTTP/1.1[0m" 304 -
+2026-08-11 12:16:47  127.0.0.1 - - [11/Aug/2026 12:16:47] "[36mGET /static/Open_hand_Hit(right).png HTTP/1.1[0m" 304 -
+2026-08-11 12:16:47  127.0.0.1 - - [11/Aug/2026 12:16:47] "[36mGET /static/Drum_image/SamphorDrumDesign12.png HTTP/1.1[0m" 304 -
+2026-08-11 12:16:47  127.0.0.1 - - [11/Aug/2026 12:16:47] "[36mGET /static/Drum_image/SamphorDrumDesign13.png HTTP/1.1[0m" 304 -
+2026-08-11 12:16:47  127.0.0.1 - - [11/Aug/2026 12:16:47] "[36mGET /static/Drum_image/SamphorDrumDesign14.png HTTP/1.1[0m" 304 -
+2026-08-11 12:16:47  127.0.0.1 - - [11/Aug/2026 12:16:47] "[36mGET /static/Drum_image/SamphorDrumDesign14.png HTTP/1.1[0m" 304 -
+2026-08-11 12:16:48  127.0.0.1 - - [11/Aug/2026 12:16:48] "[36mGET /static/Drum_image/SamphorDrumDesign12.png HTTP/1.1[0m" 304 -
+2026-08-11 12:16:48  127.0.0.1 - - [11/Aug/2026 12:16:48] "[36mGET /static/Drum_image/SamphorDrumDesign8.png HTTP/1.1[0m" 304 -
+2026-08-11 12:16:48  127.0.0.1 - - [11/Aug/2026 12:16:48] "[36mGET /static/Drum_image/SamphorDrumDesign9.png HTTP/1.1[0m" 304 -
+2026-08-11 12:16:48  127.0.0.1 - - [11/Aug/2026 12:16:48] "[36mGET /static/Drum_image/SamphorDrumDesign10.png HTTP/1.1[0m" 304 -
+2026-08-11 12:16:48  127.0.0.1 - - [11/Aug/2026 12:16:48] "[36mGET /static/Mute(right).png HTTP/1.1[0m" 304 -
+2026-08-11 12:16:48  127.0.0.1 - - [11/Aug/2026 12:16:48] "[36mGET /static/Drum_image/SamphorDrumDesign4.png HTTP/1.1[0m" 304 -
+2026-08-11 12:16:48  127.0.0.1 - - [11/Aug/2026 12:16:48] "[36mGET /static/Drum_image/SamphorDrumDesign5.png HTTP/1.1[0m" 304 -
+2026-08-11 12:16:48  127.0.0.1 - - [11/Aug/2026 12:16:48] "[36mGET /static/Drum_image/SamphorDrumDesign6.png HTTP/1.1[0m" 304 -
+2026-08-11 12:16:50  127.0.0.1 - - [11/Aug/2026 12:16:50] "[36mGET /static/Drum_image/SamphorDrumDesign4.png HTTP/1.1[0m" 304 -
+2026-08-11 12:16:50  127.0.0.1 - - [11/Aug/2026 12:16:50] "[36mGET /static/Drum_image/SamphorDrumDesign5.png HTTP/1.1[0m" 304 -
+2026-08-11 12:16:50  127.0.0.1 - - [11/Aug/2026 12:16:50] "[36mGET /static/Mute(left).png HTTP/1.1[0m" 304 -
+2026-08-11 12:16:51  127.0.0.1 - - [11/Aug/2026 12:16:51] "[36mGET /static/Drum_image/SamphorDrumDesign6.png HTTP/1.1[0m" 304 -
+2026-08-11 12:24:52  127.0.0.1 - - [11/Aug/2026 12:24:52] "GET / HTTP/1.1" 200 -
+2026-08-11 12:24:52  127.0.0.1 - - [11/Aug/2026 12:24:52] "[36mGET /images/top-curtain.png HTTP/1.1[0m" 304 -
+2026-08-11 12:24:52  127.0.0.1 - - [11/Aug/2026 12:24:52] "[36mGET /images/side%20curtain.png HTTP/1.1[0m" 304 -
+2026-08-11 12:24:52  127.0.0.1 - - [11/Aug/2026 12:24:52] "[36mGET /images/textiles.png HTTP/1.1[0m" 304 -
+2026-08-11 12:24:52  127.0.0.1 - - [11/Aug/2026 12:24:52] "[36mGET /images/statue.png HTTP/1.1[0m" 304 -
+2026-08-11 12:24:52  127.0.0.1 - - [11/Aug/2026 12:24:52] "[36mGET /static/drum-mode.css HTTP/1.1[0m" 304 -
+2026-08-11 12:24:52  127.0.0.1 - - [11/Aug/2026 12:24:52] "[36mGET /static/Samspert-Icon.png HTTP/1.1[0m" 304 -
+2026-08-11 12:24:52  127.0.0.1 - - [11/Aug/2026 12:24:52] "[36mGET /static/Drum_image/SamphorDrumDesign11.png HTTP/1.1[0m" 304 -
+2026-08-11 12:24:52  127.0.0.1 - - [11/Aug/2026 12:24:52] "[36mGET /static/Drum_image/SamphorDrumDesign7.png HTTP/1.1[0m" 304 -
+2026-08-11 12:24:52  127.0.0.1 - - [11/Aug/2026 12:24:52] "[36mGET /static/Drum_image/SamphorDrumDesign3.png HTTP/1.1[0m" 304 -
+2026-08-11 12:24:52  127.0.0.1 - - [11/Aug/2026 12:24:52] "[36mGET /static/drum-mode.js HTTP/1.1[0m" 304 -
+2026-08-11 12:24:52  127.0.0.1 - - [11/Aug/2026 12:24:52] "[36mGET /static/drum-tutorial.js HTTP/1.1[0m" 304 -
+2026-08-11 12:24:52  127.0.0.1 - - [11/Aug/2026 12:24:52] "[35m[1mGET /static/Sounds/Center-mute.wav HTTP/1.1[0m" 206 -
+2026-08-11 12:24:52  127.0.0.1 - - [11/Aug/2026 12:24:52] "[35m[1mGET /static/Sounds/Middle-Layer.wav HTTP/1.1[0m" 206 -
+2026-08-11 12:24:52  127.0.0.1 - - [11/Aug/2026 12:24:52] "[35m[1mGET /static/Sounds/Rim.wav HTTP/1.1[0m" 206 -
+2026-08-11 12:24:52  127.0.0.1 - - [11/Aug/2026 12:24:52] "[35m[1mGET /static/Sounds/Hi-pitch-CenterMute.wav HTTP/1.1[0m" 206 -
+2026-08-11 12:24:52  127.0.0.1 - - [11/Aug/2026 12:24:52] "[35m[1mGET /static/Sounds/Hi-pitch-MiddleLayer.wav HTTP/1.1[0m" 206 -
+2026-08-11 12:24:52  127.0.0.1 - - [11/Aug/2026 12:24:52] "[35m[1mGET /static/Sounds/Center-open.wav HTTP/1.1[0m" 206 -
+2026-08-11 12:24:52  127.0.0.1 - - [11/Aug/2026 12:24:52] "[35m[1mGET /static/Sounds/Hi-pitch-CenterOpen.wav HTTP/1.1[0m" 206 -
+2026-08-11 12:24:52  127.0.0.1 - - [11/Aug/2026 12:24:52] "[35m[1mGET /static/Sounds/Hi-pitch-Rim.wav HTTP/1.1[0m" 206 -
+2026-08-11 12:24:52  127.0.0.1 - - [11/Aug/2026 12:24:52] "[35m[1mGET /static/Sounds/Center-mute.wav HTTP/1.1[0m" 206 -
+2026-08-11 12:24:52  127.0.0.1 - - [11/Aug/2026 12:24:52] "[35m[1mGET /static/Sounds/Hi-pitch-Rim.wav HTTP/1.1[0m" 206 -
+2026-08-11 12:24:52  127.0.0.1 - - [11/Aug/2026 12:24:52] "[35m[1mGET /static/Sounds/Center-mute.wav HTTP/1.1[0m" 206 -
+2026-08-11 12:24:52  127.0.0.1 - - [11/Aug/2026 12:24:52] "[35m[1mGET /static/Sounds/Hi-pitch-Rim.wav HTTP/1.1[0m" 206 -
+2026-08-11 12:24:52  127.0.0.1 - - [11/Aug/2026 12:24:52] "[35m[1mGET /static/Sounds/Center-mute.wav HTTP/1.1[0m" 206 -
+2026-08-11 12:24:52  127.0.0.1 - - [11/Aug/2026 12:24:52] "[35m[1mGET /static/Sounds/Hi-pitch-Rim.wav HTTP/1.1[0m" 206 -
+2026-08-11 12:24:52  127.0.0.1 - - [11/Aug/2026 12:24:52] "[33mGET /favicon.ico HTTP/1.1[0m" 404 -
+2026-08-11 12:25:01  [417dc2dd] Session reset
+2026-08-11 12:25:01  127.0.0.1 - - [11/Aug/2026 12:25:01] "POST /reset HTTP/1.1" 200 -
+2026-08-11 12:25:14  127.0.0.1 - - [11/Aug/2026 12:25:14] "GET / HTTP/1.1" 200 -
+2026-08-11 12:25:15  127.0.0.1 - - [11/Aug/2026 12:25:15] "[36mGET /static/drum-mode.css HTTP/1.1[0m" 304 -
+2026-08-11 12:25:15  127.0.0.1 - - [11/Aug/2026 12:25:15] "[36mGET /images/top-curtain.png HTTP/1.1[0m" 304 -
+2026-08-11 12:25:15  127.0.0.1 - - [11/Aug/2026 12:25:15] "[36mGET /images/side%20curtain.png HTTP/1.1[0m" 304 -
+2026-08-11 12:25:15  127.0.0.1 - - [11/Aug/2026 12:25:15] "[36mGET /images/textiles.png HTTP/1.1[0m" 304 -
+2026-08-11 12:25:15  127.0.0.1 - - [11/Aug/2026 12:25:15] "[36mGET /images/statue.png HTTP/1.1[0m" 304 -
+2026-08-11 12:25:15  127.0.0.1 - - [11/Aug/2026 12:25:15] "[36mGET /static/drum-mode.js HTTP/1.1[0m" 304 -
+2026-08-11 12:25:15  127.0.0.1 - - [11/Aug/2026 12:25:15] "[36mGET /static/drum-tutorial.js HTTP/1.1[0m" 304 -
+2026-08-11 12:25:15  127.0.0.1 - - [11/Aug/2026 12:25:15] "[36mGET /static/Samspert-Icon.png HTTP/1.1[0m" 304 -
+2026-08-11 12:25:15  127.0.0.1 - - [11/Aug/2026 12:25:15] "[36mGET /static/Drum_image/SamphorDrumDesign11.png HTTP/1.1[0m" 304 -
+2026-08-11 12:25:15  127.0.0.1 - - [11/Aug/2026 12:25:15] "[36mGET /static/Drum_image/SamphorDrumDesign7.png HTTP/1.1[0m" 304 -
+2026-08-11 12:25:15  127.0.0.1 - - [11/Aug/2026 12:25:15] "[36mGET /static/Drum_image/SamphorDrumDesign3.png HTTP/1.1[0m" 304 -
+2026-08-11 12:25:15  127.0.0.1 - - [11/Aug/2026 12:25:15] "[35m[1mGET /static/Sounds/Center-mute.wav HTTP/1.1[0m" 206 -
+2026-08-11 12:25:15  127.0.0.1 - - [11/Aug/2026 12:25:15] "[35m[1mGET /static/Sounds/Center-open.wav HTTP/1.1[0m" 206 -
+2026-08-11 12:25:15  127.0.0.1 - - [11/Aug/2026 12:25:15] "[35m[1mGET /static/Sounds/Middle-Layer.wav HTTP/1.1[0m" 206 -
+2026-08-11 12:25:15  127.0.0.1 - - [11/Aug/2026 12:25:15] "[35m[1mGET /static/Sounds/Rim.wav HTTP/1.1[0m" 206 -
+2026-08-11 12:25:15  127.0.0.1 - - [11/Aug/2026 12:25:15] "[35m[1mGET /static/Sounds/Hi-pitch-CenterMute.wav HTTP/1.1[0m" 206 -
+2026-08-11 12:25:15  127.0.0.1 - - [11/Aug/2026 12:25:15] "[35m[1mGET /static/Sounds/Hi-pitch-CenterOpen.wav HTTP/1.1[0m" 206 -
+2026-08-11 12:25:15  127.0.0.1 - - [11/Aug/2026 12:25:15] "[35m[1mGET /static/Sounds/Hi-pitch-MiddleLayer.wav HTTP/1.1[0m" 206 -
+2026-08-11 12:25:15  127.0.0.1 - - [11/Aug/2026 12:25:15] "[35m[1mGET /static/Sounds/Hi-pitch-Rim.wav HTTP/1.1[0m" 206 -
+2026-08-11 12:25:15  127.0.0.1 - - [11/Aug/2026 12:25:15] "[33mGET /favicon.ico HTTP/1.1[0m" 404 -
+2026-08-11 12:25:39  [417dc2dd] User context pre-set: name='call me yip', occupation='im a student'
+2026-08-11 12:25:39  127.0.0.1 - - [11/Aug/2026 12:25:39] "POST /user-context HTTP/1.1" 200 -
+2026-08-11 12:25:48  [417dc2dd] Session reset
+2026-08-11 12:25:48  127.0.0.1 - - [11/Aug/2026 12:25:48] "POST /reset HTTP/1.1" 200 -
+2026-08-11 12:26:39  [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5000
+ * Running on http://192.168.1.50:5000
+2026-08-11 12:26:39  [33mPress CTRL+C to quit[0m
+2026-08-11 12:42:53  127.0.0.1 - - [11/Aug/2026 12:42:53] "GET / HTTP/1.1" 200 -
+2026-08-11 12:42:53  127.0.0.1 - - [11/Aug/2026 12:42:53] "[36mGET /static/drum-mode.css HTTP/1.1[0m" 304 -
+2026-08-11 12:42:53  127.0.0.1 - - [11/Aug/2026 12:42:53] "[36mGET /static/drum-tutorial.js HTTP/1.1[0m" 304 -
+2026-08-11 12:42:53  127.0.0.1 - - [11/Aug/2026 12:42:53] "[36mGET /static/Samspert-Icon.png HTTP/1.1[0m" 304 -
+2026-08-11 12:42:53  127.0.0.1 - - [11/Aug/2026 12:42:53] "[36mGET /images/side%20curtain.png HTTP/1.1[0m" 304 -
+2026-08-11 12:42:53  127.0.0.1 - - [11/Aug/2026 12:42:53] "[36mGET /images/top-curtain.png HTTP/1.1[0m" 304 -
+2026-08-11 12:42:53  127.0.0.1 - - [11/Aug/2026 12:42:53] "[36mGET /static/Drum_image/SamphorDrumDesign11.png HTTP/1.1[0m" 304 -
+2026-08-11 12:42:53  127.0.0.1 - - [11/Aug/2026 12:42:53] "[36mGET /static/Drum_image/SamphorDrumDesign7.png HTTP/1.1[0m" 304 -
+2026-08-11 12:42:53  127.0.0.1 - - [11/Aug/2026 12:42:53] "[36mGET /static/Drum_image/SamphorDrumDesign3.png HTTP/1.1[0m" 304 -
+2026-08-11 12:42:53  127.0.0.1 - - [11/Aug/2026 12:42:53] "[36mGET /images/textiles.png HTTP/1.1[0m" 304 -
+2026-08-11 12:42:53  127.0.0.1 - - [11/Aug/2026 12:42:53] "[36mGET /static/drum-mode.js HTTP/1.1[0m" 304 -
+2026-08-11 12:42:53  127.0.0.1 - - [11/Aug/2026 12:42:53] "[36mGET /images/statue.png HTTP/1.1[0m" 304 -
+2026-08-11 12:42:53  127.0.0.1 - - [11/Aug/2026 12:42:53] "[35m[1mGET /static/Sounds/Center-mute.wav HTTP/1.1[0m" 206 -
+2026-08-11 12:42:53  127.0.0.1 - - [11/Aug/2026 12:42:53] "[35m[1mGET /static/Sounds/Center-open.wav HTTP/1.1[0m" 206 -
+2026-08-11 12:42:53  127.0.0.1 - - [11/Aug/2026 12:42:53] "[35m[1mGET /static/Sounds/Middle-Layer.wav HTTP/1.1[0m" 206 -
+2026-08-11 12:42:53  127.0.0.1 - - [11/Aug/2026 12:42:53] "[35m[1mGET /static/Sounds/Rim.wav HTTP/1.1[0m" 206 -
+2026-08-11 12:42:53  127.0.0.1 - - [11/Aug/2026 12:42:53] "[35m[1mGET /static/Sounds/Hi-pitch-CenterMute.wav HTTP/1.1[0m" 206 -
+2026-08-11 12:42:53  127.0.0.1 - - [11/Aug/2026 12:42:53] "[35m[1mGET /static/Sounds/Hi-pitch-CenterOpen.wav HTTP/1.1[0m" 206 -
+2026-08-11 12:42:53  127.0.0.1 - - [11/Aug/2026 12:42:53] "[35m[1mGET /static/Sounds/Hi-pitch-MiddleLayer.wav HTTP/1.1[0m" 206 -
+2026-08-11 12:42:53  127.0.0.1 - - [11/Aug/2026 12:42:53] "[35m[1mGET /static/Sounds/Hi-pitch-Rim.wav HTTP/1.1[0m" 206 -
+2026-08-11 12:42:53  127.0.0.1 - - [11/Aug/2026 12:42:53] "[35m[1mGET /static/Sounds/Center-mute.wav HTTP/1.1[0m" 206 -
+2026-08-11 12:42:53  127.0.0.1 - - [11/Aug/2026 12:42:53] "[35m[1mGET /static/Sounds/Middle-Layer.wav HTTP/1.1[0m" 206 -
+2026-08-11 12:42:53  127.0.0.1 - - [11/Aug/2026 12:42:53] "[35m[1mGET /static/Sounds/Rim.wav HTTP/1.1[0m" 206 -
+2026-08-11 12:42:53  127.0.0.1 - - [11/Aug/2026 12:42:53] "[35m[1mGET /static/Sounds/Hi-pitch-CenterMute.wav HTTP/1.1[0m" 206 -
+2026-08-11 12:42:53  127.0.0.1 - - [11/Aug/2026 12:42:53] "[35m[1mGET /static/Sounds/Hi-pitch-Rim.wav HTTP/1.1[0m" 206 -
+2026-08-11 12:42:53  127.0.0.1 - - [11/Aug/2026 12:42:53] "[35m[1mGET /static/Sounds/Hi-pitch-MiddleLayer.wav HTTP/1.1[0m" 206 -
+2026-08-11 12:42:53  127.0.0.1 - - [11/Aug/2026 12:42:53] "[35m[1mGET /static/Sounds/Center-mute.wav HTTP/1.1[0m" 206 -
+2026-08-11 12:42:53  127.0.0.1 - - [11/Aug/2026 12:42:53] "[35m[1mGET /static/Sounds/Middle-Layer.wav HTTP/1.1[0m" 206 -
+2026-08-11 12:42:53  127.0.0.1 - - [11/Aug/2026 12:42:53] "[35m[1mGET /static/Sounds/Rim.wav HTTP/1.1[0m" 206 -
+2026-08-11 12:42:53  127.0.0.1 - - [11/Aug/2026 12:42:53] "[35m[1mGET /static/Sounds/Middle-Layer.wav HTTP/1.1[0m" 206 -
+2026-08-11 12:42:53  127.0.0.1 - - [11/Aug/2026 12:42:53] "[35m[1mGET /static/Sounds/Hi-pitch-Rim.wav HTTP/1.1[0m" 206 -
+2026-08-11 12:42:53  127.0.0.1 - - [11/Aug/2026 12:42:53] "[35m[1mGET /static/Sounds/Hi-pitch-MiddleLayer.wav HTTP/1.1[0m" 206 -
+2026-08-11 12:42:53  127.0.0.1 - - [11/Aug/2026 12:42:53] "[35m[1mGET /static/Sounds/Hi-pitch-CenterMute.wav HTTP/1.1[0m" 206 -
+2026-08-11 12:42:53  127.0.0.1 - - [11/Aug/2026 12:42:53] "[35m[1mGET /static/Sounds/Rim.wav HTTP/1.1[0m" 206 -
+2026-08-11 12:42:53  127.0.0.1 - - [11/Aug/2026 12:42:53] "[35m[1mGET /static/Sounds/Hi-pitch-MiddleLayer.wav HTTP/1.1[0m" 206 -
+2026-08-11 12:42:53  127.0.0.1 - - [11/Aug/2026 12:42:53] "[35m[1mGET /static/Sounds/Hi-pitch-CenterMute.wav HTTP/1.1[0m" 206 -
+2026-08-11 12:43:19  [417dc2dd] User context pre-set: name='Yip', occupation='student'
+2026-08-11 12:43:19  127.0.0.1 - - [11/Aug/2026 12:43:19] "POST /user-context HTTP/1.1" 200 -

@@ -29,4 +29,5 @@ dist/
 build/
 *.egg-info/
 logs/chat.log
-logs/chat.log
+.claude/settings.local.json
+

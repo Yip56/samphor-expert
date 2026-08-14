@@ -742,6 +742,30 @@ const introSubmit    = document.getElementById('intro-submit');
 
 function delay(ms) { return new Promise(r => setTimeout(r, ms)); }
 
+function extractNameFromInput(val) {
+  val = val.trim().replace(/[.,!?]+$/, '').replace(/^[.,!?]+/, '');
+  const skipWords = ["skip","pass","private","anonymous","secret","nothing","nope","no"];
+  if (skipWords.some(w => val.toLowerCase().split(/\s+/).includes(w))) return '';
+  const greetingWords = ["hello","hi","hey","greetings","howdy","hiya","sup","yo","good morning","good afternoon","good evening","good day"];
+  if (greetingWords.includes(val.toLowerCase().trim())) return '';
+  const prefixes = [
+    "my name is","i'm called","i am called","you can call me",
+    "call me","the name is","my name's","they call me","just call me","people call me",
+    "im called","im known as","im","name is","name's","it's","i'm","i am",
+  ].sort((a, b) => b.length - a.length);
+  const lower = val.toLowerCase();
+  for (const prefix of prefixes) {
+    if (lower.startsWith(prefix)) {
+      val = val.slice(prefix.length).trim().replace(/^[.,!?]+/, '').replace(/[.,!?]+$/, '');
+      break;
+    }
+  }
+  const words = val.trim().split(/\s+/).filter(Boolean);
+  if (!words.length) return '';
+  const name = words.length > 2 ? words.slice(0, 2).join(' ') : words.join(' ');
+  return name.replace(/\b\w/g, c => c.toUpperCase());
+}
+
 function getTimeGreeting() {
   const h = new Date().getHours();
   if (h >= 5 && h < 12) return 'Good morning!';
@@ -808,7 +832,8 @@ async function askNextQuestion() {
 async function submitIntroAnswer() {
   const val = introAnswer.value.trim();
   if (!val) return;
-  userData[RAPPORT_QUESTIONS[introQIdx].key] = val;
+  const key = RAPPORT_QUESTIONS[introQIdx].key;
+  userData[key] = (key === 'name') ? (extractNameFromInput(val) || val) : val;
   introQIdx++;
 
   if (introQIdx < RAPPORT_QUESTIONS.length) {
@@ -1108,23 +1133,27 @@ function showSaveToast(filename, ts) {
   _toastTimer = setTimeout(() => saveToast.classList.remove('visible'), 4500);
 }
 
-// ── Save history — downloads directly to user's Downloads folder ─────────────
+// ── Save history — download to browser Downloads folder ─────────────────────
 document.getElementById('download-btn').addEventListener('click', () => {
   const groups = chatBox.querySelectorAll('.msg-group');
   if (!groups.length) return;
-  const ts    = new Date().toLocaleString();
+  const now  = new Date();
+  const ts   = now.toLocaleString();
+  const pad  = n => String(n).padStart(2, '0');
+  const stamp = `${now.getFullYear()}-${pad(now.getMonth()+1)}-${pad(now.getDate())}_${pad(now.getHours())}-${pad(now.getMinutes())}-${pad(now.getSeconds())}`;
+  const filename = `chat_history_${stamp}.txt`;
   const lines = ['Samphor Expert System — Chat History', 'Saved: ' + ts, '='.repeat(50), ''];
   groups.forEach(g => {
     const label  = g.querySelector('.msg-label');
     const bubble = g.querySelector('.msg-bubble');
     if (label && bubble) { lines.push(label.textContent.trim() + ': ' + bubble.textContent.trim(), ''); }
   });
-  const filename = 'chat_history_' + new Date().toISOString().replace(/[:.]/g, '-').slice(0, 19) + '.txt';
-  const blob = new Blob([lines.join('\n')], { type: 'text/plain' });
+  const blob = new Blob([lines.join('\n')], { type: 'text/plain;charset=utf-8' });
   const url  = URL.createObjectURL(blob);
   const a    = document.createElement('a');
   a.href = url; a.download = filename;
-  a.click();
+  document.body.appendChild(a); a.click();
+  document.body.removeChild(a);
   URL.revokeObjectURL(url);
   showSaveToast(filename, ts);
 });
@@ -1163,25 +1192,26 @@ resetBtn.addEventListener('click', async () => {
 const hasHistory   = loadFromStorage();
 const introDone    = localStorage.getItem(INTRO_DONE_KEY);
 
-// Sync server session so onboarding is never re-triggered after intro is done.
-function syncUserContext() {
-  let stored = {};
-  try { stored = JSON.parse(introDone || '{}'); } catch(e) {}
-  fetch('/user-context', {
-    method: 'POST', headers: {'Content-Type': 'application/json'},
-    body: JSON.stringify({ name: stored.name || '', occupation: stored.occupation || '' }),
-  }).catch(() => {});
+function syncBackendContext() {
+  // Re-send user context to backend in case the server session expired.
+  try {
+    const cached = JSON.parse(localStorage.getItem(INTRO_DONE_KEY) || '{}');
+    fetch('/user-context', {
+      method: 'POST', headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({ name: cached.name || '', occupation: cached.occupation || '' }),
+    }).catch(() => {});
+  } catch(e) {}
 }
 
 if (hasHistory) {
   // Returning user with history — skip intro, go to chat
   introOverlay.style.display = 'none';
   enterChatState();
-  syncUserContext();
+  syncBackendContext();
 } else if (introDone) {
   // Intro done before but no history — show landing
   introOverlay.style.display = 'none';
-  syncUserContext();
+  syncBackendContext();
 } else {
   // First-time user — run intro
   runIntroSequence();
